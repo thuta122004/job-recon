@@ -1,0 +1,17 @@
+@import "tailwindcss";
+
+/* Your Custom Floating Label Styles */
+.floating-input:placeholder-shown~.floating-label {
+    top: 50%;
+    transform: translateY(-50%) scale(1);
+    color: #9ca3af;
+}
+
+.floating-input:focus~.floating-label,
+.floating-input:not(:placeholder-shown)~.floating-label {
+    top: 0;
+    transform: translateY(-50%) scale(0.85);
+    background-color: white;
+    padding: 0 4px;
+    color: #4f46e5;
+}
