@@ -65,7 +65,11 @@ const handleSave = async (formData) => {
     saving.value = true;
     try {
         if (isEditing.value) {
-            await api.put(`/roles/${formData.id}`, formData);
+            const updateData = {
+                name: formData.name,
+                desc: formData.desc
+            };
+            await api.put(`/roles/${formData.id}`, updateData);
             toast.success("Role updated successfully!");
         } else {
             await api.post('/roles', formData);
@@ -146,7 +150,7 @@ onMounted(fetchRoles);
                 <table class="w-full text-left border-collapse">
                     <thead>
                         <tr class="bg-gray-50/50 border-b border-gray-100">
-                            <th class="px-6 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-wider">ID</th>
+                            <th class="px-6 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-wider">No</th>
                             <th class="px-6 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-wider">Role Info</th>
                             <th class="px-6 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-wider">Description</th>
                             <th class="px-6 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-wider">Status</th>

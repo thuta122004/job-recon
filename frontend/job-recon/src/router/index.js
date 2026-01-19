@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import RolesView from '@/views/RolesView.vue'
+import UsersView from '../views/UsersView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -12,6 +13,11 @@ const router = createRouter({
       path: '/roles',
       name: 'roles',
       component: RolesView
+    },
+    {
+      path: '/users',
+      name: 'users',
+      component: UsersView
     }
   ]
 })

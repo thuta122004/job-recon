@@ -31,7 +31,6 @@ class RoleController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255|unique:roles,name',
-            'status' => 'required|in:ACTIVE,INACTIVE',
         ]);
 
         if ($validator->fails()) {
@@ -70,7 +69,6 @@ class RoleController extends Controller
             'message' => 'Role found',
             'data' => $role
         ], 200);
-
     }
 
     /**
@@ -89,7 +87,6 @@ class RoleController extends Controller
 
         $validator = Validator::make($request->all(), [
             'name' => ['required', 'string', 'max:255', Rule::unique('roles', 'name')->ignore($id),],
-            'status' => 'required|in:ACTIVE,INACTIVE'
         ]);
 
         if ($validator->fails()) {

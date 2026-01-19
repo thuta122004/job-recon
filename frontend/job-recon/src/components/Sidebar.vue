@@ -20,6 +20,11 @@ const route = useRoute();
                 active-class="bg-indigo-50 text-indigo-700 font-semibold">
                 <i class="fa-solid fa-shield-halved w-5 mr-3"></i> Roles
             </router-link>
+
+            <router-link to="/users" class="flex items-center px-4 py-3 text-gray-500 hover:bg-gray-50 rounded-lg transition-all"
+                active-class="bg-indigo-50 text-indigo-700 font-semibold">
+                <i class="fa-solid fa-user w-5 mr-3"></i> Users
+            </router-link>
             
             </nav>
     </aside>
