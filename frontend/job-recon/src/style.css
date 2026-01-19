@@ -1,6 +1,5 @@
 @import "tailwindcss";
 
-/* Your Custom Floating Label Styles */
 .floating-input:placeholder-shown~.floating-label {
     top: 50%;
     transform: translateY(-50%) scale(1);

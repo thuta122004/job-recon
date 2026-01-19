@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, watch, ref } from 'vue';
+import { reactive, watch } from 'vue';
 
 const props = defineProps({
     isOpen: Boolean,
@@ -17,14 +17,19 @@ const form = reactive({
     status: 'ACTIVE'
 });
 
-// Whenever roleData changes (when editing), update the form
-watch(() => props.roleData, (newVal) => {
-    if (newVal) {
-        Object.assign(form, newVal);
-    } else {
-        Object.assign(form, { id: null, name: '', desc: '', status: 'ACTIVE' });
+watch(() => props.isOpen, (newVal) => {
+    if (newVal && !props.isEditing) {
+        Object.assign(form, { 
+            id: null, 
+            name: '', 
+            desc: '', 
+            status: 'ACTIVE' 
+        });
+    } 
+    else if (newVal && props.isEditing && props.roleData) {
+        Object.assign(form, props.roleData);
     }
-}, { deep: true });
+});
 
 const handleSubmit = () => {
     emit('save', { ...form });

@@ -6,7 +6,7 @@ const router = createRouter({
   routes: [
     {
       path: '/',
-      redirect: '/roles' // Redirect home to roles for now
+      redirect: '/roles'
     },
     {
       path: '/roles',
