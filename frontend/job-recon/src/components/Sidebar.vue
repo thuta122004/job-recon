@@ -13,11 +13,6 @@ const route = useRoute();
         </div>
         <nav class="flex-1 px-4 py-6 space-y-1">
             <div class="text-xs font-semibold text-gray-400 uppercase tracking-wider px-4 mb-2">Main</div>
-            
-            <router-link to="/" class="flex items-center px-4 py-3 text-gray-500 hover:bg-gray-50 rounded-lg transition-all"
-                active-class="bg-indigo-50 text-indigo-700 font-semibold">
-                <i class="fa-solid fa-chart-pie w-5 mr-3"></i> Dashboard
-            </router-link>
 
             <router-link to="/roles" class="flex items-center px-4 py-3 text-gray-500 hover:bg-gray-50 rounded-lg transition-all"
                 active-class="bg-indigo-50 text-indigo-700 font-semibold">

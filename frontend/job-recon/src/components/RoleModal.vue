@@ -61,7 +61,7 @@ const handleSubmit = () => {
 
                 <div class="relative">
                     <textarea id="r_desc" v-model="form.desc" rows="3" placeholder=" "
-                        class="floating-input block w-full px-4 py-4 text-sm text-gray-900 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none peer appearance-none transition-all"></textarea>
+                        class="floating-input block w-full px-4 py-4 text-sm text-gray-900 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none peer appearance-none transition-all resize-none"></textarea>
                     <label for="r_desc" class="floating-label absolute left-4 transition-all duration-200 pointer-events-none text-gray-400 text-sm">Description (Optional)</label>
                 </div>
             </div>
@@ -69,7 +69,7 @@ const handleSubmit = () => {
             <div class="px-8 py-5 bg-gray-50 border-t border-gray-100 flex justify-end gap-3">
                 <button @click="$emit('close')" 
                     class="px-5 py-2.5 text-sm font-bold text-gray-500 hover:text-gray-700 transition-colors">
-                    Cancel
+                    Discard
                 </button>
                 <button @click="handleSubmit" :disabled="loading"
                     class="bg-indigo-600 text-white px-8 py-2.5 rounded-xl text-sm font-bold shadow-lg shadow-indigo-100 hover:bg-indigo-700 active:scale-95 disabled:opacity-50 transition-all flex items-center gap-2">
@@ -80,3 +80,25 @@ const handleSubmit = () => {
         </div>
     </div>
 </template>
+
+<style scoped>
+.floating-input:focus ~ .floating-label,
+.floating-input:not(:placeholder-shown) ~ .floating-label {
+    top: 0.5rem;
+    font-size: 0.65rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #6366f1;
+}
+
+.floating-label {
+    top: 1.15rem;
+}
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+</style>

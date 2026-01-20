@@ -137,7 +137,7 @@ const handleSubmit = () => {
             <div class="px-8 py-5 bg-gray-50 border-t border-gray-100 flex justify-end gap-3">
                 <button @click="$emit('close')" 
                     class="px-5 py-2.5 text-sm font-bold text-gray-500 hover:text-gray-700 transition-colors">
-                    Cancel
+                    Discard
                 </button>
                 <button @click="handleSubmit" :disabled="loading"
                     class="bg-indigo-600 text-white px-8 py-2.5 rounded-xl text-sm font-bold shadow-lg shadow-indigo-100 hover:bg-indigo-700 active:scale-95 disabled:opacity-50 disabled:active:scale-100 transition-all flex items-center gap-2">

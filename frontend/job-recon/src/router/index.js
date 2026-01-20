@@ -7,23 +7,31 @@ const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
-      path: '/',
-      redirect: '/roles'
-    },
-    {
       path: '/roles',
       name: 'roles',
-      component: RolesView
+      component: RolesView,
+        meta: { 
+        parent: 'Management', 
+        label: 'Roles' 
+      }
     },
     {
       path: '/users',
       name: 'users',
-      component: UsersView
+      component: UsersView,
+      meta: { 
+        parent: 'Management', 
+        label: 'Users' 
+      }
     },
     {
       path: '/job-seeker-profiles',
       name: 'job-seeker-profiles',
-      component: JobSeekerProfilesView
+      component: JobSeekerProfilesView,
+      meta: { 
+        parent: 'Management', 
+        label: 'Job Seekers' 
+      }
     }
   ]
 })
