@@ -18,7 +18,6 @@ const form = reactive({
 
 watch(() => props.isOpen, (newVal) => {
     if (newVal && !props.isEditing) {
-        // Reset form for new role
         Object.assign(form, { 
             id: null, 
             name: '', 
@@ -26,7 +25,6 @@ watch(() => props.isOpen, (newVal) => {
         });
     } 
     else if (newVal && props.isEditing && props.roleData) {
-        // Populate form for editing
         Object.assign(form, {
             id: props.roleData.id,
             name: props.roleData.name,

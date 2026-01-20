@@ -178,7 +178,7 @@ onMounted(fetchData);
                     </thead>
                     <tbody class="divide-y divide-gray-50">
                         <tr v-if="loading">
-                            <td colspan="5" class="px-6 py-20 text-center">
+                            <td colspan="6" class="px-6 py-20 text-center">
                                 <div class="flex flex-col items-center gap-3">
                                     <i class="fa-solid fa-circle-notch fa-spin text-2xl text-indigo-500"></i>
                                     <span class="text-sm text-gray-400 font-medium">Fetching users...</span>
@@ -187,7 +187,7 @@ onMounted(fetchData);
                         </tr>
                         
                         <tr v-else-if="filteredUsers.length === 0">
-                            <td colspan="5" class="px-6 py-20 text-center">
+                            <td colspan="6" class="px-6 py-20 text-center">
                                 <div class="flex flex-col items-center gap-2 text-gray-400">
                                     <i class="fa-solid fa-folder-open text-3xl mb-2 opacity-20"></i>
                                     <p class="text-sm">No users match your current filters.</p>

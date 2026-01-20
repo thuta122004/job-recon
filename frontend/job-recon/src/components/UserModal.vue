@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, watch } from 'vue';
+import { computed, reactive, watch } from 'vue';
 
 const props = defineProps({
     isOpen: Boolean,
@@ -20,6 +20,10 @@ const form = reactive({
     password: '', 
     password_confirmation: '',
     phone: '',
+});
+
+const activeRoles = computed(() => {
+    return props.roles?.filter(role => role.status === 'ACTIVE') ?? [];
 });
 
 watch(() => props.isOpen, (newVal) => {
@@ -88,7 +92,7 @@ const handleSubmit = () => {
                         <select id="u_role" v-model="form.role_id"
                             class="block w-full px-4 py-4 text-sm text-gray-500 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none appearance-none cursor-pointer transition-all">
                             <option value="" disabled>Select Role</option>
-                            <option v-for="role in roles" :key="role.id" :value="role.id">{{ role.name }}</option>
+                            <option v-for="role in activeRoles" :key="role.id" :value="role.id">{{ role.name }}</option>
                         </select>
                         <div class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
                             <i class="fa-solid fa-chevron-down text-[10px]"></i>

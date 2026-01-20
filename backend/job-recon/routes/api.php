@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\JobSeekerProfileController;
 use App\Http\Controllers\Api\RoleController;
 use App\Http\Controllers\Api\UserController;
 use Illuminate\Http\Request;
@@ -12,3 +13,4 @@ Route::get('/user', function (Request $request) {
 Route::apiResource('roles', RoleController::class);
 Route::apiResource('users', UserController::class);
 Route::patch('users/{id}/suspend', [UserController::class, 'suspend']);
+Route::apiResource('job-seeker-profiles', JobSeekerProfileController::class);
