@@ -6,6 +6,8 @@ import JobSeekerProfileModal from '@/components/JobSeekerProfileModal.vue';
 
 const profiles = ref([]);
 const users = ref([]);
+const roles = ref([]);
+
 const loading = ref(false);
 const saving = ref(false);
 const showModal = ref(false);
@@ -37,12 +39,14 @@ const closeZoom = () => {
 const fetchData = async () => {
     loading.value = true;
     try {
-        const [profileRes, userRes] = await Promise.all([
+        const [profileRes, userRes, roleRes] = await Promise.all([
             api.get('/job-seeker-profiles'),
-            api.get('/users')
+            api.get('/users'),
+            api.get('/roles')
         ]);
         profiles.value = profileRes.data.data || profileRes.data;
         users.value = userRes.data.data || userRes.data;
+        roles.value = roleRes.data.data || roleRes.data;
     } catch (e) {
         toast.error("Failed to sync profiles from server");
     } finally {
@@ -155,11 +159,12 @@ const executeToggleVisibility = async (id) => {
     }
 };
 
-const roles = ref([]);
-
 const isJobSeekerDisabled = computed(() => {
-    const jobSeekerRole = roles.value.find(r => r.name === 'Job Seeker');
-    return !jobSeekerRole || jobSeekerRole.status !== 'ACTIVE';
+    const jobSeekerRole = roles.value.find(r => r.id == 2);
+    
+    if (!jobSeekerRole) return true;
+    
+    return jobSeekerRole.status !== 'ACTIVE';
 });
 
 onMounted(fetchData);

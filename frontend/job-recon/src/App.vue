@@ -22,7 +22,7 @@ const currentLabel = computed(() => route.meta.label || 'Overview')
         </div>
 
         <div class="flex items-center gap-4">
-           <div class="h-8 w-8 bg-indigo-600 rounded-full flex items-center justify-center text-white text-xs">
+           <div class="h-10 w-10 bg-indigo-600 rounded-full flex items-center justify-center text-white text-xs">
               T
            </div>
         </div>

@@ -12,6 +12,9 @@ const props = defineProps({
 
 const emit = defineEmits(['close', 'save']);
 
+const userSearch = ref('');
+const showUserDropdown = ref(false);
+
 const form = reactive({
     id: null,
     user_id: '',
@@ -31,6 +34,82 @@ const fileName = ref({
 });
 
 const imagePreview = ref(null);
+
+const filteredUsers = computed(() => {
+    const query = userSearch.value.toLowerCase().trim();
+    if (!query) return activeUsers.value;
+    return activeUsers.value.filter(user => 
+        `${user.first_name} ${user.last_name}`.toLowerCase().includes(query) ||
+        user.email.toLowerCase().includes(query)
+    );
+});
+
+// Select a user and sync both the ID for the database and search text for the UI
+const selectUser = (user) => {
+    form.user_id = user.id; // Correct way for reactive()
+    userSearch.value = `${user.first_name} ${user.last_name}`;
+    showUserDropdown.value = false;
+};
+
+// Sync the UI search text when the modal opens or data changes
+const syncSearchText = () => {
+    if (form.user_id) {
+        const user = props.users.find(u => u.id == form.user_id);
+        if (user) userSearch.value = `${user.first_name} ${user.last_name}`;
+    } else {
+        userSearch.value = '';
+    }
+};
+
+watch(() => props.isOpen, (newVal) => {
+    if (newVal) {
+        if (!props.isEditing) {
+            // 1. Reset the form object
+            Object.assign(form, {
+                id: null,
+                user_id: '', // Crucial: clear the ID
+                headline: '',
+                summary: '',
+                location: '',
+                current_position: '',
+                experience_years: null,
+                profile_visibility: 'PUBLIC',
+                profile_picture: null,
+                resume: null
+            });
+            
+            // 2. Reset the search text and UI states
+            userSearch.value = ''; // FIX: Clear the typeable field
+            fileName.value = { picture: '', resume: '' };
+            imagePreview.value = null;
+            showUserDropdown.value = false;
+
+        } else if (props.profileData) {
+            // Edit Mode logic remains mostly same but ensures search text syncs
+            Object.assign(form, {
+                id: props.profileData.id,
+                user_id: props.profileData.user_id,
+                headline: props.profileData.headline || '',
+                summary: props.profileData.summary || '',
+                location: props.profileData.location || '',
+                current_position: props.profileData.current_position || '',
+                experience_years: props.profileData.experience_years,
+                profile_visibility: props.profileData.profile_visibility || 'PUBLIC',
+                profile_picture: null,
+                resume: null
+            });
+            
+            // Sync search text with the user being edited
+            const user = props.users?.find(u => u.id == props.profileData.user_id);
+            userSearch.value = user ? `${user.first_name} ${user.last_name}` : '';
+            
+            imagePreview.value = props.profileData.profile_picture_url || null;
+        }
+    } else {
+        // OPTIONAL: Clear data when modal closes to be safe
+        showUserDropdown.value = false;
+    }
+});
 
 const activeUsers = computed(() => {
     const profilesList = Array.isArray(props.profiles) 
@@ -122,19 +201,70 @@ const handleSubmit = () => {
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-7">
                     
                     <div class="relative md:col-span-2">
-                        <select id="p_user" v-model="form.user_id" :disabled="isEditing"
-                            class="block w-full px-4 py-4 text-sm text-gray-600 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none appearance-none transition-all disabled:bg-gray-50 disabled:text-gray-400">
-                            <option value="" selected disabled>
-                                {{ activeUsers.length > 0 ? 'Link to User Account' : 'No active Job Seekers available' }}
-                            </option>
-                            <option v-for="user in activeUsers" :key="user.id" :value="user.id">
-                                {{ user.first_name }} {{ user.last_name }} ({{ user.email }})
-                            </option>
-                        </select>
-                        <div class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
-                            <i class="fa-solid fa-link text-xs"></i>
-                        </div>
+    <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1 mb-2 block">
+        Candidate Account
+    </label>
+    
+    <div class="relative">
+        <div class="relative group">
+            <input 
+                type="text"
+                v-model="userSearch"
+                @focus="showUserDropdown = true"
+                @blur="setTimeout(() => showUserDropdown = false, 200)"
+                :disabled="isEditing"
+                placeholder="Search by name or email..."
+                class="block w-full px-4 py-4 text-sm text-gray-900 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all disabled:bg-gray-50 disabled:text-gray-400"
+            />
+            
+            <div class="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-2 pointer-events-none">
+                <i v-if="!userSearch" class="fa-solid fa-magnifying-glass text-xs text-gray-300"></i>
+                <i v-else class="fa-solid fa-check text-xs text-emerald-500"></i>
+            </div>
+        </div>
+
+        <transition
+            enter-active-class="transition duration-200 ease-out"
+            enter-from-class="opacity-0 translate-y-1"
+            enter-to-class="opacity-100 translate-y-0"
+            leave-active-class="transition duration-150 ease-in"
+            leave-from-class="opacity-100 translate-y-0"
+            leave-to-class="opacity-0 translate-y-1"
+        >
+            <div v-if="showUserDropdown && !isEditing" 
+                 class="absolute z-[60] w-full mt-2 bg-white border border-gray-100 shadow-2xl rounded-2xl overflow-hidden">
+                
+                <div class="max-h-64 overflow-y-auto p-2 space-y-1">
+                    <div v-if="filteredUsers.length === 0" class="p-4 text-center">
+                        <i class="fa-solid fa-user-slash text-gray-200 text-xl mb-2"></i>
+                        <p class="text-xs text-gray-400 font-medium">No available candidates found</p>
                     </div>
+
+                    <button 
+                        v-for="user in filteredUsers" 
+                        :key="user.id"
+                        type="button"
+                        @mousedown="selectUser(user)"
+                        class="w-full text-left px-4 py-3 rounded-xl hover:bg-indigo-50 transition-all flex items-center justify-between group"
+                    >
+                        <div class="flex flex-col">
+                            <span class="text-sm font-bold text-gray-700 group-hover:text-indigo-600">
+                                {{ user.first_name }} {{ user.last_name }}
+                            </span>
+                            <span class="text-[11px] text-gray-400">{{ user.email }}</span>
+                        </div>
+                        <i class="fa-solid fa-plus text-[10px] text-gray-300 group-hover:text-indigo-400"></i>
+                    </button>
+                </div>
+            </div>
+        </transition>
+    </div>
+    
+    <p v-if="!form.user_id && !isEditing" class="text-[10px] text-amber-600 mt-2 ml-1 flex items-center gap-1">
+        <i class="fa-solid fa-circle-info text-[9px]"></i>
+        You must link an active account to create a profile.
+    </p>
+</div>
 
                     <div class="relative md:col-span-2">
                         <input type="text" id="p_headline" v-model="form.headline" placeholder=" "
