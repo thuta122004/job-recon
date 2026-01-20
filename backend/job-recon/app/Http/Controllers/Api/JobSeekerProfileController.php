@@ -117,6 +117,8 @@ class JobSeekerProfileController extends Controller
             'profile_visibility' => 'required|in:PUBLIC,PRIVATE',
             'profile_picture'    => 'nullable|image|mimes:jpeg,png,jpg|max:2048', 
             'resume'             => 'nullable|file|mimes:pdf,doc,docx|max:5120',
+            'delete_picture'     => 'nullable', 
+            'delete_resume'      => 'nullable',
         ]);
 
         if ($validator->fails()) {
@@ -127,7 +129,7 @@ class JobSeekerProfileController extends Controller
             return response()->json(['status' => false, 'message' => 'User account is not active.'], 403);
         }
 
-        $data = $request->except(['profile_picture', 'resume']);
+        $data = $request->except(['profile_picture', 'resume', 'delete_picture', 'delete_resume']);
 
         if ($request->hasFile('profile_picture')) {
             $oldPath = $profile->getRawOriginal('profile_picture_url');
@@ -135,13 +137,29 @@ class JobSeekerProfileController extends Controller
                 Storage::disk('public')->delete($oldPath);
             }
             $data['profile_picture_url'] = $request->file('profile_picture')->store('profiles/avatars', 'public');
+        } 
+        elseif ($request->input('delete_picture') === 'true') {
+            $oldPath = $profile->getRawOriginal('profile_picture_url');
+            if ($oldPath && Storage::disk('public')->exists($oldPath)) {
+                Storage::disk('public')->delete($oldPath);
+            }
+            $data['profile_picture_url'] = null;
         }
-
         if ($request->hasFile('resume')) {
-            if ($profile->resume_url) {
-                Storage::disk('public')->delete($profile->resume_url);
+            $oldResumePath = $profile->getRawOriginal('resume_url');
+
+            if ($oldResumePath && Storage::disk('public')->exists($oldResumePath)) {
+                Storage::disk('public')->delete($oldResumePath);
             }
             $data['resume_url'] = $request->file('resume')->store('profiles/resumes', 'public');
+        }
+        elseif ($request->input('delete_resume') === 'true') {
+            $oldResumePath = $profile->getRawOriginal('resume_url');
+            
+            if ($oldResumePath && Storage::disk('public')->exists($oldResumePath)) {
+                Storage::disk('public')->delete($oldResumePath);
+            }
+            $data['resume_url'] = null;
         }
 
         $profile->update($data);

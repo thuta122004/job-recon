@@ -15,7 +15,7 @@ class UserController extends Controller
      */
     public function index()
     {
-        $users = User::with('role')->latest()->get();
+        $users = User::with(['role', 'profile'])->latest()->get();
 
         return response()->json([
             'status' => true,
@@ -88,13 +88,22 @@ class UserController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $user = User::find($id);
+        $user = User::with('profile')->find($id);
 
         if (!$user) {
             return response()->json([
                 'status'  => false,
                 'message' => 'User not found'
             ], 404);
+        }
+
+        if ($request->has('role_id') && (int)$request->role_id !== (int)$user->role_id) {
+            if ($user->profile) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Role cannot be changed because this user has an active Job Seeker profile.'
+                ], 403);
+            }
         }
 
         $validator = Validator::make($request->all(), [

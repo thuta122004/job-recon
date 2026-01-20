@@ -91,10 +91,14 @@ const handleSave = async (formData) => {
         await fetchData();
         showModal.value = false;
     } catch (e) {
-        if (e.response?.status === 422) {
+        if (e.response?.status === 403) {
+            toast.error(e.response.data.message);
+        }
+        else if (e.response?.status === 422) {
             const validationErrors = e.response.data.errors;
-            toast.error(Object.values(validationErrors)[0][0]); 
-        } else {
+            toast.error(Object.values(validationErrors)[0][0]);
+        }
+        else {
             toast.error("Server error. Please try again later.");
         }
     } finally {
@@ -371,6 +375,7 @@ onMounted(fetchData);
         :roles="roles" 
         :is-editing="isEditing"
         :loading="saving"
+        :disable-role="isEditing && !!selectedUser?.profile" 
         @close="showModal = false"
         @save="handleSave"
     />

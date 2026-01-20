@@ -63,7 +63,7 @@ const openEditModal = (role) => {
 };
 
 const handleSave = async (formData) => {
-    if (!formData.name) return toast.warning('Name is required');
+    if (!formData.name) return toast.error('Name is required');
     
     saving.value = true;
     try {

@@ -158,14 +158,13 @@ const executeToggleVisibility = async (id) => {
         showConfirmModal.value = false;
     }
 };
-
 const isJobSeekerDisabled = computed(() => {
-    const jobSeekerRole = roles.value.find(r => r.id == 2);
-    
-    if (!jobSeekerRole) return true;
-    
+    if (!roles.value.length) return false;
+    const jobSeekerRole = roles.value.find(r => r.id === 2);
+    if (!jobSeekerRole) return false;
     return jobSeekerRole.status !== 'ACTIVE';
 });
+
 
 onMounted(fetchData);
 </script>
@@ -298,7 +297,12 @@ onMounted(fetchData);
                             <td class="px-6 py-4">
                                 <div class="flex flex-col gap-1">
                                     <span class="text-xs font-semibold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-lg w-fit">
-                                        {{ profile.experience_years }} {{ profile.experience_years == 1 ? 'Year' : 'Years' }} Exp
+                                        <template v-if="profile.experience_years">
+                                            {{ profile.experience_years }} {{ profile.experience_years === 1 ? 'Year' : 'Years' }} Exp
+                                        </template>
+                                        <template v-else>
+                                            Fresher
+                                        </template>
                                     </span>
                                     <span class="text-[10px] text-gray-400 flex items-center gap-1">
                                         <i class="fa-solid fa-location-dot text-[9px]"></i>
