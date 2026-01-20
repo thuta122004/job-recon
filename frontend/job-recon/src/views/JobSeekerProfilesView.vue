@@ -127,23 +127,59 @@ const handleSave = async (formDataRaw) => {
     }
 };
 
-const toggleVisibility = async (profile) => {
-    const action = profile.profile_visibility === 'PUBLIC' ? 'hide' : 'make public';
-    if (!confirm(`Are you sure you want to ${action} this profile?`)) return;
+const showConfirmModal = ref(false);
+const confirmConfig = ref({ title: '', message: '', action: null, type: 'indigo' });
+
+const requestToggleVisibility = (profile) => {
+    const isPublic = profile.profile_visibility === 'PUBLIC';
+    confirmConfig.value = {
+        title: isPublic ? 'Hide Profile?' : 'Make Profile Public?',
+        message: isPublic 
+            ? 'This will hide the candidate from the public talent directory. You can change this back at any time.' 
+            : 'This will make the candidate’s portfolio visible to all recruiters and employers.',
+        type: isPublic ? 'warning' : 'indigo',
+        action: () => executeToggleVisibility(profile.id)
+    };
+    showConfirmModal.value = true;
+};
+
+const executeToggleVisibility = async (id) => {
     try {
-        await api.delete(`/job-seeker-profiles/${profile.id}`);
+        await api.delete(`/job-seeker-profiles/${id}`);
         toast.info(`Visibility updated`);
-        fetchData();
+        await fetchData();
     } catch (e) {
         toast.error("Failed to update visibility");
+    } finally {
+        showConfirmModal.value = false;
     }
 };
+
+const roles = ref([]);
+
+const isJobSeekerDisabled = computed(() => {
+    const jobSeekerRole = roles.value.find(r => r.name === 'Job Seeker');
+    return !jobSeekerRole || jobSeekerRole.status !== 'ACTIVE';
+});
 
 onMounted(fetchData);
 </script>
 
 <template>
-    <div class="space-y-6">
+<div class="space-y-6">
+        <div v-if="isJobSeekerDisabled && !loading" 
+            class="bg-amber-50 border border-amber-200 rounded-2xl p-4 flex items-center gap-3 mb-6 animate-in slide-in-from-top-2 duration-300">
+            <div class="h-10 w-10 bg-amber-100 text-amber-600 rounded-xl flex items-center justify-center flex-shrink-0">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <div class="flex-1">
+                <h4 class="text-sm font-bold text-amber-900">Creation Disabled</h4>
+                <p class="text-xs text-amber-700 mt-0.5">
+                    The <span class="font-bold">Job Seeker</span> role is currently inactive. You cannot create new profiles until this role is reactivated in 
+                    <router-link to="/roles" class="underline hover:text-amber-900 transition-colors">Roles Management</router-link>.
+                </p>
+            </div>
+        </div>
         <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
             <div>
                 <h1 class="text-2xl font-extrabold text-gray-900 tracking-tight">Talent Directory</h1>
@@ -169,11 +205,21 @@ onMounted(fetchData);
                         class="pl-11 pr-4 py-2.5 w-64 bg-white border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all">
                 </div>
                 
-                <button @click="openCreateModal"
-                    class="bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white px-5 py-2.5 rounded-xl text-sm font-bold shadow-md shadow-indigo-200 transition-all flex items-center gap-2">
-                    <i class="fa-solid fa-plus text-xs"></i>
-                    Add Profile
-                </button>
+                <div class="flex flex-wrap items-center gap-3">
+                    <button @click="openCreateModal"
+                        :disabled="isJobSeekerDisabled"
+                        :title="isJobSeekerDisabled ? 'Job Seeker role is currently inactive' : 'Add Profile'"
+                        :class="[
+                            'px-5 py-2.5 rounded-xl text-sm font-bold shadow-md transition-all flex items-center gap-2',
+                            isJobSeekerDisabled 
+                                ? 'bg-gray-200 text-gray-400 cursor-not-allowed shadow-none' 
+                                : 'bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white shadow-indigo-200'
+                        ]"
+                    >
+                        <i class="fa-solid fa-plus text-xs"></i>
+                        Add Profile
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -274,8 +320,8 @@ onMounted(fetchData);
                                         <i class="fa-solid fa-pencil"></i>
                                     </button>
                                     
-                                    <button @click="toggleVisibility(profile)" 
-                                        :class="profile.profile_visibility === 'PUBLIC' ? 'text-amber-500 hover:bg-amber-50' : 'text-emerald-500 hover:bg-emerald-50'"
+                                    <button @click="requestToggleVisibility(profile)" 
+                                        :class="profile.profile_visibility === 'PUBLIC' ? 'text-amber-500 hover:bg-amber-50' : 'text-indigo-500 hover:bg-indigo-50'"
                                         class="p-2 rounded-md transition-all"
                                         :title="profile.profile_visibility === 'PUBLIC' ? 'Hide Profile' : 'Show Profile'">
                                         <i v-if="profile.profile_visibility === 'PUBLIC'" class="fa-solid fa-eye-slash"></i>
@@ -311,37 +357,67 @@ onMounted(fetchData);
             </div>
         </div>
         <Transition
-    enter-active-class="transition duration-300 ease-out"
-    enter-from-class="opacity-0 scale-95"
-    enter-to-class="opacity-100 scale-100"
-    leave-active-class="transition duration-200 ease-in"
-    leave-from-class="opacity-100 scale-100"
-    leave-to-class="opacity-0 scale-95"
->
-    <div v-if="zoomedImage" class="fixed inset-0 z-[100] flex items-center justify-center p-6">
-        <div @click="closeZoom" class="absolute inset-0 bg-zinc-900/90 backdrop-blur-sm"></div>
-        
-        <div class="relative max-w-md w-full">
-            <div class="bg-white rounded-2xl overflow-hidden shadow-2xl">
-                <div class="aspect-square bg-zinc-100 relative">
-                    <img :src="zoomedImage" 
-                         class="w-full h-full object-cover" 
-                         @click.stop />
-                    
-                    <button @click="closeZoom" 
-                        class="absolute top-4 right-4 bg-black/20 hover:bg-black/40 backdrop-blur-md text-white w-8 h-8 rounded-full flex items-center justify-center transition-all">
-                        <i class="fa-solid fa-xmark text-sm"></i>
-                    </button>
-                </div>
+            enter-active-class="transition duration-300 ease-out"
+            enter-from-class="opacity-0 scale-95"
+            enter-to-class="opacity-100 scale-100"
+            leave-active-class="transition duration-200 ease-in"
+            leave-from-class="opacity-100 scale-100"
+            leave-to-class="opacity-0 scale-95"
+        >
+            <div v-if="zoomedImage" class="fixed inset-0 z-[100] flex items-center justify-center p-6">
+                <div @click="closeZoom" class="absolute inset-0 bg-zinc-900/90 backdrop-blur-sm"></div>
                 
-                <div class="p-5 bg-white">
-                    <p class="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1">Candidate Profile</p>
-                    <h3 class="text-zinc-900 text-lg font-bold">{{ zoomName }}</h3>
+                <div class="relative max-w-md w-full">
+                    <div class="bg-white rounded-2xl overflow-hidden shadow-2xl">
+                        <div class="aspect-square bg-zinc-100 relative">
+                            <img :src="zoomedImage" 
+                                class="w-full h-full object-cover" 
+                                @click.stop />
+                            
+                            <button @click="closeZoom" 
+                                class="absolute top-4 right-4 bg-black/20 hover:bg-black/40 backdrop-blur-md text-white w-8 h-8 rounded-full flex items-center justify-center transition-all">
+                                <i class="fa-solid fa-xmark text-sm"></i>
+                            </button>
+                        </div>
+                        
+                        <div class="p-5 bg-white">
+                            <p class="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1">Candidate Profile</p>
+                            <h3 class="text-zinc-900 text-lg font-bold">{{ zoomName }}</h3>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
-    </div>
-</Transition>
+        </Transition>
+        <Transition
+            enter-active-class="transition duration-300 ease-out"
+            enter-from-class="opacity-0 scale-95"
+            enter-to-class="opacity-100 scale-100"
+            leave-active-class="transition duration-200 ease-in"
+            leave-from-class="opacity-100 scale-100"
+            leave-to-class="opacity-0 scale-95"
+        >
+            <div v-if="showConfirmModal" class="fixed inset-0 z-[110] flex items-center justify-center p-6">
+                <div @click="showConfirmModal = false" class="absolute inset-0 bg-zinc-900/60 backdrop-blur-sm"></div>
+                <div class="relative max-w-sm w-full bg-white rounded-2xl shadow-2xl overflow-hidden border border-gray-100">
+                    <div class="p-6">
+                        <div :class="confirmConfig.type === 'warning' ? 'bg-amber-50 text-amber-600' : 'bg-indigo-50 text-indigo-600'" 
+                             class="h-12 w-12 rounded-xl flex items-center justify-center mb-4 text-xl">
+                            <i :class="confirmConfig.type === 'warning' ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye'"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900 tracking-tight">{{ confirmConfig.title }}</h3>
+                        <p class="text-sm text-gray-500 mt-2 leading-relaxed">{{ confirmConfig.message }}</p>
+                        <div class="mt-8 flex gap-3">
+                            <button @click="showConfirmModal = false" class="flex-1 px-4 py-2.5 rounded-xl text-sm font-bold text-gray-500 bg-gray-50 hover:bg-gray-100 transition-colors">Cancel</button>
+                            <button @click="confirmConfig.action" 
+                                :class="confirmConfig.type === 'warning' ? 'bg-amber-500 hover:bg-amber-600' : 'bg-indigo-600 hover:bg-indigo-700'"
+                                class="flex-1 px-4 py-2.5 rounded-xl text-sm font-bold text-white shadow-lg transition-all active:scale-95">
+                                Confirm
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </Transition>
     </div>
 
     <JobSeekerProfileModal 

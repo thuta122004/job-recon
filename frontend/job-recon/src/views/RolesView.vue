@@ -18,6 +18,9 @@ const itemsPerPage = ref(8);
 
 const toast = useToast();
 
+const showConfirmModal = ref(false);
+const confirmConfig = ref({ title: '', message: '', action: null, type: 'indigo', icon: '' });
+
 const fetchRoles = async () => {
     loading.value = true;
     try {
@@ -95,15 +98,29 @@ const handleSave = async (formData) => {
     }
 };
 
-const deleteRole = async (id, currentStatus) => {
-    const action = currentStatus === 'ACTIVE' ? 'deactivate' : 'reactivate';
-    if (!confirm(`Are you sure you want to ${action} this role?`)) return;
+const requestToggleStatus = (role) => {
+    const isActive = role.status === 'ACTIVE';
+    confirmConfig.value = {
+        title: isActive ? 'Deactivate Role?' : 'Reactivate Role?',
+        message: isActive 
+            ? `Are you sure you want to deactivate the "${role.name}" role? Users assigned to this role may lose access to certain features.` 
+            : `This will restore the "${role.name}" role, allowing it to be assigned to users again.`,
+        type: isActive ? 'danger' : 'indigo',
+        icon: isActive ? 'fa-trash-can' : 'fa-rotate-left',
+        action: () => executeToggleStatus(role.id)
+    };
+    showConfirmModal.value = true;
+};
+
+const executeToggleStatus = async (id) => {
     try {
         await api.delete(`/roles/${id}`);
-        toast.info(`Status updated`);
-        fetchRoles();
+        toast.info("Role status updated");
+        await fetchRoles();
     } catch (e) {
-        toast.error("Failed to update status");
+        toast.error("Failed to update role status");
+    } finally {
+        showConfirmModal.value = false;
     }
 };
 
@@ -199,9 +216,10 @@ onMounted(fetchRoles);
                                     <button @click="openEditModal(role)" class="text-indigo-600 hover:bg-indigo-50 p-2 rounded-md transition-all">
                                         <i class="fa-solid fa-pencil"></i>
                                     </button>
-                                    <button @click="deleteRole(role.id, role.status)"
+                                    <button @click="requestToggleStatus(role)"
                                         :class="role.status === 'ACTIVE' ? 'text-red-400 hover:bg-red-50' : 'text-emerald-500 hover:bg-emerald-50'"
-                                        class="p-2 rounded-md transition-all">
+                                        class="p-2 rounded-md transition-all"
+                                        :title="role.status === 'ACTIVE' ? 'Deactivate Role' : 'Reactivate Role'">
                                         <i v-if="role.status === 'ACTIVE'" class="fa-solid fa-trash-can"></i>
                                         <i v-else class="fa-solid fa-rotate-left"></i>
                                     </button>
@@ -234,6 +252,47 @@ onMounted(fetchRoles);
                 </div>
             </div>
         </div>
+        <Transition
+            enter-active-class="transition duration-300 ease-out"
+            enter-from-class="opacity-0 scale-95"
+            enter-to-class="opacity-100 scale-100"
+            leave-active-class="transition duration-200 ease-in"
+            leave-from-class="opacity-100 scale-100"
+            leave-to-class="opacity-0 scale-95"
+        >
+            <div v-if="showConfirmModal" class="fixed inset-0 z-[110] flex items-center justify-center p-6">
+                <div @click="showConfirmModal = false" class="absolute inset-0 bg-zinc-900/60 backdrop-blur-sm"></div>
+                
+                <div class="relative max-w-sm w-full bg-white rounded-2xl shadow-2xl overflow-hidden border border-gray-100">
+                    <div class="p-6">
+                        <div :class="{
+                            'bg-rose-50 text-rose-600': confirmConfig.type === 'danger',
+                            'bg-indigo-50 text-indigo-600': confirmConfig.type === 'indigo'
+                        }" class="h-12 w-12 rounded-xl flex items-center justify-center mb-4 text-xl">
+                            <i :class="['fa-solid', confirmConfig.icon]"></i>
+                        </div>
+                        
+                        <h3 class="text-xl font-bold text-gray-900 tracking-tight">{{ confirmConfig.title }}</h3>
+                        <p class="text-sm text-gray-500 mt-2 leading-relaxed">{{ confirmConfig.message }}</p>
+                        
+                        <div class="mt-8 flex gap-3">
+                            <button @click="showConfirmModal = false" 
+                                class="flex-1 px-4 py-2.5 rounded-xl text-sm font-bold text-gray-500 bg-gray-50 hover:bg-gray-100 transition-colors">
+                                Cancel
+                            </button>
+                            <button @click="confirmConfig.action" 
+                                :class="{
+                                    'bg-rose-500 hover:bg-rose-600': confirmConfig.type === 'danger',
+                                    'bg-indigo-600 hover:bg-indigo-700': confirmConfig.type === 'indigo'
+                                }"
+                                class="flex-1 px-4 py-2.5 rounded-xl text-sm font-bold text-white shadow-lg transition-all active:scale-95">
+                                Confirm
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </Transition>
     </div>
 
     <RoleModal 

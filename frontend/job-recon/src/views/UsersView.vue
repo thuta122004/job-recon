@@ -19,6 +19,9 @@ const itemsPerPage = ref(8);
 
 const toast = useToast();
 
+const showConfirmModal = ref(false);
+const confirmConfig = ref({ title: '', message: '', action: null, type: 'indigo', icon: '' });
+
 const fetchData = async () => {
     loading.value = true;
     try {
@@ -99,28 +102,55 @@ const handleSave = async (formData) => {
     }
 };
 
-const toggleActive = async (user) => {
-    const action = user.status === 'ACTIVE' ? 'deactivate' : 'reactivate';
-    if (!confirm(`Are you sure you want to ${action} this user?`)) return;
+const requestToggleActive = (user) => {
+    const isActive = user.status === 'ACTIVE';
+    confirmConfig.value = {
+        title: isActive ? 'Deactivate User?' : 'Reactivate User?',
+        message: isActive 
+            ? 'Deactivating this user will revoke their access to the system immediately.' 
+            : 'This will restore the user\'s ability to log in and manage data.',
+        type: isActive ? 'danger' : 'indigo',
+        icon: isActive ? 'fa-trash-can' : 'fa-rotate-left',
+        action: () => executeToggleActive(user.id)
+    };
+    showConfirmModal.value = true;
+};
+
+const executeToggleActive = async (id) => {
     try {
-        await api.delete(`/users/${user.id}`);
-        toast.info(`User ${user.status === 'ACTIVE' ? 'deactivated' : 'reactivated'}`);
-        fetchData();
+        await api.delete(`/users/${id}`);
+        toast.info("User status updated");
+        await fetchData();
     } catch (e) {
-        toast.error(e.response?.data?.message || "Failed to update status");
+        toast.error("Failed to update status");
+    } finally {
+        showConfirmModal.value = false;
     }
 };
 
-const handleSuspend = async (user) => {
+const requestSuspend = (user) => {
     const isSuspended = user.status === 'SUSPENDED';
-    const action = isSuspended ? 'unsuspend' : 'suspend';
-    if (!confirm(`Are you sure you want to ${action} this user?`)) return;
+    confirmConfig.value = {
+        title: isSuspended ? 'Unsuspend User?' : 'Suspend User?',
+        message: isSuspended 
+            ? 'Access will be restored. The user will be able to log back into their account.' 
+            : 'Suspension is a temporary restriction. The user will be unable to log in until unsuspended.',
+        type: isSuspended ? 'indigo' : 'warning',
+        icon: isSuspended ? 'fa-unlock' : 'fa-ban',
+        action: () => executeSuspend(user.id, isSuspended)
+    };
+    showConfirmModal.value = true;
+};
+
+const executeSuspend = async (id, isSuspended) => {
     try {
-        await api.patch(`/users/${user.id}/suspend`);
+        await api.patch(`/users/${id}/suspend`);
         isSuspended ? toast.success(`User unsuspended`) : toast.warning(`User suspended`);
-        fetchData();
+        await fetchData();
     } catch (e) {
-        toast.error(e.response?.data?.message || "Action failed");
+        toast.error("Action failed");
+    } finally {
+        showConfirmModal.value = false;
     }
 };
 
@@ -242,22 +272,22 @@ onMounted(fetchData);
                                         <i class="fa-solid fa-pencil"></i>
                                     </button>
                                     
-                                    <button @click="handleSuspend(user)" 
+                                    <button @click="requestSuspend(user)" 
                                         :disabled="user.status === 'INACTIVE'"
                                         :class="[
                                             'p-2 rounded-md transition-all disabled:opacity-20',
                                             user.status === 'SUSPENDED' ? 'text-emerald-600 hover:bg-emerald-50' : 'text-amber-500 hover:bg-amber-50'
                                         ]"
-                                        :title="user.status === 'SUSPENDED' ? 'Unsuspend User' : 'Suspend User'">
+                                        title="Manage Suspension">
                                         <i v-if="user.status === 'SUSPENDED'" class="fa-solid fa-unlock"></i>
                                         <i v-else class="fa-solid fa-ban"></i>
                                     </button>
 
-                                    <button @click="toggleActive(user)"
+                                    <button @click="requestToggleActive(user)"
                                         :disabled="user.status === 'SUSPENDED'"
                                         :class="user.status === 'ACTIVE' ? 'text-red-400 hover:bg-red-50' : 'text-emerald-500 hover:bg-emerald-50'"
                                         class="p-2 rounded-md transition-all disabled:opacity-20"
-                                        :title="user.status === 'ACTIVE' ? 'Deactivate User' : 'Reactivate User'">
+                                        title="Toggle Active Status">
                                         <i v-if="user.status === 'ACTIVE'" class="fa-solid fa-trash-can"></i>
                                         <i v-else class="fa-solid fa-rotate-left"></i>
                                     </button>
@@ -290,6 +320,49 @@ onMounted(fetchData);
                 </div>
             </div>
         </div>
+        <Transition
+            enter-active-class="transition duration-300 ease-out"
+            enter-from-class="opacity-0 scale-95"
+            enter-to-class="opacity-100 scale-100"
+            leave-active-class="transition duration-200 ease-in"
+            leave-from-class="opacity-100 scale-100"
+            leave-to-class="opacity-0 scale-95"
+        >
+            <div v-if="showConfirmModal" class="fixed inset-0 z-[110] flex items-center justify-center p-6">
+                <div @click="showConfirmModal = false" class="absolute inset-0 bg-zinc-900/60 backdrop-blur-sm"></div>
+                
+                <div class="relative max-w-sm w-full bg-white rounded-2xl shadow-2xl overflow-hidden border border-gray-100">
+                    <div class="p-6">
+                        <div :class="{
+                            'bg-amber-50 text-amber-600': confirmConfig.type === 'warning',
+                            'bg-rose-50 text-rose-600': confirmConfig.type === 'danger',
+                            'bg-indigo-50 text-indigo-600': confirmConfig.type === 'indigo'
+                        }" class="h-12 w-12 rounded-xl flex items-center justify-center mb-4 text-xl">
+                            <i :class="['fa-solid', confirmConfig.icon]"></i>
+                        </div>
+                        
+                        <h3 class="text-xl font-bold text-gray-900 tracking-tight">{{ confirmConfig.title }}</h3>
+                        <p class="text-sm text-gray-500 mt-2 leading-relaxed">{{ confirmConfig.message }}</p>
+                        
+                        <div class="mt-8 flex gap-3">
+                            <button @click="showConfirmModal = false" 
+                                class="flex-1 px-4 py-2.5 rounded-xl text-sm font-bold text-gray-500 bg-gray-50 hover:bg-gray-100 transition-colors">
+                                Cancel
+                            </button>
+                            <button @click="confirmConfig.action" 
+                                :class="{
+                                    'bg-amber-500 hover:bg-amber-600': confirmConfig.type === 'warning',
+                                    'bg-rose-500 hover:bg-rose-600': confirmConfig.type === 'danger',
+                                    'bg-indigo-600 hover:bg-indigo-700': confirmConfig.type === 'indigo'
+                                }"
+                                class="flex-1 px-4 py-2.5 rounded-xl text-sm font-bold text-white shadow-lg transition-all active:scale-95">
+                                Confirm
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </Transition>
     </div>
 
     <UserModal 
