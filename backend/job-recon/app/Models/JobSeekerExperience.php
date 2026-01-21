@@ -10,6 +10,8 @@ class JobSeekerExperience extends Model
         'job_seeker_profile_id',
         'job_title',
         'company_name',
+        'location',
+        'employment_type',
         'start_date',
         'end_date',
         'description'

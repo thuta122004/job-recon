@@ -51,6 +51,7 @@ const handleSave = async (formData) => {
     const cleanData = {
         ...formData,
         location: formData.location?.trim() || null,
+        employment_type: formData.employment_type || 'FULL-TIME',
         end_date: formData.end_date || null,
         description: formData.description?.trim() || null
     };
@@ -97,6 +98,24 @@ const executeDelete = async () => {
         showConfirmModal.value = false;
         experienceToDelete.value = null;
     }
+};
+
+const getDuration = (start, end) => {
+    const startDate = new Date(start);
+    const endDate = end ? new Date(end) : new Date();
+    
+    let years = endDate.getFullYear() - startDate.getFullYear();
+    let months = endDate.getMonth() - startDate.getMonth();
+
+    if (months < 0) {
+        years--;
+        months += 12;
+    }
+
+    const yearPart = years > 0 ? `${years} yr${years > 1 ? 's' : ''}` : '';
+    const monthPart = months > 0 ? `${months} mo${months > 1 ? 's' : ''}` : '';
+    
+    return [yearPart, monthPart].filter(Boolean).join(' ') || '1 mo';
 };
 
 onMounted(fetchData);
@@ -146,44 +165,73 @@ onMounted(fetchData);
                 <div v-for="exp in experiences" :key="exp.id" 
                     class="group bg-white rounded-2xl p-6 border border-gray-100 shadow-sm hover:shadow-md hover:border-indigo-100 transition-all animate-in slide-in-from-bottom-2">
                     
-                    <div class="flex flex-col md:flex-row md:items-start justify-between gap-4">
-                        <div class="flex gap-5">
-                            <div class="h-14 w-14 rounded-2xl bg-indigo-50 flex items-center justify-center text-indigo-500 shrink-0 border border-indigo-100/50 shadow-inner">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 group">
+    
+                        <div class="flex gap-5 items-center w-full md:w-1/3">
+                            <div class="h-14 w-14 rounded-2xl bg-white flex items-center justify-center text-indigo-500 shrink-0 border border-gray-100 shadow-sm group-hover:border-indigo-200 group-hover:bg-indigo-50/30 transition-all duration-500">
                                 <i class="fa-solid fa-briefcase text-xl"></i>
                             </div>
-                            <div class="space-y-1">
-                                <h3 class="font-bold text-gray-900 text-lg group-hover:text-indigo-600 transition-colors">{{ exp.job_title }}</h3>
-                                <p class="text-gray-600 font-medium flex items-center gap-1.5">
+                            <div class="space-y-0.5 overflow-hidden">
+                                <h3 class="font-bold text-gray-900 text-lg group-hover:text-indigo-600 transition-colors truncate">
+                                    {{ exp.job_title }}
+                                </h3>
+                                <p class="text-gray-600 font-medium flex items-center gap-1.5 text-sm">
                                     {{ exp.company_name }}
                                     <i v-if="verifiedCompanies.includes(exp.company_name)" 
-                                    class="fa-solid fa-circle-check text-emerald-400 text-[13px]"
-                                    title="Verified Company">
+                                    class="fa-solid fa-circle-check text-emerald-400 text-[12px]">
                                     </i>
                                 </p>
-                                
-                                <div class="flex flex-wrap items-center gap-y-2 gap-x-4 mt-2">
-                                    <span class="flex items-center gap-2 text-[11px] font-bold text-gray-400 uppercase tracking-wider">
-                                        <i class="fa-regular fa-calendar-check text-indigo-400"></i>
-                                        {{ exp.start_date }} — {{ exp.end_date || 'Present' }}
-                                    </span>
-                                </div>
                             </div>
                         </div>
 
-                        <div class="flex items-center justify-end">
-                            <div class="flex items-center gap-3">
+                        <div class="hidden md:flex flex-1 flex-col items-center justify-center px-10 relative">
+                            <div class="mb-2 flex items-center gap-1.5 px-3 py-1 bg-indigo-50/50 rounded-full border border-indigo-100/50 group-hover:bg-indigo-600 group-hover:border-indigo-600 transition-all duration-500">
+                                <i class="fa-solid fa-hourglass-half text-[9px] text-indigo-400 group-hover:text-white transition-colors"></i>
+                                <span class="text-[10px] font-black text-indigo-600 group-hover:text-white uppercase tracking-wider transition-colors">
+                                    {{ getDuration(exp.start_date, exp.end_date) }}
+                                </span>
+                            </div>
+
+                            <div class="w-full h-[1.5px] bg-gray-100 relative">
+                                <div class="absolute inset-0 bg-gradient-to-r from-indigo-200 via-indigo-500 to-indigo-200 w-0 group-hover:w-full transition-all duration-700 ease-in-out"></div>
+                                
+                                <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+                                    <div class="h-1.5 w-1.5 rounded-full bg-white border border-gray-200 group-hover:border-indigo-500 group-hover:scale-125 transition-all duration-500"></div>
+                                </div>
+                            </div>
+                            
+                            <span class="mt-2 text-[8px] font-bold text-gray-300 uppercase tracking-[0.3em] group-hover:text-indigo-300 transition-colors">
+                                Total Tenure
+                            </span>
+                        </div>
+
+                        <div class="flex flex-col items-end gap-2 min-w-[160px] md:w-1/3">
+                            <div class="flex items-center gap-3 h-9">
                                 <span v-if="!exp.end_date" 
                                     class="bg-emerald-50 text-emerald-600 text-[10px] font-black px-3 py-1.5 rounded-xl uppercase border border-emerald-100 whitespace-nowrap transition-all duration-500 ease-in-out order-1">
                                     Current Role
                                 </span>
 
                                 <div class="flex items-center gap-2 overflow-hidden max-w-0 opacity-0 translate-x-4 group-hover:max-w-[100px] group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-500 ease-in-out order-2">
-                                    <button @click="openEditModal(exp)" class="h-9 w-9 flex items-center justify-center text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all shrink-0">
+                                    <button @click="openEditModal(exp)" class="h-9 w-9 flex items-center justify-center text-gray-400 hover:text-indigo-600 hover:bg-white hover:shadow-sm border border-transparent hover:border-indigo-100 rounded-xl transition-all shrink-0">
                                         <i class="fa-solid fa-pencil text-sm"></i>
                                     </button>
-                                    <button @click="confirmDelete(exp.id)" class="h-9 w-9 flex items-center justify-center text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all shrink-0">
+                                    <button @click="confirmDelete(exp.id)" class="h-9 w-9 flex items-center justify-center text-gray-400 hover:text-red-500 hover:bg-white hover:shadow-sm border border-transparent hover:border-red-100 rounded-xl transition-all shrink-0">
                                         <i class="fa-solid fa-trash-can text-sm"></i>
                                     </button>
+                                </div>
+                            </div>
+
+                            <div class="flex flex-col items-end gap-1">
+                                <div class="flex items-center gap-2 text-[10px] font-bold text-gray-400 uppercase tracking-tight">
+                                    {{ exp.location || 'Remote' }}
+                                    <div class="h-1 w-1 rounded-full bg-gray-300"></div>
+                                    <i class="fa-solid fa-location-dot text-indigo-300 text-[11px]"></i>
+                                </div>
+                                <div class="flex items-center gap-2 text-[10px] font-bold text-gray-400 uppercase tracking-tight">
+                                    {{ exp.employment_type }}
+                                    <div class="h-1 w-1 rounded-full bg-gray-300"></div>
+                                    <i class="fa-solid fa-clock text-indigo-300 text-[11px]"></i>
                                 </div>
                             </div>
                         </div>

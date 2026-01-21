@@ -47,6 +47,8 @@ class JobSeekerExperienceController extends Controller
             'job_seeker_profile_id' => 'required|integer|exists:job_seeker_profiles,id',
             'job_title'             => 'required|string|max:255',
             'company_name'          => 'required|string|max:255',
+            'location'              => 'nullable|string|max:255',
+            'employment_type'       => 'required|in:FULL-TIME,PART-TIME',
             'start_date'            => 'required|date|before_or_equal:today',
             'end_date'              => 'nullable|date|after_or_equal:start_date|before_or_equal:today',
             'description'           => 'nullable|string',
@@ -98,6 +100,10 @@ class JobSeekerExperienceController extends Controller
             ], 403);
         }
 
+        $data = $validator->validated();
+        $data['end_date'] = !empty($data['end_date']) ? $data['end_date'] : null;
+        $data['location'] = !empty($data['location']) ? $data['location'] : null;
+
         $experience = JobSeekerExperience::create($request->all());
 
         return response()->json([
@@ -132,6 +138,8 @@ class JobSeekerExperienceController extends Controller
         $validator = Validator::make($request->all(), [
             'job_title'    => 'required|string|max:255',
             'company_name' => 'required|string|max:255',
+            'location'              => 'nullable|string|max:255',
+            'employment_type'       => 'required|in:FULL-TIME,PART-TIME',
             'start_date'   => 'required|date|before_or_equal:today',
             'end_date'     => 'nullable|date|after_or_equal:start_date|before_or_equal:today',
             'description'  => 'nullable|string',
@@ -176,6 +184,10 @@ class JobSeekerExperienceController extends Controller
                 'errors' => $validator->errors()
             ], 422);
         }
+
+        $data = $validator->validated();
+        $data['end_date'] = !empty($data['end_date']) ? $data['end_date'] : null;
+        $data['location'] = !empty($data['location']) ? $data['location'] : null;
 
         $experience->update($request->all());
 

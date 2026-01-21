@@ -17,6 +17,8 @@ const form = reactive({
     job_seeker_profile_id: '',
     job_title: '',
     company_name: '',
+    location: '',
+    employment_type: 'FULL-TIME',
     start_date: '',
     end_date: '',
     description: ''
@@ -33,6 +35,8 @@ watch(() => props.isOpen, (newVal) => {
                 job_seeker_profile_id: props.profileId,
                 job_title: '',
                 company_name: '',
+                location: '',   
+                employment_type: 'FULL-TIME',
                 start_date: '',
                 end_date: '',
                 description: ''
@@ -89,6 +93,22 @@ const handleSave = () => {
 
                 <div class="grid grid-cols-2 gap-5">
                     <div class="space-y-2">
+                        <label class="text-[11px] font-bold text-gray-400 uppercase tracking-[0.1em] ml-1">Location</label>
+                        <input type="text" v-model="form.location" placeholder="City, Country"
+                            class="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-2xl text-sm focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 focus:bg-white outline-none transition-all" />
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-[11px] font-bold text-gray-400 uppercase tracking-[0.1em] ml-1">Employment Type</label>
+                        <select v-model="form.employment_type"
+                            class="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-2xl text-sm focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 focus:bg-white outline-none transition-all appearance-none cursor-pointer">
+                            <option value="FULL-TIME">Full-Time</option>
+                            <option value="PART-TIME">Part-Time</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-5">
+                    <div class="space-y-2">
                         <label class="text-[11px] font-bold text-gray-400 uppercase tracking-[0.1em] ml-1">Start Date</label>
                         <input type="date" v-model="form.start_date"
                             class="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-2xl text-sm focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 focus:bg-white outline-none transition-all" />
@@ -116,7 +136,7 @@ const handleSave = () => {
             <div class="px-8 py-6 bg-gray-50/50 border-t border-gray-50 flex justify-end gap-3">
                 <button @click="$emit('close')" 
                     class="px-6 py-3 text-sm font-bold text-gray-500 hover:text-gray-700 transition-colors">
-                    Cancel
+                    Discard
                 </button>
                 <button @click="handleSave" :disabled="loading"
                     class="bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-300 text-white px-8 py-3 rounded-2xl text-sm font-bold shadow-xl shadow-indigo-100 transition-all flex items-center gap-2 active:scale-95">
