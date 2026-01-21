@@ -118,6 +118,11 @@ const getDuration = (start, end) => {
     return [yearPart, monthPart].filter(Boolean).join(' ') || '1 mo';
 };
 
+const formatYear = (dateString) => {
+    if (!dateString) return 'Present';
+    return new Date(dateString).getFullYear();
+};
+
 onMounted(fetchData);
 </script>
 
@@ -181,6 +186,9 @@ onMounted(fetchData);
                                     class="fa-solid fa-circle-check text-emerald-400 text-[12px]">
                                     </i>
                                 </p>
+                                <div class="text-[10px] font-bold text-gray-400 uppercase tracking-tight">
+                                    {{ formatYear(exp.start_date) }} — {{ formatYear(exp.end_date) }}
+                                </div>
                             </div>
                         </div>
 
@@ -223,15 +231,13 @@ onMounted(fetchData);
                             </div>
 
                             <div class="flex flex-col items-end gap-1">
-                                <div class="flex items-center gap-2 text-[10px] font-bold text-gray-400 uppercase tracking-tight">
-                                    {{ exp.location || 'Remote' }}
-                                    <div class="h-1 w-1 rounded-full bg-gray-300"></div>
-                                    <i class="fa-solid fa-location-dot text-indigo-300 text-[11px]"></i>
-                                </div>
-                                <div class="flex items-center gap-2 text-[10px] font-bold text-gray-400 uppercase tracking-tight">
+                                <div class="px-2 py-0.5 rounded-lg border text-[10px] font-black uppercase tracking-tighter bg-indigo-50 text-indigo-600 border-indigo-100">
                                     {{ exp.employment_type }}
-                                    <div class="h-1 w-1 rounded-full bg-gray-300"></div>
-                                    <i class="fa-solid fa-clock text-indigo-300 text-[11px]"></i>
+                                </div>
+
+                                <div class="text-[10px] font-bold text-gray-400 uppercase tracking-tight flex items-center gap-1">
+                                    {{ exp.location || 'Remote' }}
+                                    <i class="fa-solid fa-location-dot text-[9px]"></i>
                                 </div>
                             </div>
                         </div>

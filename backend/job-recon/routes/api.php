@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\JobSeekerEducationController;
 use App\Http\Controllers\Api\JobSeekerExperienceController;
 use App\Http\Controllers\Api\JobSeekerProfileController;
 use App\Http\Controllers\Api\RoleController;
@@ -17,3 +18,5 @@ Route::patch('users/{id}/suspend', [UserController::class, 'suspend']);
 Route::apiResource('job-seeker-profiles', JobSeekerProfileController::class);
 Route::get('job-seeker-experiences/{id}', [JobSeekerExperienceController::class, 'index']);
 Route::apiResource('job-seeker-experiences', JobSeekerExperienceController::class)->except(['index']);
+Route::get('job-seeker-educations/{id}', [JobSeekerEducationController::class, 'index']);
+Route::apiResource('job-seeker-educations', JobSeekerEducationController::class)->except(['index']);

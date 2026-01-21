@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 
 class JobSeekerProfile extends Model
@@ -22,5 +21,15 @@ class JobSeekerProfile extends Model
     protected function resumeUrl(): Attribute
     {
         return Attribute::get(fn ($value) => $value ? asset('storage/' . $value) : null);
+    }
+
+    public function experiences()
+    {
+        return $this->hasMany(JobSeekerExperience::class);
+    }
+
+    public function educations()
+    {
+        return $this->hasMany(JobSeekerEducation::class);
     }
 }

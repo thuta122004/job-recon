@@ -3,6 +3,7 @@ import RolesView from '@/views/RolesView.vue'
 import UsersView from '../views/UsersView.vue'
 import JobSeekerProfilesView from '../views/JobSeekerProfilesView.vue'
 import JobSeekerExperiencesView from '../views/JobSeekerExperiencesView.vue'
+import JobSeekerEducationsView from '../views/JobSeekerEducationsView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -41,6 +42,15 @@ const router = createRouter({
         meta: { 
         parent: 'Management', 
         label: 'Job Seeker Experiences' 
+      }
+    },
+    {
+        path: '/job-seekers/:profileId/education',
+        name: 'JobSeekerEducation',
+        component: JobSeekerEducationsView,
+        meta: { 
+        parent: 'Management', 
+        label: 'Job Seeker Educations' 
       }
     }
   ]

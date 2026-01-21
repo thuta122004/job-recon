@@ -327,6 +327,12 @@ onMounted(fetchData);
                                         <i class="fa-solid fa-file-pdf"></i>
                                     </a>
 
+                                    <button @click="router.push(`/job-seekers/${profile.id}/education`)" 
+                                        class="text-emerald-600 hover:bg-emerald-50 p-2 rounded-md transition-all" 
+                                        title="Manage Education">
+                                        <i class="fa-solid fa-graduation-cap"></i>
+                                    </button>
+
                                     <button @click="router.push(`/job-seekers/${profile.id}/experience`)" 
                                         class="text-amber-600 hover:bg-amber-50 p-2 rounded-md transition-all" 
                                         title="Manage Experience">
