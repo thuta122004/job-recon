@@ -18,6 +18,8 @@ const saving = ref(false);
 const showModal = ref(false);
 const selectedExperience = ref(null);
 
+const verifiedCompanies = ['Google', 'Meta', 'Microsoft', 'KMD College', 'Apple'];
+
 const fetchData = async () => {
     loading.value = true;
     try {
@@ -151,27 +153,39 @@ onMounted(fetchData);
                             </div>
                             <div class="space-y-1">
                                 <h3 class="font-bold text-gray-900 text-lg group-hover:text-indigo-600 transition-colors">{{ exp.job_title }}</h3>
-                                <p class="text-gray-600 font-medium">{{ exp.company_name }}</p>
+                                <p class="text-gray-600 font-medium flex items-center gap-1.5">
+                                    {{ exp.company_name }}
+                                    <i v-if="verifiedCompanies.includes(exp.company_name)" 
+                                    class="fa-solid fa-circle-check text-emerald-400 text-[13px]"
+                                    title="Verified Company">
+                                    </i>
+                                </p>
                                 
                                 <div class="flex flex-wrap items-center gap-y-2 gap-x-4 mt-2">
                                     <span class="flex items-center gap-2 text-[11px] font-bold text-gray-400 uppercase tracking-wider">
                                         <i class="fa-regular fa-calendar-check text-indigo-400"></i>
                                         {{ exp.start_date }} — {{ exp.end_date || 'Present' }}
                                     </span>
-                                    <span v-if="!exp.end_date" class="bg-emerald-50 text-emerald-600 text-[10px] font-black px-2 py-0.5 rounded-md uppercase border border-emerald-100">
-                                        Current Role
-                                    </span>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="flex items-center gap-2 md:opacity-0 group-hover:opacity-100 transition-opacity">
-                            <button @click="openEditModal(exp)" class="h-9 w-9 flex items-center justify-center text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all">
-                                <i class="fa-solid fa-pencil text-sm"></i>
-                            </button>
-                            <button @click="confirmDelete(exp.id)" class="h-9 w-9 flex items-center justify-center text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all">
-                                <i class="fa-solid fa-trash-can text-sm"></i>
-                            </button>
+                        <div class="flex items-center justify-end">
+                            <div class="flex items-center gap-3">
+                                <span v-if="!exp.end_date" 
+                                    class="bg-emerald-50 text-emerald-600 text-[10px] font-black px-3 py-1.5 rounded-xl uppercase border border-emerald-100 whitespace-nowrap transition-all duration-500 ease-in-out order-1">
+                                    Current Role
+                                </span>
+
+                                <div class="flex items-center gap-2 overflow-hidden max-w-0 opacity-0 translate-x-4 group-hover:max-w-[100px] group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-500 ease-in-out order-2">
+                                    <button @click="openEditModal(exp)" class="h-9 w-9 flex items-center justify-center text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all shrink-0">
+                                        <i class="fa-solid fa-pencil text-sm"></i>
+                                    </button>
+                                    <button @click="confirmDelete(exp.id)" class="h-9 w-9 flex items-center justify-center text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all shrink-0">
+                                        <i class="fa-solid fa-trash-can text-sm"></i>
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
