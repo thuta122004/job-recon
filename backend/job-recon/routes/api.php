@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\JobSeekerExperienceController;
 use App\Http\Controllers\Api\JobSeekerProfileController;
 use App\Http\Controllers\Api\RoleController;
 use App\Http\Controllers\Api\UserController;
@@ -14,3 +15,5 @@ Route::apiResource('roles', RoleController::class);
 Route::apiResource('users', UserController::class);
 Route::patch('users/{id}/suspend', [UserController::class, 'suspend']);
 Route::apiResource('job-seeker-profiles', JobSeekerProfileController::class);
+Route::get('job-seeker-experiences/{id}', [JobSeekerExperienceController::class, 'index']);
+Route::apiResource('job-seeker-experiences', JobSeekerExperienceController::class)->except(['index']);

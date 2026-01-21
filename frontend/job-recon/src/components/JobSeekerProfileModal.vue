@@ -256,7 +256,7 @@ const handleSubmit = () => {
                     <div class="relative md:col-span-2">
                         <input type="text" id="p_headline" v-model="form.headline" placeholder=" "
                             class="floating-input block w-full px-4 py-4 text-sm text-gray-900 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none peer appearance-none transition-all" />
-                        <label for="p_headline" class="floating-label absolute left-4 transition-all duration-200 pointer-events-none text-gray-400 text-sm">Professional Headline (e.g. Senior Instructor)</label>
+                        <label for="p_headline" class="floating-label absolute left-4 transition-all duration-200 pointer-events-none text-gray-400 text-sm">Professional Headline</label>
                     </div>
 
                     <div class="relative">

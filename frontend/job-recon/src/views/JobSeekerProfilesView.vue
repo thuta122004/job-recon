@@ -1,9 +1,11 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import { useToast } from "vue-toastification";
+import { useRouter } from 'vue-router';
 import api from '@/services/api';
 import JobSeekerProfileModal from '@/components/JobSeekerProfileModal.vue';
 
+const router = useRouter();
 const profiles = ref([]);
 const users = ref([]);
 const roles = ref([]);
@@ -324,6 +326,12 @@ onMounted(fetchData);
                                         class="text-emerald-600 hover:bg-emerald-50 p-2 rounded-md transition-all" title="View Resume">
                                         <i class="fa-solid fa-file-pdf"></i>
                                     </a>
+
+                                    <button @click="router.push(`/job-seekers/${profile.id}/experience`)" 
+                                        class="text-amber-600 hover:bg-amber-50 p-2 rounded-md transition-all" 
+                                        title="Manage Experience">
+                                        <i class="fa-solid fa-briefcase"></i>
+                                    </button>
 
                                     <button @click="openEditModal(profile)" class="text-indigo-600 hover:bg-indigo-50 p-2 rounded-md transition-all" title="Edit Profile">
                                         <i class="fa-solid fa-pencil"></i>

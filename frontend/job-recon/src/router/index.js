@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import RolesView from '@/views/RolesView.vue'
 import UsersView from '../views/UsersView.vue'
 import JobSeekerProfilesView from '../views/JobSeekerProfilesView.vue'
+import JobSeekerExperiencesView from '../views/JobSeekerExperiencesView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -31,6 +32,15 @@ const router = createRouter({
       meta: { 
         parent: 'Management', 
         label: 'Job Seekers' 
+      }
+    },
+    {
+        path: '/job-seekers/:profileId/experience',
+        name: 'JobSeekerExperience',
+        component: JobSeekerExperiencesView,
+        meta: { 
+        parent: 'Management', 
+        label: 'Job Seeker Experiences' 
       }
     }
   ]
