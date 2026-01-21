@@ -79,7 +79,7 @@ class RoleController extends Controller
         $role = Role::find($id);
 
         if (!$role) {
-            return response([
+            return response()->json([
                 'status' => false,
                 'message' => 'Role not found'
             ], 404);

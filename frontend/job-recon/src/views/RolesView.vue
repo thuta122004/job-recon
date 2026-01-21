@@ -197,7 +197,7 @@ onMounted(fetchRoles);
                             <td class="px-6 py-4 text-xs font-mono text-gray-400">
                                 {{ (currentPage - 1) * itemsPerPage + (index + 1) }}
                             </td>
-                            <td class="px-6 py-4">
+                            <td v-if="filteredRoles.length > 0" class="px-6 py-4">
                                 <div class="font-bold text-gray-900 text-sm group-hover:text-indigo-600 transition-colors">{{ role.name }}</div>
                             </td>
                             <td class="px-6 py-4">

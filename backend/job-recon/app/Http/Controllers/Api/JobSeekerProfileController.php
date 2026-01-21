@@ -138,7 +138,7 @@ class JobSeekerProfileController extends Controller
             }
             $data['profile_picture_url'] = $request->file('profile_picture')->store('profiles/avatars', 'public');
         } 
-        elseif ($request->input('delete_picture') === 'true') {
+        elseif ($request->boolean('delete_picture')) {
             $oldPath = $profile->getRawOriginal('profile_picture_url');
             if ($oldPath && Storage::disk('public')->exists($oldPath)) {
                 Storage::disk('public')->delete($oldPath);
@@ -153,7 +153,7 @@ class JobSeekerProfileController extends Controller
             }
             $data['resume_url'] = $request->file('resume')->store('profiles/resumes', 'public');
         }
-        elseif ($request->input('delete_resume') === 'true') {
+        elseif ($request->boolean('delete_resume')) {
             $oldResumePath = $profile->getRawOriginal('resume_url');
             
             if ($oldResumePath && Storage::disk('public')->exists($oldResumePath)) {
