@@ -268,7 +268,7 @@ onMounted(fetchData);
                         <h3 class="text-xl font-bold text-gray-900 tracking-tight">Remove Experience?</h3>
                         <p class="text-sm text-gray-500 mt-2 leading-relaxed">This action cannot be undone. This work record will be permanently removed from the candidate's profile.</p>
                         <div class="mt-8 flex gap-3">
-                            <button @click="showConfirmModal = false" class="flex-1 px-4 py-2.5 rounded-xl text-sm font-bold text-gray-500 bg-gray-50 hover:bg-gray-100 transition-colors">Cancel</button>
+                            <button @click="showConfirmModal = false" class="flex-1 px-4 py-2.5 rounded-xl text-sm font-bold text-gray-500 bg-gray-50 hover:bg-gray-100 transition-colors">Discard</button>
                             <button @click="executeDelete" class="flex-1 px-4 py-2.5 rounded-xl text-sm font-bold text-white bg-red-500 hover:bg-red-600 shadow-lg shadow-red-100 transition-all active:scale-95">
                                 Delete
                             </button>

@@ -81,12 +81,12 @@ const handleSave = () => {
                 <div class="grid grid-cols-1 gap-5">
                     <div class="space-y-2">
                         <label class="text-[11px] font-bold text-gray-400 uppercase tracking-[0.1em] ml-1">Job Title</label>
-                        <input type="text" v-model="form.job_title" placeholder="Software Engineer"
+                        <input type="text" v-model="form.job_title" placeholder="Instructor"
                             class="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-2xl text-sm focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 focus:bg-white outline-none transition-all" />
                     </div>
                     <div class="space-y-2">
                         <label class="text-[11px] font-bold text-gray-400 uppercase tracking-[0.1em] ml-1">Company Name</label>
-                        <input type="text" v-model="form.company_name" placeholder="Tech Solutions Inc."
+                        <input type="text" v-model="form.company_name" placeholder="KMD College"
                             class="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-2xl text-sm focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 focus:bg-white outline-none transition-all" />
                     </div>
                 </div>

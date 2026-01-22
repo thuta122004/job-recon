@@ -32,7 +32,7 @@ const fetchData = async () => {
         users.value = userRes.data.data || userRes.data;
         roles.value = roleRes.data.data || roleRes.data;
     } catch (e) {
-        toast.error("Failed to sync data from server");
+        toast.error("Failed to sync users from server");
     } finally {
         loading.value = false;
     }
@@ -126,7 +126,7 @@ const executeToggleActive = async (id) => {
         toast.info("User status updated");
         await fetchData();
     } catch (e) {
-        toast.error("Failed to update status");
+        toast.error("Failed to update user status");
     } finally {
         showConfirmModal.value = false;
     }
@@ -351,7 +351,7 @@ onMounted(fetchData);
                         <div class="mt-8 flex gap-3">
                             <button @click="showConfirmModal = false" 
                                 class="flex-1 px-4 py-2.5 rounded-xl text-sm font-bold text-gray-500 bg-gray-50 hover:bg-gray-100 transition-colors">
-                                Cancel
+                                Discard
                             </button>
                             <button @click="confirmConfig.action" 
                                 :class="{

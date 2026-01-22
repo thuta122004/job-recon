@@ -126,7 +126,7 @@ const handleSave = async (formDataRaw) => {
         if (e.response?.status === 422) {
             toast.error(Object.values(e.response.data.errors)[0][0]); 
         } else {
-            toast.error("Server error occurred.");
+            toast.error("Server error. Please try again later.");
         }
     } finally {
         saving.value = false;
@@ -155,7 +155,7 @@ const executeToggleVisibility = async (id) => {
         toast.info(`Visibility updated`);
         await fetchData();
     } catch (e) {
-        toast.error("Failed to update visibility");
+        toast.error("Failed to update profile visibility");
     } finally {
         showConfirmModal.value = false;
     }
@@ -430,7 +430,7 @@ onMounted(fetchData);
                         <h3 class="text-xl font-bold text-gray-900 tracking-tight">{{ confirmConfig.title }}</h3>
                         <p class="text-sm text-gray-500 mt-2 leading-relaxed">{{ confirmConfig.message }}</p>
                         <div class="mt-8 flex gap-3">
-                            <button @click="showConfirmModal = false" class="flex-1 px-4 py-2.5 rounded-xl text-sm font-bold text-gray-500 bg-gray-50 hover:bg-gray-100 transition-colors">Cancel</button>
+                            <button @click="showConfirmModal = false" class="flex-1 px-4 py-2.5 rounded-xl text-sm font-bold text-gray-500 bg-gray-50 hover:bg-gray-100 transition-colors">Discard</button>
                             <button @click="confirmConfig.action" 
                                 :class="confirmConfig.type === 'warning' ? 'bg-amber-500 hover:bg-amber-600' : 'bg-indigo-600 hover:bg-indigo-700'"
                                 class="flex-1 px-4 py-2.5 rounded-xl text-sm font-bold text-white shadow-lg transition-all active:scale-95">

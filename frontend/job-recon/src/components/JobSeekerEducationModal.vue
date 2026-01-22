@@ -85,12 +85,12 @@ const handleSave = () => {
                 <div class="grid grid-cols-1 gap-5">
                     <div class="space-y-2">
                         <label class="text-[11px] font-bold text-gray-400 uppercase tracking-[0.1em] ml-1">Institution / University</label>
-                        <input type="text" v-model="form.institution" placeholder="University of Yangon"
+                        <input type="text" v-model="form.institution" placeholder="University of Greenwich"
                             class="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-2xl text-sm focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 focus:bg-white outline-none transition-all" />
                     </div>
                     <div class="space-y-2">
                         <label class="text-[11px] font-bold text-gray-400 uppercase tracking-[0.1em] ml-1">Qualification / Degree Name</label>
-                        <input type="text" v-model="form.qualification_name" placeholder="Bachelor of Computer Science"
+                        <input type="text" v-model="form.qualification_name" placeholder="B.Sc. (Hons) Computing"
                             class="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-2xl text-sm focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 focus:bg-white outline-none transition-all" />
                     </div>
                 </div>
@@ -98,7 +98,7 @@ const handleSave = () => {
                 <div class="grid grid-cols-2 gap-5">
                     <div class="space-y-2">
                         <label class="text-[11px] font-bold text-gray-400 uppercase tracking-[0.1em] ml-1">Field of Study</label>
-                        <input type="text" v-model="form.field_of_study" placeholder="Software Engineering"
+                        <input type="text" v-model="form.field_of_study" placeholder="Computer Science"
                             class="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-2xl text-sm focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 focus:bg-white outline-none transition-all" />
                     </div>
                     <div class="space-y-2">
@@ -135,7 +135,7 @@ const handleSave = () => {
                 </div>
 
                 <div class="space-y-2">
-                    <label class="text-[11px] font-bold text-gray-400 uppercase tracking-[0.1em] ml-1">Description (Optional)</label>
+                    <label class="text-[11px] font-bold text-gray-400 uppercase tracking-[0.1em] ml-1">Description</label>
                     <textarea v-model="form.description" rows="3" placeholder="Honors, activities, or specific focus..."
                         class="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-2xl text-sm focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 focus:bg-white outline-none transition-all resize-none"></textarea>
                 </div>
@@ -144,7 +144,7 @@ const handleSave = () => {
             <div class="px-8 py-6 bg-gray-50/50 border-t border-gray-50 flex justify-end gap-3">
                 <button @click="$emit('close')" 
                     class="px-6 py-3 text-sm font-bold text-gray-500 hover:text-gray-700 transition-colors">
-                    Cancel
+                    Discard
                 </button>
                 <button @click="handleSave" :disabled="loading"
                     class="bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-300 text-white px-8 py-3 rounded-2xl text-sm font-bold shadow-xl shadow-indigo-100 transition-all flex items-center gap-2 active:scale-95">

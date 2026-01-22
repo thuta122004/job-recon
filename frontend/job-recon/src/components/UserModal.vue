@@ -176,7 +176,7 @@ const handleSubmit = () => {
                         <input type="password" id="u_pw" v-model="form.password" placeholder=" "
                             class="floating-input block w-full px-4 py-4 text-sm text-gray-900 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none peer appearance-none transition-all" />
                         <label for="u_pw" class="floating-label absolute left-4 transition-all duration-200 pointer-events-none text-gray-400 text-sm">
-                            {{ isEditing ? 'New Password (Optional)' : 'Account Password' }}
+                            {{ isEditing ? 'New Password' : 'Account Password' }}
                         </label>
                     </div>
 

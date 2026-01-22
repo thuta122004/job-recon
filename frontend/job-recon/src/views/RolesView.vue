@@ -27,7 +27,7 @@ const fetchRoles = async () => {
         const response = await api.get('/roles');
         roles.value = response.data.data || response.data;
     } catch (e) {
-        toast.error("Failed to load roles");
+        toast.error("Failed to sync roles from server");
     } finally {
         loading.value = false;
     }
@@ -278,7 +278,7 @@ onMounted(fetchRoles);
                         <div class="mt-8 flex gap-3">
                             <button @click="showConfirmModal = false" 
                                 class="flex-1 px-4 py-2.5 rounded-xl text-sm font-bold text-gray-500 bg-gray-50 hover:bg-gray-100 transition-colors">
-                                Cancel
+                                Discard
                             </button>
                             <button @click="confirmConfig.action" 
                                 :class="{
