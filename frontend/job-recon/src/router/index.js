@@ -60,7 +60,7 @@ const router = createRouter({
       component: SkillsView,
         meta: { 
         parent: 'Management', 
-        label: 'Skill' 
+        label: 'Skills' 
       }
     },
   ]

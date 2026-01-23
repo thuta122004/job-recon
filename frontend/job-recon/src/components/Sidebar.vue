@@ -16,22 +16,22 @@ const route = useRoute();
 
             <router-link to="/roles" class="flex items-center px-4 py-3 text-gray-500 hover:bg-gray-50 rounded-lg transition-all"
                 active-class="bg-indigo-50 text-indigo-700 font-semibold">
-                <i class="fa-solid fa-shield-halved w-5 mr-3"></i> Roles
+                <i class="fa-solid fa-shield-halved w-5 mr-3"></i> Access Roles
             </router-link>
 
             <router-link to="/skills" class="flex items-center px-4 py-3 text-gray-500 hover:bg-gray-50 rounded-lg transition-all"
                 active-class="bg-indigo-50 text-indigo-700 font-semibold">
-                <i class="fa-solid fa-kitchen-set w-5 mr-3"></i> Skills
+                <i class="fa-solid fa-lightbulb w-5 mr-3"></i> Competency Library
             </router-link>
 
             <router-link to="/users" class="flex items-center px-4 py-3 text-gray-500 hover:bg-gray-50 rounded-lg transition-all"
                 active-class="bg-indigo-50 text-indigo-700 font-semibold">
-                <i class="fa-solid fa-user w-5 mr-3"></i> Users
+                <i class="fa-solid fa-users-gear w-5 mr-3"></i> User Accounts
             </router-link>
 
             <router-link to="/job-seeker-profiles" class="flex items-center px-4 py-3 text-gray-500 hover:bg-gray-50 rounded-lg transition-all"
                 active-class="bg-indigo-50 text-indigo-700 font-semibold">
-                <i class="fa-solid fa-users w-5 mr-3"></i> Job Seekers
+                <i class="fa-solid fa-address-card w-5 mr-3"></i> Talent Directory
             </router-link>
             
             </nav>

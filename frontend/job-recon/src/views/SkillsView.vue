@@ -103,8 +103,8 @@ const requestToggleStatus = (skill) => {
     confirmConfig.value = {
         title: isActive ? 'Deactivate skill?' : 'Reactivate skill?',
         message: isActive 
-            ? `Are you sure you want to deactivate the "${skill.name}" skill? Users assigned to this skill may lose access to certain features.` 
-            : `This will restore the "${skill.name}" skill, allowing it to be assigned to users again.`,
+            ? `Are you sure you want to deactivate "${skill.name}"? This skill will be hidden from the directory and profiles assigned to it.` 
+            : `This will restore the "${skill.name}" competency to the global library.`,
         type: isActive ? 'danger' : 'indigo',
         icon: isActive ? 'fa-trash-can' : 'fa-rotate-left',
         action: () => executeToggleStatus(skill.id)
