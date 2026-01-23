@@ -167,6 +167,19 @@ const isJobSeekerDisabled = computed(() => {
     return jobSeekerRole.status !== 'ACTIVE';
 });
 
+const showActionModal = ref(false);
+const activeProfileForActions = ref(null);
+
+const openActionModal = (profile) => {
+    activeProfileForActions.value = profile;
+    showActionModal.value = true;
+};
+
+const navigateTo = (path) => {
+    showActionModal.value = false;
+    router.push(path);
+};
+
 
 onMounted(fetchData);
 </script>
@@ -327,18 +340,6 @@ onMounted(fetchData);
                                         <i class="fa-solid fa-file-pdf"></i>
                                     </a>
 
-                                    <button @click="router.push(`/job-seekers/${profile.id}/education`)" 
-                                        class="text-emerald-600 hover:bg-emerald-50 p-2 rounded-md transition-all" 
-                                        title="Manage Education">
-                                        <i class="fa-solid fa-graduation-cap"></i>
-                                    </button>
-
-                                    <button @click="router.push(`/job-seekers/${profile.id}/experience`)" 
-                                        class="text-amber-600 hover:bg-amber-50 p-2 rounded-md transition-all" 
-                                        title="Manage Experience">
-                                        <i class="fa-solid fa-briefcase"></i>
-                                    </button>
-
                                     <button @click="openEditModal(profile)" class="text-indigo-600 hover:bg-indigo-50 p-2 rounded-md transition-all" title="Edit Profile">
                                         <i class="fa-solid fa-pencil"></i>
                                     </button>
@@ -349,6 +350,12 @@ onMounted(fetchData);
                                         :title="profile.profile_visibility === 'PUBLIC' ? 'Hide Profile' : 'Show Profile'">
                                         <i v-if="profile.profile_visibility === 'PUBLIC'" class="fa-solid fa-eye-slash"></i>
                                         <i v-else class="fa-solid fa-eye"></i>
+                                    </button>
+
+                                    <button @click="openActionModal(profile)" 
+                                        class="flex items-center gap-1 bg-indigo-50 text-indigo-600 hover:bg-indigo-600 hover:text-white px-3 py-2 rounded-xl text-xs font-bold transition-all border border-indigo-100">
+                                        Manage
+                                        <i class="fa-solid fa-gear text-[10px]"></i>
                                     </button>
                                 </div>
                             </td>
@@ -437,6 +444,82 @@ onMounted(fetchData);
                                 Confirm
                             </button>
                         </div>
+                    </div>
+                </div>
+            </div>
+        </Transition>
+        <Transition
+            enter-active-class="transition duration-300 ease-out"
+            enter-from-class="opacity-0 translate-y-4"
+            enter-to-class="opacity-100 translate-y-0"
+            leave-active-class="transition duration-200 ease-in"
+            leave-from-class="opacity-100 translate-y-0"
+            leave-to-class="opacity-0 translate-y-4"
+        >
+            <div v-if="showActionModal" class="fixed inset-0 z-[120] flex items-center justify-center p-6">
+                <div @click="showActionModal = false" class="absolute inset-0 bg-zinc-900/60 backdrop-blur-sm"></div>
+                
+                <div class="relative max-w-sm w-full bg-white rounded-3xl shadow-2xl overflow-hidden border border-gray-100">
+                    <div class="p-6 text-center border-b border-gray-50 bg-gray-50/50">
+                        <div class="h-16 w-16 rounded-2xl bg-white shadow-sm mx-auto mb-3 overflow-hidden border border-gray-100">
+                            <img v-if="activeProfileForActions?.profile_picture_url" :src="activeProfileForActions.profile_picture_url" class="h-full w-full object-cover">
+                            <div v-else class="h-full w-full flex items-center justify-center text-indigo-200">
+                                <i class="fa-solid fa-user text-2xl"></i>
+                            </div>
+                        </div>
+                        <h3 class="text-lg font-black text-gray-900 leading-tight">
+                            {{ activeProfileForActions?.user?.first_name }}'s Records
+                        </h3>
+                        <p class="text-[11px] font-bold text-gray-400 uppercase tracking-widest mt-1">Portfolio Management</p>
+                    </div>
+
+                    <div class="p-4 grid grid-cols-1 gap-2">
+                        <button @click="navigateTo(`/job-seekers/${activeProfileForActions.id}/education`)"
+                            class="group flex items-center justify-between p-4 rounded-2xl hover:bg-emerald-50 border border-transparent hover:border-emerald-100 transition-all text-left">
+                            <div class="flex items-center gap-4">
+                                <div class="h-10 w-10 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+                                    <i class="fa-solid fa-graduation-cap"></i>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-bold text-gray-900">Academic History</p>
+                                    <p class="text-[10px] text-gray-500 font-medium">Degrees, certifications & diplomas</p>
+                                </div>
+                            </div>
+                            <i class="fa-solid fa-chevron-right text-[10px] text-gray-300 group-hover:text-emerald-500"></i>
+                        </button>
+
+                        <button @click="navigateTo(`/job-seekers/${activeProfileForActions.id}/experience`)"
+                            class="group flex items-center justify-between p-4 rounded-2xl hover:bg-amber-50 border border-transparent hover:border-amber-100 transition-all text-left">
+                            <div class="flex items-center gap-4">
+                                <div class="h-10 w-10 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+                                    <i class="fa-solid fa-briefcase"></i>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-bold text-gray-900">Professional History</p>
+                                    <p class="text-[10px] text-gray-500 font-medium">Work experience & tenure logs</p>
+                                </div>
+                            </div>
+                            <i class="fa-solid fa-chevron-right text-[10px] text-gray-300 group-hover:text-amber-500"></i>
+                        </button>
+
+                        <button class="group flex items-center justify-between p-4 rounded-2xl hover:bg-indigo-50 border border-transparent hover:border-indigo-100 transition-all text-left">
+                            <div class="flex items-center gap-4">
+                                <div class="h-10 w-10 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+                                    <i class="fa-solid fa-layer-group"></i>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-bold text-gray-900">Competency Stack</p>
+                                    <p class="text-[10px] text-gray-500 font-medium">Skills, tools & expertise levels</p>
+                                </div>
+                            </div>
+                            <span class="text-[8px] font-black bg-indigo-600 text-white px-1.5 py-0.5 rounded uppercase tracking-tighter">Soon</span>
+                        </button>
+                    </div>
+
+                    <div class="p-4 bg-gray-50/80 mt-2">
+                        <button @click="showActionModal = false" class="w-full py-3 rounded-xl text-xs font-bold text-gray-500 hover:bg-white hover:shadow-sm border border-transparent hover:border-gray-200 transition-all">
+                            Close Hub
+                        </button>
                     </div>
                 </div>
             </div>
