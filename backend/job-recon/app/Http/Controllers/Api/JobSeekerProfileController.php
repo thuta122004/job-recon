@@ -80,20 +80,20 @@ class JobSeekerProfileController extends Controller
      */
     public function show($id)
     {
-        $profile = JobSeekerProfile::with('user')->find($id);
+        // $profile = JobSeekerProfile::with('user')->find($id);
 
-        if (!$profile) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Profile not found',
-            ], 404);
-        }
+        // if (!$profile) {
+        //     return response()->json([
+        //         'status' => false,
+        //         'message' => 'Profile not found',
+        //     ], 404);
+        // }
 
-        return response()->json([
-            'status' => true,
-            'message' => 'Profile found',
-            'data' => $profile
-        ], 200);
+        // return response()->json([
+        //     'status' => true,
+        //     'message' => 'Profile found',
+        //     'data' => $profile
+        // ], 200);
     }
 
     /**

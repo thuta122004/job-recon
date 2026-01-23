@@ -70,14 +70,14 @@ const handleSave = () => {
                     <h3 class="font-black text-gray-900 text-xl tracking-tight">
                         {{ experienceData ? 'Update Experience' : 'Add Experience' }}
                     </h3>
-                    <p class="text-xs text-gray-500 font-medium mt-0.5 uppercase tracking-widest">Work History Details</p>
+                    <p class="text-xs text-gray-500 font-medium mt-0.5 uppercase tracking-widest">Chronological record of career milestones and achievements.</p>
                 </div>
                 <button @click="$emit('close')" class="h-10 w-10 flex items-center justify-center rounded-xl hover:bg-white hover:shadow-sm text-gray-400 hover:text-indigo-600 transition-all">
                     <i class="fa-solid fa-xmark"></i>
                 </button>
             </div>
 
-            <div class="p-8 space-y-6">
+            <div class="p-5 space-y-6">
                 <div class="grid grid-cols-1 gap-5">
                     <div class="space-y-2">
                         <label class="text-[11px] font-bold text-gray-400 uppercase tracking-[0.1em] ml-1">Job Title</label>

@@ -189,7 +189,7 @@ onMounted(fetchData);
         <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
             <div>
                 <h1 class="text-2xl font-extrabold text-gray-900 tracking-tight">Talent Directory</h1>
-                <p class="text-sm text-gray-500 mt-1">Manage job seeker portfolios, resumes, and visibility.</p>
+                <p class="text-sm text-gray-500 mt-1">Centralized repository for candidate identities and portfolios.</p>
             </div>
             
             <div class="flex flex-wrap items-center gap-3">

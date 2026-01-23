@@ -3,7 +3,7 @@ import { reactive, watch } from 'vue';
 
 const props = defineProps({
     isOpen: Boolean,
-    roleData: Object,
+    skillData: Object,
     isEditing: Boolean,
     loading: Boolean
 });
@@ -24,11 +24,11 @@ watch(() => props.isOpen, (newVal) => {
             desc: ''
         });
     } 
-    else if (newVal && props.isEditing && props.roleData) {
+    else if (newVal && props.isEditing && props.skillData) {
         Object.assign(form, {
-            id: props.roleData.id,
-            name: props.roleData.name,
-            desc: props.roleData.desc
+            id: props.skillData.id,
+            name: props.skillData.name,
+            desc: props.skillData.desc
         });
     }
 });
@@ -44,8 +44,8 @@ const handleSubmit = () => {
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md relative z-10 overflow-hidden border border-gray-100">
             <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
                 <div>
-                    <h3 class="font-bold text-gray-800 text-lg">{{ isEditing ? 'Update Role' : 'Create New Role' }}</h3>
-                    <p class="text-xs text-gray-500">Configure system permissions and user authorization levels.</p>
+                    <h3 class="font-bold text-gray-800 text-lg">{{ isEditing ? 'Update Skill' : 'Create New Skill' }}</h3>
+                    <p class="text-xs text-gray-500">Standardized library of technical and soft skill definitions.</p>
                 </div>
                 <button @click="$emit('close')" class="text-gray-400 hover:text-gray-600 p-2 transition-colors">
                     <i class="fa-solid fa-xmark text-lg"></i>
@@ -56,7 +56,7 @@ const handleSubmit = () => {
                 <div class="relative">
                     <input type="text" id="r_name" v-model="form.name" placeholder=" "
                         class="floating-input block w-full px-4 py-4 text-sm text-gray-900 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none peer appearance-none transition-all" />
-                    <label for="r_name" class="floating-label absolute left-4 transition-all duration-200 pointer-events-none text-gray-400 text-sm">Role Name</label>
+                    <label for="r_name" class="floating-label absolute left-4 transition-all duration-200 pointer-events-none text-gray-400 text-sm">Skill Name</label>
                 </div>
 
                 <div class="relative">

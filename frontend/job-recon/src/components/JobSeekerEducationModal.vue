@@ -74,7 +74,7 @@ const handleSave = () => {
                     <h3 class="font-black text-gray-900 text-xl tracking-tight">
                         {{ educationData ? 'Update Education' : 'Add Education' }}
                     </h3>
-                    <p class="text-xs text-gray-500 font-medium mt-0.5 uppercase tracking-widest">Academic Details</p>
+                    <p class="text-xs text-gray-500 font-medium mt-0.5 uppercase tracking-widest">Verified institutional qualifications and scholarly records.</p>
                 </div>
                 <button @click="$emit('close')" class="h-10 w-10 flex items-center justify-center rounded-xl hover:bg-white hover:shadow-sm text-gray-400 hover:text-indigo-600 transition-all">
                     <i class="fa-solid fa-xmark"></i>

@@ -4,6 +4,7 @@ import UsersView from '../views/UsersView.vue'
 import JobSeekerProfilesView from '../views/JobSeekerProfilesView.vue'
 import JobSeekerExperiencesView from '../views/JobSeekerExperiencesView.vue'
 import JobSeekerEducationsView from '../views/JobSeekerEducationsView.vue'
+import SkillsView from '../views/SkillsView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -52,7 +53,16 @@ const router = createRouter({
         parent: 'Management', 
         label: 'Job Seeker Educations' 
       }
-    }
+    },
+    {
+      path: '/skills',
+      name: 'skills',
+      component: SkillsView,
+        meta: { 
+        parent: 'Management', 
+        label: 'Skill' 
+      }
+    },
   ]
 })
 

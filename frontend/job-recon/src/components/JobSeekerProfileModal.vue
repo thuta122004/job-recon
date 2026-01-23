@@ -177,7 +177,7 @@ const handleSubmit = () => {
             <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
                 <div>
                     <h3 class="font-bold text-gray-800 text-lg">{{ isEditing ? 'Edit Professional Profile' : 'New Talent Profile' }}</h3>
-                    <p class="text-xs text-gray-500">Configure how this candidate appears to potential employers.</p>
+                    <p class="text-xs text-gray-500">Centralized repository for candidate identities and portfolios.</p>
                 </div>
                 <button @click="$emit('close')" class="text-gray-400 hover:text-gray-600 p-2 transition-colors">
                     <i class="fa-solid fa-xmark text-lg"></i>
