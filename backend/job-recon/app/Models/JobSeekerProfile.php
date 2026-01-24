@@ -32,4 +32,11 @@ class JobSeekerProfile extends Model
     {
         return $this->hasMany(JobSeekerEducation::class);
     }
+
+    public function skills()
+    {
+        return $this->belongsToMany(Skill::class, 'job_seeker_skills', 'job_seeker_profile_id', 'skill_id')
+                    ->withPivot('proficiency')
+                    ->withTimestamps();
+    }
 }

@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\JobSeekerEducationController;
 use App\Http\Controllers\Api\JobSeekerExperienceController;
 use App\Http\Controllers\Api\JobSeekerProfileController;
+use App\Http\Controllers\Api\JobSeekerSkillController;
 use App\Http\Controllers\Api\RoleController;
 use App\Http\Controllers\Api\SkillController;
 use App\Http\Controllers\Api\UserController;
@@ -22,3 +23,6 @@ Route::apiResource('job-seeker-experiences', JobSeekerExperienceController::clas
 Route::get('job-seeker-educations/{id}', [JobSeekerEducationController::class, 'index']);
 Route::apiResource('job-seeker-educations', JobSeekerEducationController::class)->except(['index']);
 Route::apiResource('skills', SkillController::class);
+Route::get('job-seeker/skills/{id}', [JobSeekerSkillController::class, 'index']);
+Route::post('job-seeker/skills', [JobSeekerSkillController::class, 'store']);
+Route::delete('job-seeker/skills/{profileId}/{skillId}', [JobSeekerSkillController::class, 'destroy']);

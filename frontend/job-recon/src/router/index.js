@@ -1,10 +1,11 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import RolesView from '@/views/RolesView.vue'
-import UsersView from '../views/UsersView.vue'
-import JobSeekerProfilesView from '../views/JobSeekerProfilesView.vue'
-import JobSeekerExperiencesView from '../views/JobSeekerExperiencesView.vue'
-import JobSeekerEducationsView from '../views/JobSeekerEducationsView.vue'
-import SkillsView from '../views/SkillsView.vue'
+import UsersView from '@/views/UsersView.vue'
+import JobSeekerProfilesView from '@/views/JobSeekerProfilesView.vue'
+import JobSeekerExperiencesView from '@/views/JobSeekerExperiencesView.vue'
+import JobSeekerEducationsView from '@/views/JobSeekerEducationsView.vue'
+import JobSeekerSkillsView from '@/views/JobSeekerSkillsView.vue'
+import SkillsView from '@/views/SkillsView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -41,8 +42,8 @@ const router = createRouter({
         name: 'JobSeekerExperience',
         component: JobSeekerExperiencesView,
         meta: { 
-        parent: 'Management', 
-        label: 'Job Seeker Experiences' 
+        parent: 'Talent Directory', 
+        label: 'Experiences' 
       }
     },
     {
@@ -50,8 +51,8 @@ const router = createRouter({
         name: 'JobSeekerEducation',
         component: JobSeekerEducationsView,
         meta: { 
-        parent: 'Management', 
-        label: 'Job Seeker Educations' 
+        parent: 'Talent Directory', 
+        label: 'Educations' 
       }
     },
     {
@@ -62,6 +63,12 @@ const router = createRouter({
         parent: 'Management', 
         label: 'Skills' 
       }
+    },
+    {
+        path: '/job-seekers/:profileId/skills',
+        name: 'JobSeekerSkills',
+        component: JobSeekerSkillsView,
+        meta: { parent: 'Talent Directory', label: 'Skills' }
     },
   ]
 })

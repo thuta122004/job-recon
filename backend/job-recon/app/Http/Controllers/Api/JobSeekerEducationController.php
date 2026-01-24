@@ -86,11 +86,6 @@ class JobSeekerEducationController extends Controller
             return response()->json(['status' => false, 'errors' => $validator->errors()], 422);
         }
 
-        $profile = JobSeekerProfile::find($request->job_seeker_profile_id);
-        if ($profile->user->status !== 'ACTIVE') {
-            return response()->json(['status' => false, 'message' => 'Cannot modify records for an inactive user.'], 403);
-        }
-
         $data = $validator->validated();
         $data['end_year'] = !empty($data['end_year']) ? $data['end_year'] : null;
         $data['field_of_study'] = !empty($data['field_of_study']) ? $data['field_of_study'] : null;

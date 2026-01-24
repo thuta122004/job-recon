@@ -7,4 +7,10 @@ use Illuminate\Database\Eloquent\Model;
 class Skill extends Model
 {
     protected $fillable = ['name', 'desc', 'status'];
+
+    public function jobSeekers()
+    {
+        return $this->belongsToMany(JobSeekerProfile::class, 'job_seeker_skill', 'skill_id', 'job_seeker_profile_id')
+                    ->withTimestamps();
+    }
 }

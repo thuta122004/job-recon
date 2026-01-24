@@ -3,7 +3,7 @@ import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useToast } from "vue-toastification";
 import api from '@/services/api';
-import JobSeekerExperienceModal from '../components/JobSeekerExperienceModal.vue';
+import JobSeekerExperienceModal from '@/components/JobSeekerExperienceModal.vue';
 
 const route = useRoute();
 const router = useRouter();

@@ -502,7 +502,8 @@ onMounted(fetchData);
                             <i class="fa-solid fa-chevron-right text-[10px] text-gray-300 group-hover:text-amber-500"></i>
                         </button>
 
-                        <button class="group flex items-center justify-between p-4 rounded-2xl hover:bg-indigo-50 border border-transparent hover:border-indigo-100 transition-all text-left">
+                        <button @click="navigateTo(`/job-seekers/${activeProfileForActions.id}/skills`)"
+                            class="group flex items-center justify-between p-4 rounded-2xl hover:bg-indigo-50 border border-transparent hover:border-indigo-100 transition-all text-left">
                             <div class="flex items-center gap-4">
                                 <div class="h-10 w-10 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center group-hover:scale-110 transition-transform">
                                     <i class="fa-solid fa-layer-group"></i>
@@ -512,7 +513,7 @@ onMounted(fetchData);
                                     <p class="text-[10px] text-gray-500 font-medium">Skills, tools & expertise levels</p>
                                 </div>
                             </div>
-                            <span class="text-[8px] font-black bg-indigo-600 text-white px-1.5 py-0.5 rounded uppercase tracking-tighter">Soon</span>
+                            <i class="fa-solid fa-chevron-right text-[10px] text-gray-300 group-hover:text-indigo-500"></i>
                         </button>
                     </div>
 

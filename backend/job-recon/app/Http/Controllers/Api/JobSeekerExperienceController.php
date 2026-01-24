@@ -92,14 +92,6 @@ class JobSeekerExperienceController extends Controller
             ], 422);
         }
 
-        $profile = JobSeekerProfile::find($request->job_seeker_profile_id);
-        if ($profile->user->status !== 'ACTIVE') {
-            return response()->json([
-                'status'  => false, 
-                'message' => 'Cannot modify records for an inactive user.'
-            ], 403);
-        }
-
         $data = $validator->validated();
         $data['end_date'] = !empty($data['end_date']) ? $data['end_date'] : null;
         $data['location'] = !empty($data['location']) ? $data['location'] : null;

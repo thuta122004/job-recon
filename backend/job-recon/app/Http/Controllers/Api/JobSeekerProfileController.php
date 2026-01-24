@@ -51,11 +51,6 @@ class JobSeekerProfileController extends Controller
             return response()->json(['status' => false, 'errors' => $validator->errors()], 422);
         }
 
-        $user = User::find($request->user_id);
-        if ($user->status !== 'ACTIVE') {
-            return response()->json(['status' => false, 'message' => 'User account is not active.'], 403);
-        }
-
         $data = $request->except(['profile_picture', 'resume']);
 
         if ($request->hasFile('profile_picture')) {
@@ -123,10 +118,6 @@ class JobSeekerProfileController extends Controller
 
         if ($validator->fails()) {
             return response()->json(['status' => false, 'errors' => $validator->errors()], 422);
-        }
-
-        if ($profile->user->status !== 'ACTIVE') {
-            return response()->json(['status' => false, 'message' => 'User account is not active.'], 403);
         }
 
         $data = $request->except(['profile_picture', 'resume', 'delete_picture', 'delete_resume']);
