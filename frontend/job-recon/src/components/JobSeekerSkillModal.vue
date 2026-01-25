@@ -87,7 +87,7 @@ const handleSave = () => {
                 </button>
             </div>
 
-            <div class="p-10 space-y-8">
+            <div class="p-8 space-y-8">
                 <div class="relative group">
                     <i class="fa-solid fa-magnifying-glass absolute left-5 top-1/2 -translate-y-1/2 text-gray-300 transition-colors group-focus-within:text-indigo-500"></i>
                     <input 
