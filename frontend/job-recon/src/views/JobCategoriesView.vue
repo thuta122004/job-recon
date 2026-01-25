@@ -2,13 +2,13 @@
 import { ref, computed, onMounted } from 'vue';
 import { useToast } from "vue-toastification";
 import api from '@/services/api';
-import RoleModal from '@/components/RoleModal.vue';
+import JobCategoryModal from '@/components/JobCategoryModal.vue';
 
-const roles = ref([]);
+const categories = ref([]);
 const loading = ref(false);
 const saving = ref(false);
 const showModal = ref(false);
-const selectedRole = ref(null);
+const selectedCategory = ref(null);
 const isEditing = ref(false);
 
 const statusFilter = ref('');
@@ -18,86 +18,67 @@ const itemsPerPage = ref(8);
 
 const toast = useToast();
 
-const PROTECTED_IDS = [1, 2, 3]; 
-
-const isLocked = (id) => PROTECTED_IDS.includes(id);
-
 const showConfirmModal = ref(false);
 const confirmConfig = ref({ title: '', message: '', action: null, type: 'indigo', icon: '' });
 
-const fetchRoles = async () => {
+const fetchCategories = async () => {
     loading.value = true;
     try {
-        const response = await api.get('/roles');
-        roles.value = response.data.data || response.data;
+        const response = await api.get('/job-categories');
+        categories.value = response.data.data || response.data;
     } catch (e) {
-        toast.error("Failed to sync roles from server");
+        toast.error("Failed to sync categories from server");
     } finally {
         loading.value = false;
     }
 };
 
-const filteredRoles = computed(() => {
-    return roles.value.filter(role => {
-        const matchesStatus = statusFilter.value === '' || role.status === statusFilter.value;
-        const matchesSearch = role.name.toLowerCase().includes(searchQuery.value.toLowerCase());
+const filteredCategories = computed(() => {
+    return categories.value.filter(cat => {
+        const matchesStatus = statusFilter.value === '' || cat.status === statusFilter.value;
+        const matchesSearch = cat.name.toLowerCase().includes(searchQuery.value.toLowerCase());
         return matchesStatus && matchesSearch;
     });
 });
 
-const totalPages = computed(() => Math.ceil(filteredRoles.value.length / itemsPerPage.value) || 1);
+const totalPages = computed(() => Math.ceil(filteredCategories.value.length / itemsPerPage.value) || 1);
 
-const paginatedRoles = computed(() => {
+const paginatedCategories = computed(() => {
     const start = (currentPage.value - 1) * itemsPerPage.value;
-    return filteredRoles.value.slice(start, start + itemsPerPage.value);
+    return filteredCategories.value.slice(start, start + itemsPerPage.value);
 });
 
 const resetPage = () => { currentPage.value = 1; };
 
 const openCreateModal = () => {
     isEditing.value = false;
-    selectedRole.value = null;
+    selectedCategory.value = null;
     showModal.value = true;
 };
 
-const openEditModal = (role) => {
-
-    if (isLocked(role.id)) {
-        toast.warning(`The "${role.name}" role is a system core and cannot be modified.`);
-        return;
-    }
-
+const openEditModal = (category) => {
     isEditing.value = true;
-    selectedRole.value = { ...role };
+    selectedCategory.value = { ...category };
     showModal.value = true;
 };
 
 const handleSave = async (formData) => {
     if (!formData.name) return toast.error('Name is required');
     
-    if (isEditing.value && isLocked(formData.id)) {
-        return toast.error("Action denied: System-protected role.");
-    }
-
     saving.value = true;
     try {
         if (isEditing.value) {
-            const updateData = {
-                name: formData.name,
-                desc: formData.desc
-            };
-            await api.put(`/roles/${formData.id}`, updateData);
-            toast.success("Role updated successfully!");
+            await api.put(`/job-categories/${formData.id}`, formData);
+            toast.success("Category updated successfully!");
         } else {
-            await api.post('/roles', formData);
-            toast.success("Role created successfully!");
+            await api.post('/job-categories', formData);
+            toast.success("Category created successfully!");
         }
-        await fetchRoles();
+        await fetchCategories();
         showModal.value = false;
     } catch (e) {
         if (e.response && e.response.status === 422) {
             const validationErrors = e.response.data.errors;
-            
             if (validationErrors.name) {
                 toast.error(validationErrors.name[0]); 
             } else {
@@ -105,54 +86,47 @@ const handleSave = async (formData) => {
             }
         } else {
             toast.error("Server error. Please try again later.");
-            console.error(e);
         }
     } finally {
         saving.value = false;
     }
 };
 
-const requestToggleStatus = (role) => {
-
-    if (isLocked(role.id)) {
-        toast.error(`Security Restriction: "${role.name}" must remain active for system stability.`);
-        return;
-    }
-    
-    const isActive = role.status === 'ACTIVE';
+const requestToggleStatus = (category) => {
+    const isActive = category.status === 'ACTIVE';
     confirmConfig.value = {
-        title: isActive ? 'Deactivate Role?' : 'Reactivate Role?',
+        title: isActive ? 'Deactivate Category?' : 'Reactivate Category?',
         message: isActive 
-            ? `Are you sure you want to deactivate the "${role.name}" role? Users assigned to this role may lose access to certain features.` 
-            : `This will restore the "${role.name}" role, allowing it to be assigned to users again.`,
+            ? `Are you sure you want to deactivate "${category.name}"? This sector will be hidden from public job listings.` 
+            : `This will restore the "${category.name}" sector to the active industry list.`,
         type: isActive ? 'danger' : 'indigo',
         icon: isActive ? 'fa-trash-can' : 'fa-rotate-left',
-        action: () => executeToggleStatus(role.id)
+        action: () => executeToggleStatus(category.id)
     };
     showConfirmModal.value = true;
 };
 
 const executeToggleStatus = async (id) => {
     try {
-        await api.delete(`/roles/${id}`);
-        toast.info("Role status updated");
-        await fetchRoles();
+        await api.delete(`/job-categories/${id}`);
+        toast.info("Category status updated");
+        await fetchCategories();
     } catch (e) {
-        toast.error("Failed to update role status");
+        toast.error("Failed to update status");
     } finally {
         showConfirmModal.value = false;
     }
 };
 
-onMounted(fetchRoles);
+onMounted(fetchCategories);
 </script>
 
 <template>
     <div class="space-y-6">
         <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
             <div>
-                <h1 class="text-2xl font-extrabold text-gray-900 tracking-tight">Role Management</h1>
-                <p class="text-sm text-gray-500 mt-1">Configure system permissions and user authorization levels.</p>
+                <h1 class="text-2xl font-extrabold text-gray-900 tracking-tight">Job Management</h1>
+                <p class="text-sm text-gray-500 mt-1">Manage industry sectors and job classifications.</p>
             </div>
             
             <div class="flex flex-wrap items-center gap-3">
@@ -170,14 +144,14 @@ onMounted(fetchRoles);
 
                 <div class="relative group">
                     <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-indigo-500 transition-colors"></i>
-                    <input type="text" v-model="searchQuery" @input="resetPage" placeholder="Search roles..."
+                    <input type="text" v-model="searchQuery" @input="resetPage" placeholder="Search categories..."
                         class="pl-11 pr-4 py-2.5 w-64 bg-white border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all">
                 </div>
                 
                 <button @click="openCreateModal"
                     class="bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white px-5 py-2.5 rounded-xl text-sm font-bold shadow-md shadow-indigo-200 transition-all flex items-center gap-2">
                     <i class="fa-solid fa-plus text-xs"></i>
-                    Add New Role
+                    Add New Category
                 </button>
             </div>
         </div>
@@ -188,7 +162,7 @@ onMounted(fetchRoles);
                     <thead>
                         <tr class="bg-gray-50/50 border-b border-gray-100">
                             <th class="px-6 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-wider">No</th>
-                            <th class="px-6 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-wider">Role Info</th>
+                            <th class="px-6 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-wider">Icon & Name</th>
                             <th class="px-6 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-wider">Description</th>
                             <th class="px-6 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-wider">Status</th>
                             <th class="px-6 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-wider text-right">Actions</th>
@@ -199,48 +173,53 @@ onMounted(fetchRoles);
                             <td colspan="5" class="px-6 py-20 text-center">
                                 <div class="flex flex-col items-center gap-3">
                                     <i class="fa-solid fa-circle-notch fa-spin text-2xl text-indigo-500"></i>
-                                    <span class="text-sm text-gray-400 font-medium">Fetching roles...</span>
+                                    <span class="text-sm text-gray-400 font-medium">Fetching categories...</span>
                                 </div>
                             </td>
                         </tr>
                         
-                        <tr v-else-if="filteredRoles.length === 0">
+                        <tr v-else-if="filteredCategories.length === 0">
                             <td colspan="5" class="px-6 py-20 text-center">
                                 <div class="flex flex-col items-center gap-2 text-gray-400">
                                     <i class="fa-solid fa-folder-open text-3xl mb-2 opacity-20"></i>
-                                    <p class="text-sm">No roles match your current filters.</p>
+                                    <p class="text-sm">No categories match your current filters.</p>
                                 </div>
                             </td>
                         </tr>
 
-                        <tr v-for="(role, index) in paginatedRoles" :key="role.id" class="hover:bg-indigo-50/30 transition-colors group">
+                        <tr v-for="(cat, index) in paginatedCategories" :key="cat.id" class="hover:bg-indigo-50/30 transition-colors group">
                             <td class="px-6 py-4 text-xs font-mono text-gray-400">
                                 {{ (currentPage - 1) * itemsPerPage + (index + 1) }}
                             </td>
-                            <td v-if="filteredRoles.length > 0" class="px-6 py-4">
-                                <div class="font-bold text-gray-900 text-sm group-hover:text-indigo-600 transition-colors">{{ role.name }}</div>
+                            <td class="px-6 py-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="h-9 w-9 rounded-lg bg-gray-50 flex items-center justify-center text-gray-400 border border-gray-100 group-hover:bg-white group-hover:text-indigo-600 transition-all">
+                                        <i :class="cat.icon_class || 'fa-solid fa-layer-group'"></i>
+                                    </div>
+                                    <div class="font-bold text-gray-900 text-sm group-hover:text-indigo-600 transition-colors">{{ cat.name }}</div>
+                                </div>
                             </td>
                             <td class="px-6 py-4">
-                                <p class="text-sm text-gray-500 line-clamp-1 max-w-xs">{{ role.desc || '—' }}</p>
+                                <p class="text-sm text-gray-500 line-clamp-1 max-w-xs">{{ cat.description || '—' }}</p>
                             </td>
                             <td class="px-6 py-4">
-                                <span :class="role.status === 'ACTIVE' 
+                                <span :class="cat.status === 'ACTIVE' 
                                     ? 'bg-emerald-50 text-emerald-600 border-emerald-100' 
                                     : 'bg-rose-50 text-rose-600 border-rose-100'"
                                     class="px-2.5 py-1 rounded-lg text-[10px] font-bold tracking-tight uppercase border">
-                                    {{ role.status }}
+                                    {{ cat.status }}
                                 </span>
                             </td>
                             <td class="px-6 py-4 text-right">
                                 <div class="flex justify-end gap-1">
-                                    <button @click="openEditModal(role)" class="text-indigo-600 hover:bg-indigo-50 p-2 rounded-md transition-all">
+                                    <button @click="openEditModal(cat)" class="text-indigo-600 hover:bg-indigo-50 p-2 rounded-md transition-all">
                                         <i class="fa-solid fa-pencil"></i>
                                     </button>
-                                    <button @click="requestToggleStatus(role)"
-                                        :class="role.status === 'ACTIVE' ? 'text-red-400 hover:bg-red-50' : 'text-emerald-500 hover:bg-emerald-50'"
+                                    <button @click="requestToggleStatus(cat)"
+                                        :class="cat.status === 'ACTIVE' ? 'text-red-400 hover:bg-red-50' : 'text-emerald-500 hover:bg-emerald-50'"
                                         class="p-2 rounded-md transition-all"
-                                        :title="role.status === 'ACTIVE' ? 'Deactivate Role' : 'Reactivate Role'">
-                                        <i v-if="role.status === 'ACTIVE'" class="fa-solid fa-trash-can"></i>
+                                        :title="cat.status === 'ACTIVE' ? 'Deactivate Category' : 'Reactivate Category'">
+                                        <i v-if="cat.status === 'ACTIVE'" class="fa-solid fa-trash-can"></i>
                                         <i v-else class="fa-solid fa-rotate-left"></i>
                                     </button>
                                 </div>
@@ -252,26 +231,25 @@ onMounted(fetchRoles);
 
             <div class="px-6 py-4 bg-gray-50/80 border-t border-gray-100 flex items-center justify-between">
                 <span class="text-xs font-medium text-gray-500">
-                    Showing <span class="text-gray-900 font-bold">{{ paginatedRoles.length }}</span> of <span class="text-gray-900 font-bold">{{ filteredRoles.length }}</span>
+                    Showing <span class="text-gray-900 font-bold">{{ paginatedCategories.length }}</span> of <span class="text-gray-900 font-bold">{{ filteredCategories.length }}</span>
                 </span>
                 
                 <div class="flex items-center gap-1">
                     <button @click="currentPage--" :disabled="currentPage === 1"
-                        class="p-2 text-gray-500 hover:bg-white hover:shadow-sm rounded-lg disabled:opacity-30 disabled:hover:bg-transparent transition-all">
+                        class="p-2 text-gray-500 hover:bg-white hover:shadow-sm rounded-lg disabled:opacity-30 transition-all">
                         <i class="fa-solid fa-chevron-left text-xs"></i>
                     </button>
-                    
                     <div class="flex items-center px-4">
                         <span class="text-xs font-bold text-gray-700">Page {{ currentPage }} <span class="text-gray-400 font-normal mx-1">/</span> {{ totalPages }}</span>
                     </div>
-
                     <button @click="currentPage++" :disabled="currentPage >= totalPages"
-                        class="p-2 text-gray-500 hover:bg-white hover:shadow-sm rounded-lg disabled:opacity-30 disabled:hover:bg-transparent transition-all">
+                        class="p-2 text-gray-500 hover:bg-white hover:shadow-sm rounded-lg disabled:opacity-30 transition-all">
                         <i class="fa-solid fa-chevron-right text-xs"></i>
                     </button>
                 </div>
             </div>
         </div>
+
         <Transition
             enter-active-class="transition duration-300 ease-out"
             enter-from-class="opacity-0 scale-95"
@@ -285,26 +263,19 @@ onMounted(fetchRoles);
                 
                 <div class="relative max-w-sm w-full bg-white rounded-2xl shadow-2xl overflow-hidden border border-gray-100">
                     <div class="p-6">
-                        <div :class="{
-                            'bg-rose-50 text-rose-600': confirmConfig.type === 'danger',
-                            'bg-indigo-50 text-indigo-600': confirmConfig.type === 'indigo'
-                        }" class="h-12 w-12 rounded-xl flex items-center justify-center mb-4 text-xl">
+                        <div :class="confirmConfig.type === 'danger' ? 'bg-rose-50 text-rose-600' : 'bg-indigo-50 text-indigo-600'" 
+                             class="h-12 w-12 rounded-xl flex items-center justify-center mb-4 text-xl">
                             <i :class="['fa-solid', confirmConfig.icon]"></i>
                         </div>
-                        
                         <h3 class="text-xl font-bold text-gray-900 tracking-tight">{{ confirmConfig.title }}</h3>
                         <p class="text-sm text-gray-500 mt-2 leading-relaxed">{{ confirmConfig.message }}</p>
-                        
                         <div class="mt-8 flex gap-3">
                             <button @click="showConfirmModal = false" 
                                 class="flex-1 px-4 py-2.5 rounded-xl text-sm font-bold text-gray-500 bg-gray-50 hover:bg-gray-100 transition-colors">
                                 Discard
                             </button>
                             <button @click="confirmConfig.action" 
-                                :class="{
-                                    'bg-rose-500 hover:bg-rose-600': confirmConfig.type === 'danger',
-                                    'bg-indigo-600 hover:bg-indigo-700': confirmConfig.type === 'indigo'
-                                }"
+                                :class="confirmConfig.type === 'danger' ? 'bg-rose-500 hover:bg-rose-600' : 'bg-indigo-600 hover:bg-indigo-700'"
                                 class="flex-1 px-4 py-2.5 rounded-xl text-sm font-bold text-white shadow-lg transition-all active:scale-95">
                                 Confirm
                             </button>
@@ -315,9 +286,9 @@ onMounted(fetchRoles);
         </Transition>
     </div>
 
-    <RoleModal 
+    <JobCategoryModal 
         :is-open="showModal" 
-        :role-data="selectedRole" 
+        :category-data="selectedCategory" 
         :is-editing="isEditing"
         :loading="saving"
         @close="showModal = false"

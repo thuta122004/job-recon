@@ -41,6 +41,11 @@ const route = useRoute();
                 <i class="fa-solid fa-address-card w-5 mr-3"></i> Talent Directory
             </router-link>
             
+            <router-link to="/job-categories" class="flex items-center px-4 py-3 text-gray-500 hover:bg-gray-50 rounded-lg transition-all"
+                active-class="bg-indigo-50 text-indigo-700 font-semibold">
+                <i class="fa-solid fa-layer-group w-5 mr-3"></i> Job Categories
+            </router-link>
+            
             </nav>
     </aside>
 </template>
