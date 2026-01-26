@@ -37,27 +37,33 @@ class JobSeekerSkillController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'job_seeker_profile_id' => 'required|integer|exists:job_seeker_profiles,id',
-            'skills'                => 'required|array',
+            'skills'                => 'present|array',
             'skills.*.id'           => 'required|integer|exists:skills,id',
             'skills.*.proficiency'  => 'required|integer|min:0|max:100',
         ]);
 
         if ($validator->fails()) {
-            return response()->json(['status' => false, 'errors' => $validator->errors()], 422);
+            return response()->json([
+                'status' => false, 
+                'errors' => $validator->errors()
+            ], 422);
         }
 
         $profile = JobSeekerProfile::findOrFail($request->job_seeker_profile_id);
         
         $syncData = [];
-        foreach ($request->skills as $skill) {
-            $syncData[$skill['id']] = ['proficiency' => $skill['proficiency']];
+        
+        if (!empty($request->skills)) {
+            foreach ($request->skills as $skill) {
+                $syncData[$skill['id']] = ['proficiency' => $skill['proficiency']];
+            }
         }
 
         $profile->skills()->sync($syncData);
 
         return response()->json([
             'status'  => true,
-            'message' => 'Skills and proficiency updated successfully',
+            'message' => 'Skills updated successfully',
             'data'    => $profile->load('skills')
         ], 200);
     }

@@ -215,8 +215,9 @@ onMounted(fetchData);
                             </div>
 
                             <div class="flex flex-col items-end gap-1">
-                                <div :class="getLevelClass(edu.education_level)" class="px-2 py-0.5 rounded-lg border text-[10px] font-black uppercase tracking-tighter">
-                                    {{ edu.education_level }}
+                                <div :class="getLevelClass(edu.education_level)" 
+                                    class="px-2 py-0.5 rounded-lg border text-[10px] font-black tracking-tighter">
+                                    {{ edu.education_level.toUpperCase() === 'PHD' ? 'PhD' : edu.education_level.toUpperCase() }}
                                 </div>
                                 <div class="text-[10px] font-bold text-gray-400 uppercase tracking-tight">
                                     {{ edu.start_year }} — {{ edu.end_year || 'Present' }}

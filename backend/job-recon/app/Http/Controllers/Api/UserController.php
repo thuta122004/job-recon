@@ -33,8 +33,8 @@ class UserController extends Controller
             'first_name' => 'required|string|max:255',
             'last_name'  => 'required|string|max:255',
             'role_id'    => 'required|integer|exists:roles,id',
-            'email'      => 'required|email:rfc,dns|max:255|unique:users,email',
             'phone'      => 'required|string|max:255',
+            'email'      => 'required|email:rfc,dns|max:255|unique:users,email',
             'password'   => 'required|string|min:8|confirmed',
         ]);
 
@@ -110,9 +110,9 @@ class UserController extends Controller
             'role_id'    => 'required|integer|exists:roles,id',
             'first_name' => 'required|string|max:255',
             'last_name'  => 'required|string|max:255',
+            'phone'      => 'required|string|max:255',
             'email'      => 'required|email:rfc,dns|max:255|unique:users,email,' . $user->id,
             'password'   => 'nullable|string|min:8|confirmed',
-            'phone'      => 'required|string|max:255',
         ]);
 
         if ($validator->fails()) {

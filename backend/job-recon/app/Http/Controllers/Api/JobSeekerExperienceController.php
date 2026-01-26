@@ -55,6 +55,10 @@ class JobSeekerExperienceController extends Controller
         ]);
 
         $validator->after(function ($validator) use ($request) {
+            if ($validator->errors()->hasAny(['job_seeker_profile_id', 'start_date'])) {
+                return;
+            }
+
             $profileId = $request->job_seeker_profile_id;
             
             if (is_null($request->end_date)) {
@@ -95,8 +99,9 @@ class JobSeekerExperienceController extends Controller
         $data = $validator->validated();
         $data['end_date'] = !empty($data['end_date']) ? $data['end_date'] : null;
         $data['location'] = !empty($data['location']) ? $data['location'] : null;
+        $data['description'] = !empty($data['description']) ? $data['description'] : null;
 
-        $experience = JobSeekerExperience::create($request->all());
+        $experience = JobSeekerExperience::create($data);
 
         return response()->json([
             'status'  => true,
@@ -128,16 +133,20 @@ class JobSeekerExperienceController extends Controller
         }
 
         $validator = Validator::make($request->all(), [
-            'job_title'    => 'required|string|max:255',
-            'company_name' => 'required|string|max:255',
-            'location'              => 'nullable|string|max:255',
-            'employment_type'       => 'required|in:FULL-TIME,PART-TIME',
-            'start_date'   => 'required|date|before_or_equal:today',
-            'end_date'     => 'nullable|date|after_or_equal:start_date|before_or_equal:today',
-            'description'  => 'nullable|string',
+            'job_title'       => 'required|string|max:255',
+            'company_name'    => 'required|string|max:255',
+            'location'        => 'nullable|string|max:255',
+            'employment_type' => 'required|in:FULL-TIME,PART-TIME',
+            'start_date'      => 'required|date|before_or_equal:today',
+            'end_date'        => 'nullable|date|after_or_equal:start_date|before_or_equal:today',
+            'description'     => 'nullable|string',
         ]);
 
         $validator->after(function ($validator) use ($request, $experience) {
+            if ($validator->errors()->has('start_date')) {
+                return;
+            }
+
             $profileId = $experience->job_seeker_profile_id;
 
             if (is_null($request->end_date)) {
@@ -180,8 +189,9 @@ class JobSeekerExperienceController extends Controller
         $data = $validator->validated();
         $data['end_date'] = !empty($data['end_date']) ? $data['end_date'] : null;
         $data['location'] = !empty($data['location']) ? $data['location'] : null;
+        $data['description'] = !empty($data['description']) ? $data['description'] : null;
 
-        $experience->update($request->all());
+        $experience->update($data);
 
         return response()->json([
             'status'  => true,

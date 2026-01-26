@@ -125,7 +125,7 @@ onMounted(fetchCategories);
     <div class="space-y-6">
         <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
             <div>
-                <h1 class="text-2xl font-extrabold text-gray-900 tracking-tight">Job Management</h1>
+                <h1 class="text-2xl font-extrabold text-gray-900 tracking-tight">Category Management</h1>
                 <p class="text-sm text-gray-500 mt-1">Manage industry sectors and job classifications.</p>
             </div>
             

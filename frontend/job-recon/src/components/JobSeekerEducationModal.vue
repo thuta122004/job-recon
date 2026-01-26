@@ -109,7 +109,7 @@ const handleSave = () => {
                             <option value="DIPLOMA">Diploma</option>
                             <option value="BACHELOR">Bachelor</option>
                             <option value="MASTER">Master</option>
-                            <option value="PHD">PHD</option>
+                            <option value="PHD">PhD</option>
                         </select>
                     </div>
                 </div>
