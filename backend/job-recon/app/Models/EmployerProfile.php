@@ -39,4 +39,9 @@ class EmployerProfile extends Model
             fn ($value) => $value ? asset('storage/' . $value) : null
         );
     }
+
+    public function jobPosts()
+    {
+        return $this->hasMany(JobPost::class, 'employer_profile_id');
+    }
 }

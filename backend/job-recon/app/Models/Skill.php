@@ -13,4 +13,11 @@ class Skill extends Model
         return $this->belongsToMany(JobSeekerProfile::class, 'job_seeker_skill', 'skill_id', 'job_seeker_profile_id')
                     ->withTimestamps();
     }
+
+    public function jobPosts()
+    {
+        return $this->belongsToMany(JobPost::class, 'job_post_skills')
+                    ->withPivot('is_required')
+                    ->withTimestamps();
+    }
 }

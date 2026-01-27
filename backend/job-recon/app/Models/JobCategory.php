@@ -12,5 +12,10 @@ class JobCategory extends Model
         'description',
         'icon_class',
         'status',
-    ];  
+    ];
+
+    public function jobPosts()
+    {
+        return $this->hasMany(JobPost::class, 'job_category_id');
+    }
 }
