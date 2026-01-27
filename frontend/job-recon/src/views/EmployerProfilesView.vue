@@ -26,6 +26,8 @@ const toast = useToast();
 const zoomedImage = ref(null);
 const zoomName = ref('');
 
+const verificationFilter = ref('all');
+
 const openZoom = (url, name) => {
     if (url) {
         zoomedImage.value = url;
@@ -73,13 +75,18 @@ const filteredProfiles = computed(() => {
         const industry = (profile.industry || '').toLowerCase();
         const userEmail = (profile.user?.email || '').toLowerCase();
 
+        const matchesVerification = 
+            verificationFilter.value === 'all' || 
+            (verificationFilter.value === 'verified' && profile.is_verified) ||
+            (verificationFilter.value === 'unverified' && !profile.is_verified);
+
         const matchesIndustry = industryFilter.value === '' || profile.industry === industryFilter.value;
         
         const matchesSearch = companyName.includes(query) || 
                              industry.includes(query) ||
                              userEmail.includes(query);
 
-        return matchesIndustry && matchesSearch;
+        return matchesVerification && matchesIndustry && matchesSearch;
     });
 });
 
@@ -220,6 +227,17 @@ onMounted(fetchData);
             </div>
             
             <div class="flex flex-wrap items-center gap-3">
+                <div class="relative w-fit">
+                    <select v-model="verificationFilter" @change="resetPage"
+                        class="w-64 pl-4 pr-10 py-2.5 bg-white border border-gray-200 rounded-xl text-sm font-normal text-gray-500 outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all appearance-none cursor-pointer">
+                        <option value="all">All Status</option>
+                        <option value="verified">Verified Only</option>
+                        <option value="unverified">Unverified</option>
+                    </select>
+                    <div class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
+                        <i class="fa-solid fa-chevron-down text-[10px]"></i>
+                    </div>
+                </div>
                 <div class="relative group">
                     <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-indigo-500 transition-colors"></i>
                     <input type="text" v-model="searchQuery" @input="resetPage" placeholder="Search companies..."
