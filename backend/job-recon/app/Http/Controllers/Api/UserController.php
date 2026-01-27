@@ -15,7 +15,7 @@ class UserController extends Controller
      */
     public function index()
     {
-        $users = User::with(['role', 'profile'])->latest()->get();
+        $users = User::with(['role', 'profile' ,'employerProfile'])->latest()->get();
 
         return response()->json([
             'status' => true,

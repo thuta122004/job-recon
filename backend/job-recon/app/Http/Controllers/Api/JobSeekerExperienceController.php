@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\EmployerProfile;
 use App\Models\JobSeekerExperience;
 use App\Models\JobSeekerProfile;
 use Illuminate\Http\Request;
@@ -27,6 +28,13 @@ class JobSeekerExperienceController extends Controller
         $experiences = JobSeekerExperience::where('job_seeker_profile_id', $id)
             ->orderBy('start_date', 'desc')
             ->get();
+
+        $experiences->transform(function ($exp) {
+            $exp->is_verified = \App\Models\EmployerProfile::whereRaw('LOWER(company_name) = ?', [strtolower($exp->company_name)])
+                ->where('is_verified', true)
+                ->exists();
+            return $exp;
+        });
 
         return response()->json([
             'status'  => true,

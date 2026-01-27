@@ -45,6 +45,11 @@ const route = useRoute();
                 active-class="bg-indigo-50 text-indigo-700 font-semibold">
                 <i class="fa-solid fa-layer-group w-5 mr-3"></i> Job Categories
             </router-link>
+
+            <router-link to="/employer-profiles" class="flex items-center px-4 py-3 text-gray-500 hover:bg-gray-50 rounded-lg transition-all"
+                active-class="bg-indigo-50 text-indigo-700 font-semibold">
+                <i class="fa-solid fa-user-check w-5 mr-3"></i> Employers
+            </router-link>
             
             </nav>
     </aside>

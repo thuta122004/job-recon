@@ -56,8 +56,13 @@ class User extends Authenticatable
         return $this->belongsTo(Role::class);
     }
 
-        public function profile()
+    public function profile()
     {
         return $this->hasOne(JobSeekerProfile::class);
+    }
+
+    public function employerProfile()
+    {
+        return $this->hasOne(EmployerProfile::class);
     }
 }

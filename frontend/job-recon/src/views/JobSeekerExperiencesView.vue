@@ -18,8 +18,6 @@ const saving = ref(false);
 const showModal = ref(false);
 const selectedExperience = ref(null);
 
-const verifiedCompanies = ['Google', 'Meta', 'Microsoft', 'KMD College', 'Apple'];
-
 const fetchData = async () => {
     loading.value = true;
     try {
@@ -182,8 +180,9 @@ onMounted(fetchData);
                                 </h3>
                                 <p class="text-gray-600 font-medium flex items-center gap-1.5 text-sm">
                                     {{ exp.company_name }}
-                                    <i v-if="verifiedCompanies.includes(exp.company_name)" 
-                                    class="fa-solid fa-circle-check text-emerald-400 text-[12px]">
+                                    <i v-if="exp.is_verified" 
+                                    class="fa-solid fa-circle-check text-emerald-400 text-[12px]"
+                                    title="Verified Employer">
                                     </i>
                                 </p>
                                 <div class="text-[10px] font-bold text-gray-400 uppercase tracking-tight">

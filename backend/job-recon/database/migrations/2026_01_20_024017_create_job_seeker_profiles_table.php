@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('job_seeker_profiles', function (Blueprint $table) {
             $table->id();
 
-            $table->foreignId('user_id')->unique();
+            $table->foreignId('user_id')->constrained('users')->unique();
             $table->string('profile_picture_url')->nullable();
             $table->string('headline')->nullable();
             $table->text('summary')->nullable();

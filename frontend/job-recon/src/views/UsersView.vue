@@ -375,7 +375,7 @@ onMounted(fetchData);
         :roles="roles" 
         :is-editing="isEditing"
         :loading="saving"
-        :disable-role="isEditing && !!selectedUser?.profile" 
+        :disable-role="isEditing && (!!selectedUser?.profile || !!selectedUser?.employer_profile)"
         @close="showModal = false"
         @save="handleSave"
     />

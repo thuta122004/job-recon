@@ -156,7 +156,7 @@ const handleSubmit = () => {
                         </div>
                         <p v-if="disableRole" class="text-[10px] text-amber-600 px-1 font-medium flex items-center gap-1">
                             <i class="fa-solid fa-circle-exclamation"></i>
-                            Role locked: User has an active job seeker profile.
+                            Role locked: User has an active profile.
                         </p>
                     </div>
 
