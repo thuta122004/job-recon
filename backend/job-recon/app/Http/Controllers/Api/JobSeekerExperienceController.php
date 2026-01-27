@@ -46,6 +46,32 @@ class JobSeekerExperienceController extends Controller
         ], 200);
     }
 
+    private function syncProfile($profileId)
+    {
+        $profile = JobSeekerProfile::find($profileId);
+        if (!$profile) return;
+
+        $experiences = JobSeekerExperience::where('job_seeker_profile_id', $profileId)->get();
+
+        $currentRole = $experiences->whereNull('end_date')->first();
+        
+        if ($currentRole) {
+            $profile->current_position = $currentRole->job_title;
+            $profile->location = $currentRole->location;
+        }
+
+        $totalDays = 0;
+        foreach ($experiences as $exp) {
+            $start = \Carbon\Carbon::parse($exp->start_date);
+            $end = $exp->end_date ? \Carbon\Carbon::parse($exp->end_date) : now();
+            $totalDays += $start->diffInDays($end);
+        }
+
+        $profile->experience_years = (int) round($totalDays / 365.25);
+        
+        $profile->save();
+    }
+
     /**
      * Store a newly created resource in storage.
      */
@@ -110,6 +136,8 @@ class JobSeekerExperienceController extends Controller
         $data['description'] = !empty($data['description']) ? $data['description'] : null;
 
         $experience = JobSeekerExperience::create($data);
+
+        $this->syncProfile($experience->job_seeker_profile_id);
 
         return response()->json([
             'status'  => true,
@@ -200,6 +228,7 @@ class JobSeekerExperienceController extends Controller
         $data['description'] = !empty($data['description']) ? $data['description'] : null;
 
         $experience->update($data);
+        $this->syncProfile($experience->job_seeker_profile_id);
 
         return response()->json([
             'status'  => true,
@@ -223,6 +252,7 @@ class JobSeekerExperienceController extends Controller
         }
 
         $experience->delete();
+        $this->syncProfile($id);
 
         return response()->json([
             'status'  => true,
