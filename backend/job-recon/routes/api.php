@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\EmployerProfileController;
 use App\Http\Controllers\Api\JobCategoryController;
+use App\Http\Controllers\Api\JobPostController;
 use App\Http\Controllers\Api\JobSeekerEducationController;
 use App\Http\Controllers\Api\JobSeekerExperienceController;
 use App\Http\Controllers\Api\JobSeekerProfileController;
@@ -31,3 +32,7 @@ Route::post('job-seeker/skills', [JobSeekerSkillController::class, 'store']);
 Route::delete('job-seeker/skills/{profileId}/{skillId}', [JobSeekerSkillController::class, 'destroy']);
 Route::apiResource('job-categories', JobCategoryController::class);
 Route::apiResource('employer-profiles', EmployerProfileController::class);
+Route::get('employer-profiles/{id}/job-posts', [JobPostController::class, 'getByEmployer']);
+Route::apiResource('job-posts', JobPostController::class)->except(['index']);
+Route::patch('job-posts/{id}/toggle-visibility', [JobPostController::class, 'toggleVisibility']);
+Route::patch('job-posts/{id}/toggle-salary', [JobPostController::class, 'toggleSalaryVisibility']);

@@ -201,6 +201,11 @@ const openActionModal = (profile) => {
     showActionModal.value = true;
 };
 
+const navigateTo = (path) => {
+    showActionModal.value = false;
+    router.push(path);
+};
+
 onMounted(fetchData);
 </script>
 
@@ -412,52 +417,64 @@ onMounted(fetchData);
             </div>
         </Transition>
 
-        <Transition enter-active-class="transition duration-300 ease-out" enter-from-class="opacity-0 translate-y-4" enter-to-class="opacity-100 translate-y-0" leave-active-class="transition duration-200 ease-in" leave-from-class="opacity-100 translate-y-0" leave-to-class="opacity-0 translate-y-4">
+        <Transition
+            enter-active-class="transition duration-300 ease-out"
+            enter-from-class="opacity-0 translate-y-4"
+            enter-to-class="opacity-100 translate-y-0"
+            leave-active-class="transition duration-200 ease-in"
+            leave-from-class="opacity-100 translate-y-0"
+            leave-to-class="opacity-0 translate-y-4"
+        >
             <div v-if="showActionModal" class="fixed inset-0 z-[120] flex items-center justify-center p-6">
                 <div @click="showActionModal = false" class="absolute inset-0 bg-zinc-900/60 backdrop-blur-sm"></div>
+                
                 <div class="relative max-w-sm w-full bg-white rounded-3xl shadow-2xl overflow-hidden border border-gray-100">
                     <div class="p-6 text-center border-b border-gray-50 bg-gray-50/50">
-                        <div class="h-16 w-16 rounded-2xl bg-white shadow-sm mx-auto mb-3 overflow-hidden flex items-center justify-center border border-gray-100">
+                        <div class="h-16 w-16 rounded-2xl bg-white shadow-sm mx-auto mb-3 overflow-hidden border border-gray-100 flex items-center justify-center">
                             <img v-if="activeProfileForActions?.company_logo_url" :src="activeProfileForActions.company_logo_url" class="h-full w-full object-cover">
-                            <i v-else class="fa-solid fa-user-check text-2xl text-indigo-200"></i>
+                            <div v-else class="h-full w-full flex items-center justify-center text-indigo-200">
+                                <i class="fa-solid fa-building text-2xl"></i>
+                            </div>
                         </div>
-                        <h3 class="text-lg font-black text-gray-900 leading-tight">{{ activeProfileForActions?.company_name }}</h3>
-                        <p class="text-[11px] font-bold text-gray-400 uppercase tracking-widest mt-1">Employer Hub</p>
+                        <h3 class="text-lg font-black text-gray-900 leading-tight">
+                            {{ activeProfileForActions?.company_name }}
+                        </h3>
+                        <p class="text-[11px] font-bold text-gray-400 uppercase tracking-widest mt-1">Employer Management Hub</p>
                     </div>
-                    
+
                     <div class="p-4 grid grid-cols-1 gap-2">
-                        <button disabled
-                            class="group relative flex items-center justify-between p-4 rounded-2xl bg-gray-50/50 border border-gray-100 cursor-not-allowed opacity-70 transition-all text-left">
+                        <button @click="navigateTo(`/employer-profiles/${activeProfileForActions.id}/job-posts`)"
+                            class="group flex items-center justify-between p-4 rounded-2xl hover:bg-indigo-50 border border-transparent hover:border-indigo-100 transition-all text-left">
                             <div class="flex items-center gap-4">
-                                <div class="h-10 w-10 rounded-xl bg-gray-200 text-gray-400 flex items-center justify-center">
+                                <div class="h-10 w-10 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center group-hover:scale-110 transition-transform">
                                     <i class="fa-solid fa-bullhorn"></i>
                                 </div>
                                 <div>
-                                    <p class="text-sm font-bold text-gray-400">Job Listings</p>
-                                    <p class="text-[10px] text-gray-400 font-medium italic">Coming Soon in Q2 2026</p>
+                                    <p class="text-sm font-bold text-gray-900">Job Listings</p>
+                                    <p class="text-[10px] text-gray-500 font-medium">Manage vacancies & recruitment</p>
                                 </div>
                             </div>
-                            <i class="fa-solid fa-lock text-[10px] text-gray-300"></i>
+                            <i class="fa-solid fa-chevron-right text-[10px] text-gray-300 group-hover:text-indigo-500"></i>
                         </button>
 
                         <button disabled
-                            class="group relative flex items-center justify-between p-4 rounded-2xl bg-gray-50/50 border border-gray-100 cursor-not-allowed opacity-70 transition-all text-left">
+                            class="group flex items-center justify-between p-4 rounded-2xl bg-gray-50/50 border border-gray-100 cursor-not-allowed opacity-70 transition-all text-left">
                             <div class="flex items-center gap-4">
-                                <div class="h-10 w-10 rounded-xl bg-gray-200 text-gray-400 flex items-center justify-center">
-                                    <i class="fa-solid fa-chart-line"></i>
+                                <div class="h-10 w-10 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center">
+                                    <i class="fa-solid fa-chart-pie"></i>
                                 </div>
                                 <div>
-                                    <p class="text-sm font-bold text-gray-400">Performance</p>
-                                    <p class="text-[10px] text-gray-400 font-medium italic">Advanced Analytics Module</p>
+                                    <p class="text-sm font-bold text-gray-400">Company Insights</p>
+                                    <p class="text-[10px] text-gray-400 font-medium italic">Statistics & performance logs</p>
                                 </div>
                             </div>
                             <i class="fa-solid fa-lock text-[10px] text-gray-300"></i>
                         </button>
                     </div>
 
-                    <div class="p-4 bg-gray-50/80">
+                    <div class="p-4 bg-gray-50/80 mt-2">
                         <button @click="showActionModal = false" 
-                            class="w-full py-3 rounded-xl text-xs font-bold text-gray-500 hover:bg-white hover:shadow-sm transition-all border border-transparent hover:border-gray-200">
+                            class="w-full py-3 rounded-xl text-xs font-bold text-gray-500 hover:bg-white hover:shadow-sm border border-transparent hover:border-gray-200 transition-all">
                             Close Hub
                         </button>
                     </div>

@@ -8,6 +8,7 @@ import JobSeekerSkillsView from '@/views/JobSeekerSkillsView.vue'
 import SkillsView from '@/views/SkillsView.vue'
 import JobCategoriesView from '../views/JobCategoriesView.vue'
 import EmployerProfilesView from '../views/EmployerProfilesView.vue'
+import EmployerJobPostsView from '../views/EmployerJobPostsView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -91,6 +92,16 @@ const router = createRouter({
       meta: { 
         parent: 'Management', 
         label: 'Employers' 
+      }
+    },
+    {
+      path: '/employer-profiles/:profileId/job-posts',
+      name: 'EmployerJobPosts',
+      component: EmployerJobPostsView, 
+      props: true,
+      meta: { 
+          parent: 'Company Directory', 
+          label: 'Job Postings' 
       }
     },
   ]
