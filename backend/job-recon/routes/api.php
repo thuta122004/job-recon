@@ -36,3 +36,4 @@ Route::get('employer-profiles/{id}/job-posts', [JobPostController::class, 'getBy
 Route::apiResource('job-posts', JobPostController::class)->except(['index']);
 Route::patch('job-posts/{id}/toggle-visibility', [JobPostController::class, 'toggleVisibility']);
 Route::patch('job-posts/{id}/toggle-salary', [JobPostController::class, 'toggleSalaryVisibility']);
+Route::post('/job-posts/{id}/restore', [JobPostController::class, 'restore']);

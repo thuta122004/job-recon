@@ -5,7 +5,6 @@ import { useToast } from "vue-toastification";
 import api from '@/services/api';
 import EmployerJobPostModal from '@/components/EmployerJobPostModal.vue';
 
-const route = useRoute();
 const router = useRouter();
 const toast = useToast();
 
@@ -24,6 +23,7 @@ const isEditing = ref(false);
 const statusUpdating = ref(null);
 
 const showConfirmModal = ref(false);
+const showArchiveModal = ref(false);
 const confirmConfig = ref({ 
     title: '', 
     message: '', 
@@ -50,9 +50,19 @@ const fetchData = async () => {
     }
 };
 
+const searchArchive = ref('');
+
+const filteredArchivedJobs = computed(() => {
+    const query = searchArchive.value.toLowerCase().trim();
+    return jobs.value.filter(job => {
+        return job.status === 'ARCHIVED' && (job.title || '').toLowerCase().includes(query);
+    });
+});
+
 const filteredJobs = computed(() => {
     const query = searchQuery.value.toLowerCase().trim();
     return jobs.value.filter(job => {
+        if (job.status === 'ARCHIVED') return false;
         const title = (job.title || '').toLowerCase();
         const matchesStatus = statusFilter.value === '' || job.status === statusFilter.value;
         const matchesSearch = title.includes(query);
@@ -152,7 +162,8 @@ const executeArchive = async (id) => {
         toast.success("Vacancy moved to archives");
         await fetchData();
     } catch (e) {
-        toast.error("Failed to archive vacancy");
+        const errorMsg = e.response?.data?.message || "Failed to archive vacancy";
+        toast.error(errorMsg);
     }
 };
 
@@ -196,6 +207,36 @@ const executeToggleSalary = async (job) => {
         toast.error("Failed to update salary privacy");
     } finally {
         salaryUpdating.value = null;
+    }
+};
+
+const archivedJobs = computed(() => {
+    return jobs.value.filter(job => job.status === 'ARCHIVED');
+});
+
+const requestRestore = (job) => {
+    confirmConfig.value = {
+        title: 'Restore Vacancy?',
+        message: `Do you want to restore "${job.title}" to the active listings? It will be set to OPEN.`,
+        type: 'indigo',
+        action: () => executeRestore(job.id)
+    };
+    showConfirmModal.value = true;
+};
+
+const executeRestore = async (id) => {
+    showConfirmModal.value = false;
+    try {
+        await api.post(`/job-posts/${id}/restore`);
+        toast.success("Vacancy restored successfully");
+        
+        await fetchData();
+        
+        if (archivedJobs.value.length === 0) {
+            showArchiveModal.value = false;
+        }
+    } catch (e) {
+        toast.error("Failed to restore vacancy");
     }
 };
 
@@ -244,6 +285,17 @@ watch(() => props.profileId, fetchData);
                     class="bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white px-5 py-2.5 rounded-xl text-sm font-bold shadow-md transition-all flex items-center gap-2">
                     <i class="fa-solid fa-plus text-xs"></i> Post Vacancy
                 </button>
+<button @click="showArchiveModal = true"
+    class="h-9 w-9 flex items-center justify-center text-rose-500 hover:bg-rose-50 rounded-xl transition-all relative group"
+    title="View Archived Vacancies">
+    
+    <i class="fa-solid fa-trash-can text-sm"></i>
+
+    <span v-if="archivedJobs.length > 0" 
+        class="absolute -top-1 -right-1 flex h-4 min-w-[16px] px-1 items-center justify-center rounded-full bg-rose-600 text-[8px] text-white font-black border-2 border-white shadow-sm transition-transform group-hover:scale-110">
+        {{ archivedJobs.length }}
+    </span>
+</button>
             </div>
         </div>
 
@@ -251,113 +303,117 @@ watch(() => props.profileId, fetchData);
             <div class="overflow-x-auto">
                 <table class="w-full text-left border-collapse min-w-[800px]">
                     <thead>
-                            <tr class="bg-gray-50/50 border-b border-gray-100">
-                                <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Vacancy Details</th>
-                                <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Work & Experience</th>
-                                <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Compensation</th>
-                                <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">Applicants</th>
-                                <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Status & Expiry</th>
-                                <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right">Manage</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-50">
-                            <tr v-if="loading">
-                                <td colspan="6" class="px-6 py-20 text-center">
-                                    <i class="fa-solid fa-circle-notch fa-spin text-2xl text-indigo-500"></i>
-                                </td>
-                            </tr>
-                            <tr v-else-if="filteredJobs.length === 0">
-                                <td colspan="6" class="px-6 py-20 text-center text-gray-400">
-                                    <i class="fa-solid fa-folder-open text-3xl mb-2 opacity-20"></i>
-                                    <p class="text-sm">No vacancies match your criteria.</p>
-                                </td>
-                            </tr>
-                            <tr v-for="job in paginatedJobs" :key="job.id" class="hover:bg-indigo-50/30 transition-all duration-300 group">
-                                <td class="px-6 py-5">
-                                    <div class="flex flex-col">
-                                        <div class="flex items-center gap-3 mb-1">
-                                            <span class="font-bold text-gray-900 text-[15px] group-hover:text-indigo-600 transition-colors line-clamp-1">
-                                                {{ job.title }}
-                                            </span>
-                                            <span class="flex items-center gap-1 text-[11px] text-gray-400 font-medium whitespace-nowrap">
-                                                <i class="fa-solid fa-location-dot opacity-60"></i>
-                                                {{ job.location }}
-                                            </span>
-                                        </div>
+                        <tr class="bg-gray-50/50 border-b border-gray-100">
+                            <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center w-16">No.</th>
+                            <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Vacancy Details</th>
+                            <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Work & Experience</th>
+                            <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Compensation</th>
+                            <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">Applicants</th>
+                            <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Status & Expiry</th>
+                            <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right">Manage</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-50">
+                        <tr v-if="loading">
+                            <td colspan="7" class="px-6 py-20 text-center">
+                                <i class="fa-solid fa-circle-notch fa-spin text-2xl text-indigo-500"></i>
+                            </td>
+                        </tr>
+                        <tr v-else-if="filteredJobs.length === 0">
+                            <td colspan="7" class="px-6 py-20 text-center text-gray-400">
+                                <i class="fa-solid fa-folder-open text-3xl mb-2 opacity-20"></i>
+                                <p class="text-sm">No vacancies match your criteria.</p>
+                            </td>
+                        </tr>
+                        <tr v-for="(job, index) in paginatedJobs" :key="job.id" class="hover:bg-indigo-50/30 transition-all duration-300 group">
+                            <td class="px-6 py-5 text-center">
+                                <span class="text-xs font-bold text-gray-400">
+                                    {{ (currentPage - 1) * itemsPerPage + index + 1 }}
+                                </span>
+                            </td>
 
-                                        <div class="flex items-center">
-                                            <span class="text-[10px] font-bold text-indigo-500 bg-indigo-50/50 px-2 py-0.5 rounded uppercase tracking-tighter">
-                                                {{ job.category?.name || 'General' }}
-                                            </span>
-                                        </div>
-                                    </div>
-                                </td>
-
-                                <td class="px-6 py-5">
-                                    <div class="flex flex-col gap-1.5">
-                                        <div class="flex items-center gap-2">
-                                            <span class="h-1.5 w-1.5 rounded-full bg-emerald-400"></span>
-                                            <span class="text-xs font-bold text-gray-700 uppercase tracking-tight">
-                                                {{ job.employment_type?.replace('-', ' ') }}
-                                            </span>
-                                        </div>
-                                        <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider ml-3">
-                                            {{ job.experience_level?.replace('-', ' ') }} • {{ job.workplace_type }}
+                            <td class="px-6 py-5">
+                                <div class="flex flex-col">
+                                    <div class="flex items-center gap-3 mb-1">
+                                        <span class="font-bold text-gray-900 text-[15px] group-hover:text-indigo-600 transition-colors line-clamp-1">
+                                            {{ job.title }}
+                                        </span>
+                                        <span class="flex items-center gap-1 text-[11px] text-gray-400 font-medium whitespace-nowrap">
+                                            <i class="fa-solid fa-location-dot opacity-60"></i>
+                                            {{ job.location }}
                                         </span>
                                     </div>
-                                </td>
-
-                                <td class="px-6 py-5">
-                                    <div class="group/salary relative flex items-center justify-between min-w-[150px]">
-                                        <div :class="job.salary_visible ? 'opacity-100' : 'opacity-40'" class="flex flex-col transition-all duration-300">
-                                            <span class="text-xs font-black text-gray-800">
-                                                {{ formatCurrency(job.salary_min, job.currency) }} - {{ formatCurrency(job.salary_max, job.currency) }}
-                                            </span>
-                                            <span class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-0.5">
-                                                {{ job.currency }} / Month
-                                            </span>
-                                        </div>
-
-                                        <button @click="requestToggleSalary(job)" 
-                                            :disabled="salaryUpdating === job.id"
-                                            :class="job.salary_visible ? 'text-amber-500 hover:bg-amber-50' : 'text-indigo-500 hover:bg-indigo-50'"
-                                            class="h-8 w-8 flex items-center justify-center rounded-xl opacity-0 group-hover/salary:opacity-100 transition-all active:scale-90 disabled:opacity-50"
-                                            :title="job.salary_visible ? 'Hide Salary' : 'Show Salary'">
-                                            
-                                            <i v-if="salaryUpdating === job.id" class="fa-solid fa-circle-notch fa-spin text-[10px]"></i>
-                                            <template v-else>
-                                                <i :class="job.salary_visible ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye'" class="text-sm"></i>
-                                            </template>
-                                        </button>
+                                    <div class="flex items-center">
+                                        <span class="text-[10px] font-bold text-indigo-500 bg-indigo-50/50 px-2 py-0.5 rounded uppercase tracking-tighter">
+                                            {{ job.category?.name || 'General' }}
+                                        </span>
                                     </div>
-                                </td>
+                                </div>
+                            </td>
 
-                                <td class="px-6 py-5 text-center">
-                                    <div class="inline-flex flex-col items-center">
-                                        <span class="text-lg font-black text-gray-900 leading-none">{{ job.application_count || 0 }}</span>
-                                        <span class="text-[9px] font-bold text-gray-400 uppercase tracking-widest mt-1">Candidates</span>
+                            <td class="px-6 py-5">
+                                <div class="flex flex-col gap-1.5">
+                                    <div class="flex items-center gap-2">
+                                        <span class="h-1.5 w-1.5 rounded-full bg-emerald-400"></span>
+                                        <span class="text-xs font-bold text-gray-700 uppercase tracking-tight">
+                                            {{ job.employment_type?.replace('-', ' ') }}
+                                        </span>
                                     </div>
-                                </td>
+                                    <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider ml-3">
+                                        {{ job.experience_level?.replace('-', ' ') }} • {{ job.workplace_type }}
+                                    </span>
+                                </div>
+                            </td>
 
-                                <td class="px-6 py-5">
-                                    <div class="flex flex-col gap-2">
-                                        <button @click="requestToggleStatus(job)" :disabled="statusUpdating === job.id"
-                                            :class="[
-                                                job.status === 'OPEN' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 
-                                                job.status === 'CLOSED' ? 'bg-rose-50 text-rose-600 border-rose-100' : 
-                                                'bg-amber-50 text-amber-600 border-amber-100',
-                                                statusUpdating === job.id ? 'opacity-50 cursor-wait' : 'hover:brightness-95'
-                                            ]"
-                                            class="w-fit px-3 py-1 rounded-lg text-[9px] font-black uppercase border transition-all shadow-sm">
-                                            {{ job.status }}
-                                        </button>
-                                        <div class="flex items-center gap-1.5 text-[10px] font-bold text-gray-400">
-                                            <i class="fa-regular fa-clock opacity-60"></i>
-                                            <span>Exp: {{ formatDate(job.expires_at) }}</span>
-                                        </div>
+                            <td class="px-6 py-5">
+                                <div class="flex items-center justify-between min-w-[150px]">
+                                    <div :class="job.salary_visible ? 'opacity-100' : 'opacity-40'" class="flex flex-col transition-all duration-300">
+                                        <span class="text-xs font-black text-gray-800">
+                                            {{ formatCurrency(job.salary_min, job.currency) }} - {{ formatCurrency(job.salary_max, job.currency) }}
+                                        </span>
+                                        <span class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-0.5">
+                                            {{ job.currency }} / Month
+                                        </span>
                                     </div>
-                                </td>
-                            <td class="px-6 py-4">
+
+                                    <button @click="requestToggleSalary(job)" 
+                                        :disabled="salaryUpdating === job.id"
+                                        :class="job.salary_visible ? 'text-amber-500 bg-amber-50' : 'text-indigo-500 bg-indigo-50'"
+                                        class="h-8 w-8 flex items-center justify-center rounded-xl transition-all active:scale-90 disabled:opacity-50"
+                                        :title="job.salary_visible ? 'Hide Salary' : 'Show Salary'">
+                                        <i v-if="salaryUpdating === job.id" class="fa-solid fa-circle-notch fa-spin text-[10px]"></i>
+                                        <i v-else :class="job.salary_visible ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye'" class="text-sm"></i>
+                                    </button>
+                                </div>
+                            </td>
+
+                            <td class="px-6 py-5 text-center">
+                                <div class="inline-flex flex-col items-center">
+                                    <span class="text-lg font-black text-gray-900 leading-none">{{ job.application_count || 0 }}</span>
+                                    <span class="text-[9px] font-bold text-gray-400 uppercase tracking-widest mt-1">Candidates</span>
+                                </div>
+                            </td>
+
+                            <td class="px-6 py-5">
+                                <div class="flex flex-col gap-2">
+                                    <button @click="requestToggleStatus(job)" :disabled="statusUpdating === job.id"
+                                        :class="[
+                                            job.status === 'OPEN' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 
+                                            job.status === 'CLOSED' ? 'bg-rose-50 text-rose-600 border-rose-100' : 
+                                            'bg-amber-50 text-amber-600 border-amber-100',
+                                            statusUpdating === job.id ? 'opacity-50 cursor-wait' : 'hover:brightness-95'
+                                        ]"
+                                        class="w-fit px-3 py-1 rounded-lg text-[9px] font-black uppercase border transition-all shadow-sm">
+                                        {{ job.status }}
+                                    </button>
+                                    <div class="flex items-center gap-1.5 text-[10px] font-bold text-gray-400">
+                                        <i class="fa-regular fa-clock opacity-60"></i>
+                                        <span>Exp: {{ formatDate(job.expires_at) }}</span>
+                                    </div>
+                                </div>
+                            </td>
+
+                            <td class="px-4 py-4">
                                 <div class="flex justify-end items-center gap-2">
                                     <button @click="openEditModal(job)" 
                                         class="h-9 w-9 flex items-center justify-center text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all" 
@@ -399,13 +455,96 @@ watch(() => props.profileId, fetchData);
 
     <Transition
         enter-active-class="transition duration-300 ease-out"
+        enter-from-class="opacity-0"
+        enter-to-class="opacity-100"
+        leave-active-class="transition duration-200 ease-in"
+        leave-from-class="opacity-100"
+        leave-to-class="opacity-0"
+    >
+        <div v-if="showArchiveModal" class="fixed inset-0 z-[120] flex items-center justify-center p-4 bg-zinc-900/60 backdrop-blur-sm">
+            <div class="bg-white w-full max-w-2xl max-h-[85vh] overflow-hidden rounded-3xl shadow-2xl flex flex-col">
+                <div class="px-8 py-6 border-b border-gray-100 bg-gray-50/50">
+                    <div class="flex items-center justify-between mb-4">
+                        <div>
+                            <h2 class="text-xl font-black text-gray-900">Archived Vacancies</h2>
+                            <p class="text-xs text-gray-500">Restore posts to active listings or manage history.</p>
+                        </div>
+                        <button @click="showArchiveModal = false" class="h-10 w-10 flex items-center justify-center rounded-xl hover:bg-white text-gray-400 transition-colors">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="relative group">
+                        <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
+                        <input 
+                            type="text" 
+                            v-model="searchArchive" 
+                            placeholder="Search archives..."
+                            class="w-full pl-10 pr-4 py-2 bg-white border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
+                        >
+                    </div>
+                </div>
+
+                <div class="flex-1 overflow-y-auto p-6 space-y-3 bg-gray-50/30">
+                    <div v-if="filteredArchivedJobs.length === 0" class="py-20 text-center text-gray-400">
+                        <i class="fa-solid fa-box-open text-4xl mb-3 opacity-20"></i>
+                        <p class="font-bold text-sm">No archived vacancies found.</p>
+                    </div>
+                    
+                    <div v-for="job in filteredArchivedJobs" :key="job.id" 
+                        class="group flex items-center justify-between p-4 bg-white border border-gray-100 rounded-2xl hover:border-indigo-200 hover:shadow-md transition-all">
+                        
+                        <div class="flex items-center gap-4">
+                            <div class="h-12 w-12 rounded-xl bg-gray-50 flex flex-col items-center justify-center border border-gray-100 group-hover:bg-indigo-50 group-hover:border-indigo-100 transition-colors">
+                                <span class="text-sm font-black text-gray-700 group-hover:text-indigo-600">{{ job.application_count || 0 }}</span>
+                                <span class="text-[7px] font-bold text-gray-400 uppercase tracking-tighter">Apps</span>
+                            </div>
+
+                            <div class="flex flex-col">
+                                <span class="font-bold text-gray-900 leading-tight group-hover:text-indigo-600 transition-colors">
+                                    {{ job.title }}
+                                </span>
+                                <div class="flex items-center gap-2 mt-1">
+                                    <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{{ job.location }}</span>
+                                    <span class="h-1 w-1 rounded-full bg-gray-300"></span>
+                                    <span class="text-[10px] font-bold text-indigo-500 uppercase">{{ job.category?.name }}</span>
+                                </div>
+                                <span class="text-[9px] text-gray-400 mt-1 italic">
+                                    Archived on {{ formatDate(job.updated_at) }}
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-2">
+                            <button @click="requestRestore(job)" 
+                                class="flex items-center gap-2 bg-emerald-50 text-emerald-600 hover:bg-emerald-600 hover:text-white px-4 py-2.5 rounded-xl text-xs font-black transition-all border border-emerald-100">
+                                <i class="fa-solid fa-rotate-left"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="px-8 py-5 border-t border-gray-100 bg-gray-50/50 flex justify-between items-center">
+                    <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                        Total: {{ filteredArchivedJobs.length }} {{ filteredArchivedJobs.length <= 1 ? 'item' : 'items' }}
+                    </span>
+                    <button @click="showArchiveModal = false" class="px-6 py-2.5 rounded-xl text-sm font-bold text-gray-500 bg-white border border-gray-200 hover:bg-gray-50 transition-colors">
+                        Discard
+                    </button>
+                </div>
+            </div>
+        </div>
+    </Transition>
+
+    <Transition
+        enter-active-class="transition duration-300 ease-out"
         enter-from-class="opacity-0 scale-95"
         enter-to-class="opacity-100 scale-100"
         leave-active-class="transition duration-200 ease-in"
         leave-from-class="opacity-100 scale-100"
         leave-to-class="opacity-0 scale-95"
     >
-        <div v-if="showConfirmModal" class="fixed inset-0 z-[110] flex items-center justify-center p-6">
+        <div v-if="showConfirmModal" class="fixed inset-0 z-[150] flex items-center justify-center p-6">
             <div @click="showConfirmModal = false" class="absolute inset-0 bg-zinc-900/60 backdrop-blur-sm"></div>
             <div class="relative max-w-sm w-full bg-white rounded-2xl shadow-2xl p-6 border border-gray-100">
                 <div :class="confirmConfig.type === 'warning' ? 'bg-amber-50 text-amber-600' : 'bg-indigo-50 text-indigo-600'" 

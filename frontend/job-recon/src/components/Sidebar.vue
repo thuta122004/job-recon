@@ -5,17 +5,19 @@ const route = useRoute();
 
 <template>
         <aside class="hidden md:flex w-64 flex-col bg-white border-r border-gray-200">
-            <div class="h-16 flex items-center px-6 border-b border-gray-100 gap-3">
-                <div class="h-20 flex items-center px-7">
-                    <div class="relative flex items-center">
-                        <div class="absolute -left-2 h-10 w-10 bg-indigo-100/50 rounded-full blur-xl"></div>
-                        
-                        <i class="fa-solid fa-file-waveform text-indigo-600 text-xl relative z-10 mr-3"></i>
-                        
-                        <span class="relative z-10 text-xl font-extrabold text-indigo-600 tracking-tighter">
-                            Job<span class="font-light text-gray-400">Recon</span>
-                        </span>
+            <div class="h-16 flex items-center px-6 border-b border-gray-100">
+                <div class="relative flex items-center">
+                    <div class="absolute -left-4 h-14 w-14 bg-indigo-100/40 rounded-full blur-xl"></div>
+                    
+                    <div class="relative z-10 flex-shrink-0">
+                        <img src="@/assets/logo.svg" 
+                            alt="JobRecon Logo" 
+                            class="h-12 w-12 object-contain" />
                     </div>
+                    
+                    <span class="relative z-10 text-xl font-extrabold text-indigo-600 tracking-tighter -ml-2.5">
+                        Job<span class="font-light text-gray-400">Recon</span>
+                    </span>
                 </div>
             </div>
         <nav class="flex-1 px-4 py-6 space-y-1">

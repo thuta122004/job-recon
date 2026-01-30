@@ -42,7 +42,6 @@ class JobPostController extends Controller
 
         $jobs = JobPost::with(['category', 'skills'])
             ->where('employer_profile_id', $id)
-            ->where('status', '!=', 'ARCHIVED')
             ->latest()
             ->get();
 
@@ -183,13 +182,53 @@ class JobPostController extends Controller
     public function destroy(string $id)
     {
         $job = JobPost::find($id);
-        if (!$job) return response()->json(['status' => false, 'message' => 'Job not found'], 404);
+
+        if (!$job) {
+            return response()->json([
+                'status' => false, 
+                'message' => 'Job not found'
+            ], 404);
+        }
+
+        if ($job->status === 'OPEN') {
+            return response()->json([
+                'status' => false,
+                'message' => 'Cannot archive an active vacancy.'
+            ], 400);
+        }
 
         $job->update(['status' => 'ARCHIVED']);
 
         return response()->json([
             'status'  => true,
             'message' => 'Job posting has been archived'
+        ], 200);
+    }
+
+    public function restore($id)
+    {
+        $job = JobPost::find($id);
+
+        if (!$job) {
+            return response()->json([
+                'status'  => false, 
+                'message' => 'Job not found'
+            ], 404);
+        }
+
+        if ($job->status !== 'ARCHIVED') {
+            return response()->json([
+                'status'  => false, 
+                'message' => 'Job is not archived'
+            ], 400);
+        }
+
+        $job->update(['status' => 'OPEN']);
+
+        return response()->json([
+            'status'  => true,
+            'message' => 'Job posting has been restored successfully',
+            'data'    => $job
         ], 200);
     }
 
