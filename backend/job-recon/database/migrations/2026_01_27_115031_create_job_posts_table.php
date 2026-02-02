@@ -29,7 +29,7 @@ return new class extends Migration
             $table->decimal('salary_max', 15, 2)->nullable();
             $table->string('currency')->default('USD');
             $table->boolean('salary_visible')->default(true);
-            $table->enum('status', ['DRAFT', 'OPEN', 'CLOSED', 'ARCHIVED'])->default('OPEN');
+            $table->enum('status', ['OPEN', 'CLOSED', 'ARCHIVED'])->default('OPEN');
             $table->timestamp('expires_at')->nullable();
             $table->integer('application_count')->default(0);
 

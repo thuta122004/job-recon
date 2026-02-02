@@ -128,7 +128,7 @@ onMounted(fetchData);
     <div class="space-y-6 animate-in fade-in duration-500">
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div class="flex items-center gap-4">
-                <button @click="router.push('/job-seeker-profiles')" 
+                <button @click="router.push('/admin/job-seeker-profiles')" 
                     class="h-11 w-11 flex items-center justify-center rounded-xl bg-white border border-gray-200 text-gray-400 hover:text-indigo-600 hover:border-indigo-100 hover:shadow-sm transition-all">
                     <i class="fa-solid fa-arrow-left"></i>
                 </button>

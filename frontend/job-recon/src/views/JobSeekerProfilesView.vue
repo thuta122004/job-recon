@@ -474,7 +474,7 @@ onMounted(fetchData);
                     </div>
 
                     <div class="p-4 grid grid-cols-1 gap-2">
-                        <button @click="navigateTo(`/job-seekers/${activeProfileForActions.id}/education`)"
+                        <button @click="navigateTo(`/admin/job-seekers/${activeProfileForActions.id}/education`)"
                             class="group flex items-center justify-between p-4 rounded-2xl hover:bg-emerald-50 border border-transparent hover:border-emerald-100 transition-all text-left">
                             <div class="flex items-center gap-4">
                                 <div class="h-10 w-10 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center group-hover:scale-110 transition-transform">
@@ -488,7 +488,7 @@ onMounted(fetchData);
                             <i class="fa-solid fa-chevron-right text-[10px] text-gray-300 group-hover:text-emerald-500"></i>
                         </button>
 
-                        <button @click="navigateTo(`/job-seekers/${activeProfileForActions.id}/experience`)"
+                        <button @click="navigateTo(`/admin/job-seekers/${activeProfileForActions.id}/experience`)"
                             class="group flex items-center justify-between p-4 rounded-2xl hover:bg-amber-50 border border-transparent hover:border-amber-100 transition-all text-left">
                             <div class="flex items-center gap-4">
                                 <div class="h-10 w-10 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center group-hover:scale-110 transition-transform">
@@ -502,7 +502,7 @@ onMounted(fetchData);
                             <i class="fa-solid fa-chevron-right text-[10px] text-gray-300 group-hover:text-amber-500"></i>
                         </button>
 
-                        <button @click="navigateTo(`/job-seekers/${activeProfileForActions.id}/skills`)"
+                        <button @click="navigateTo(`/admin/job-seekers/${activeProfileForActions.id}/skills`)"
                             class="group flex items-center justify-between p-4 rounded-2xl hover:bg-indigo-50 border border-transparent hover:border-indigo-100 transition-all text-left">
                             <div class="flex items-center gap-4">
                                 <div class="h-10 w-10 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center group-hover:scale-110 transition-transform">

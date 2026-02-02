@@ -443,7 +443,7 @@ onMounted(fetchData);
                     </div>
 
                     <div class="p-4 grid grid-cols-1 gap-2">
-                        <button @click="navigateTo(`/employer-profiles/${activeProfileForActions.id}/job-posts`)"
+                        <button @click="navigateTo(`/admin/employer-profiles/${activeProfileForActions.id}/job-posts`)"
                             class="group flex items-center justify-between p-4 rounded-2xl hover:bg-indigo-50 border border-transparent hover:border-indigo-100 transition-all text-left">
                             <div class="flex items-center gap-4">
                                 <div class="h-10 w-10 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center group-hover:scale-110 transition-transform">

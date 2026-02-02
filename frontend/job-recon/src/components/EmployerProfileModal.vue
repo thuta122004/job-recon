@@ -210,6 +210,11 @@ const handleSubmit = () => {
                                 </div>
                             </transition>
                         </div>
+                        <p v-if="!form.user_id && !isEditing && !showUserDropdown" 
+                        class="text-[10px] text-amber-500 font-bold mt-2 ml-1 flex items-center gap-1.5 animate-pulse">
+                            <i class="fa-solid fa-circle-info text-[10px]"></i>
+                            <span>Selection required: Link an active account to create this profile.</span>
+                        </p>
                     </div>
 
                     <div class="relative md:col-span-2">

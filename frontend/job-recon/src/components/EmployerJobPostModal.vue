@@ -13,6 +13,8 @@ const props = defineProps({
 
 const emit = defineEmits(['close', 'save']);
 const toast = useToast();
+const categorySearch = ref('');
+const showCategoryDropdown = ref(false);
 
 const skillSearch = ref('');
 const showSkillDropdown = ref(false);
@@ -51,6 +53,14 @@ const fetchMetadata = async () => {
     }
 };
 
+const filteredCategories = computed(() => {
+    const query = categorySearch.value.toLowerCase().trim();
+    if (!query) return categories.value;
+    return categories.value.filter(cat => 
+        cat.name.toLowerCase().includes(query)
+    );
+});
+
 const filteredSkills = computed(() => {
     const query = skillSearch.value.toLowerCase().trim();
     const selectedIds = new Set(form.skills.map(s => s.id));
@@ -59,11 +69,18 @@ const filteredSkills = computed(() => {
     return list;
 });
 
+const selectCategory = (cat) => {
+    form.job_category_id = cat.id;
+    categorySearch.value = cat.name;
+    showCategoryDropdown.value = false;
+};
+
 const addSkill = (skill) => {
     form.skills.push(skill);
     skillSearch.value = '';
     showSkillDropdown.value = false;
 };
+
 watch(() => props.isOpen, (newVal) => {
     if (newVal) {
         if (!props.isEditing) {
@@ -77,16 +94,22 @@ watch(() => props.isOpen, (newVal) => {
                 expires_at: null,
                 salary_visible: true
             });
+            categorySearch.value = '';
         } else if (props.jobData) {
             const expiryDate = props.jobData.expires_at ? props.jobData.expires_at.split(' ')[0] : null;
+            
             Object.assign(form, { 
                 ...props.jobData, 
                 expires_at: expiryDate,
                 skills: props.jobData.skills ? [...props.jobData.skills] : [],
                 salary_visible: props.jobData.salary_visible ?? true
             });
+
+            const currentCat = categories.value.find(c => c.id === props.jobData.job_category_id);
+            categorySearch.value = currentCat ? currentCat.name : '';
         }
     }
+    showCategoryDropdown.value = false;
 });
 
 onMounted(fetchMetadata);
@@ -118,13 +141,55 @@ onMounted(fetchMetadata);
                     <div class="flex flex-col">
                         <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1 mb-1.5">Job Category</label>
                         <div class="relative">
-                            <select v-model="form.job_category_id" 
-                                    class="w-full px-4 py-3.5 text-sm text-gray-900 bg-white border border-gray-200 rounded-xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all appearance-none pr-10">
-                                <option value="" disabled>Select Category</option>
-                                <option v-for="cat in categories" :key="cat.id" :value="cat.id">{{ cat.name }}</option>
-                            </select>
-                            <i class="fa-solid fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none text-[10px]"></i>
+                            <div class="relative">
+                                <input 
+                                    type="text" 
+                                    v-model="categorySearch" 
+                                    @focus="showCategoryDropdown = true" 
+                                    @blur="setTimeout(() => showCategoryDropdown = false, 200)"
+                                    placeholder="Search categories..."
+                                    class="block w-full px-4 py-3.5 text-sm text-gray-900 bg-white border border-gray-200 rounded-xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all placeholder:text-gray-300" 
+                                />
+                                <i class="fa-solid fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none text-[10px]"></i>
+                            </div>
+                            
+                            <transition 
+                                enter-active-class="transition duration-200 ease-out" 
+                                enter-from-class="opacity-0 translate-y-1" 
+                                enter-to-class="opacity-100 translate-y-0" 
+                                leave-active-class="transition duration-150 ease-in" 
+                                leave-from-class="opacity-100 translate-y-0" 
+                                leave-to-class="opacity-0 translate-y-1"
+                            >
+                                <div v-if="showCategoryDropdown" class="absolute z-[60] w-full mt-2 bg-white border border-gray-100 shadow-2xl rounded-2xl overflow-hidden">
+                                    <div class="max-h-60 overflow-y-auto p-2 space-y-1 custom-scrollbar">
+                                        <div v-if="filteredCategories.length === 0" class="p-4 text-center">
+                                            <i class="fa-solid fa-layer-group text-gray-200 text-xl mb-2"></i>
+                                            <p class="text-xs text-gray-400 font-medium italic">No matching categories found</p>
+                                        </div>
+                                        
+                                        <button 
+                                            v-for="cat in filteredCategories" 
+                                            :key="cat.id" 
+                                            type="button" 
+                                            @mousedown="selectCategory(cat)"
+                                            class="w-full text-left px-4 py-3 rounded-xl hover:bg-indigo-50 transition-all flex items-center justify-between group"
+                                        >
+                                            <div class="flex items-center gap-3">
+                                                <div class="h-8 w-8 rounded-lg bg-gray-50 flex items-center justify-center group-hover:bg-white transition-colors">
+                                                    <i :class="cat.icon_class || 'fa-solid fa-tag'" class="text-indigo-500 text-xs"></i>
+                                                </div>
+                                                <span class="text-sm font-bold text-gray-700 group-hover:text-indigo-600 transition-colors">{{ cat.name }}</span>
+                                            </div>
+                                            <i v-if="form.job_category_id === cat.id" class="fa-solid fa-check text-indigo-600 text-xs"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </transition>
                         </div>
+                        <p v-if="!form.job_category_id && !showCategoryDropdown" class="text-[10px] text-amber-500 font-bold mt-1.5 ml-1 animate-pulse">
+                            <i class="fa-solid fa-circle-info mr-1"></i> Please select a valid category from the list.
+                        </p>
                     </div>
                 </div>
 
@@ -246,7 +311,11 @@ onMounted(fetchMetadata);
 
             <div class="px-8 py-5 bg-gray-50 border-t border-gray-100 flex justify-end gap-3">
                 <button @click="$emit('close')" class="px-5 py-2.5 text-sm font-bold text-gray-400 hover:text-gray-600 transition-colors">Discard</button>
-                <button @click="emit('save', {...form})" :disabled="loading" class="bg-indigo-600 text-white px-10 py-2.5 rounded-xl text-sm font-bold shadow-lg shadow-indigo-200 hover:bg-indigo-700 active:scale-95 disabled:opacity-50 transition-all flex items-center gap-2">
+                <button 
+                    @click="emit('save', {...form})" 
+                    :disabled="loading || !form.job_category_id" 
+                    class="bg-indigo-600 text-white px-10 py-2.5 rounded-xl text-sm font-bold shadow-lg shadow-indigo-200 hover:bg-indigo-700 active:scale-95 disabled:opacity-50 disabled:active:scale-100 transition-all flex items-center gap-2"
+                >
                     <i v-if="loading" class="fa-solid fa-circle-notch fa-spin"></i>
                     {{ isEditing ? 'Update Posting' : 'Publish Vacancy' }}
                 </button>

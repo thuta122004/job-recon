@@ -248,7 +248,7 @@ watch(() => props.profileId, fetchData);
     <div class="space-y-6">
         <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
             <div class="flex items-center gap-4">
-                <button @click="router.push('/employer-profiles')" 
+                <button @click="router.push('/admin/employer-profiles')" 
                     class="h-11 w-11 flex items-center justify-center rounded-xl bg-white border border-gray-200 text-gray-400 hover:text-indigo-600 transition-all shadow-sm">
                     <i class="fa-solid fa-arrow-left"></i>
                 </button>
@@ -343,7 +343,11 @@ watch(() => props.profileId, fetchData);
                                             {{ job.location }}
                                         </span>
                                     </div>
-                                    <div class="flex items-center">
+                                    <div class="flex items-center gap-2">
+                                        <i v-if="job.category?.icon_class" 
+                                        :class="job.category.icon_class" 
+                                        class="text-[10px] text-indigo-400"></i>
+                                        
                                         <span class="text-[10px] font-bold text-indigo-500 bg-indigo-50/50 px-2 py-0.5 rounded uppercase tracking-tighter">
                                             {{ job.category?.name || 'General' }}
                                         </span>
@@ -504,10 +508,13 @@ watch(() => props.profileId, fetchData);
                                 <span class="font-bold text-gray-900 leading-tight group-hover:text-indigo-600 transition-colors">
                                     {{ job.title }}
                                 </span>
-                                <div class="flex items-center gap-2 mt-1">
-                                    <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{{ job.location }}</span>
-                                    <span class="h-1 w-1 rounded-full bg-gray-300"></span>
-                                    <span class="text-[10px] font-bold text-indigo-500 uppercase">{{ job.category?.name }}</span>
+                                <div v-if="job.category" class="flex items-center gap-1.5 mt-1.5">
+                                    <i :class="job.category.icon_class || 'fa-solid fa-tag'" 
+                                    class="text-[10px] text-indigo-400"></i>
+                                    
+                                    <span class="text-[10px] font-bold text-indigo-500 uppercase">
+                                        {{ job.category.name }}
+                                    </span>
                                 </div>
                                 <span class="text-[9px] text-gray-400 mt-1 italic">
                                     Archived on {{ formatDate(job.updated_at) }}

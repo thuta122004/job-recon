@@ -71,6 +71,11 @@ watch(() => props.isOpen, (newVal) => {
     showRoleDropdown.value = false;
 });
 
+const passwordsMatch = computed(() => {
+    if (!form.password && !form.password_confirmation) return true;
+    return form.password === form.password_confirmation;
+});
+
 const handleSubmit = () => {
     emit('save', { ...form });
 };
@@ -154,9 +159,15 @@ const handleSubmit = () => {
                                 </div>
                             </transition>
                         </div>
-                        <p v-if="disableRole" class="text-[10px] text-amber-600 px-1 font-medium flex items-center gap-1">
-                            <i class="fa-solid fa-circle-exclamation"></i>
-                            Role locked: User has an active profile.
+                        <p v-if="disableRole" class="text-[10px] text-amber-500 font-bold mt-2 ml-1 flex items-center gap-1.5">
+                            <i class="fa-solid fa-lock text-[9px]"></i>
+                            <span>Role locked: This user is currently linked to an active employer profile.</span>
+                        </p>
+
+                        <p v-else-if="!form.role_id && !showRoleDropdown" 
+                        class="text-[10px] text-amber-500 font-bold mt-2 ml-1 flex items-center gap-1.5 animate-pulse">
+                            <i class="fa-solid fa-circle-info text-[10px]"></i>
+                            <span>Selection required: Assign a system role to define access levels.</span>
                         </p>
                     </div>
 
@@ -172,25 +183,51 @@ const handleSubmit = () => {
                         <label for="u_email" class="floating-label absolute left-4 transition-all duration-200 pointer-events-none text-gray-400 text-sm">Email Address</label>
                     </div>
 
-                    <div class="relative">
-                        <input type="password" id="u_pw" v-model="form.password" placeholder=" "
-                            class="floating-input block w-full px-4 py-4 text-sm text-gray-900 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none peer appearance-none transition-all" />
-                        <label for="u_pw" class="floating-label absolute left-4 transition-all duration-200 pointer-events-none text-gray-400 text-sm">
-                            {{ isEditing ? 'New Password' : 'Account Password' }}
-                        </label>
+                    <div class="relative flex flex-col">
+                        <div class="relative">
+                            <input type="password" id="u_pw" v-model="form.password" placeholder=" "
+                                class="floating-input block w-full px-4 py-4 text-sm text-gray-900 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none peer appearance-none transition-all" />
+                            <label for="u_pw" class="floating-label absolute left-4 transition-all duration-200 pointer-events-none text-gray-400 text-sm">
+                                {{ isEditing ? 'New Password' : 'Account Password' }}
+                            </label>
+                        </div>
                     </div>
 
-                    <div class="relative">
-                        <input type="password" id="u_pwc" v-model="form.password_confirmation" placeholder=" "
-                            class="floating-input block w-full px-4 py-4 text-sm text-gray-900 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none peer appearance-none transition-all" />
-                        <label for="u_pwc" class="floating-label absolute left-4 transition-all duration-200 pointer-events-none text-gray-400 text-sm">Confirm Password</label>
-                    </div>
+                    <div class="relative flex flex-col">
+                        <div class="relative">
+                            <input type="password" id="u_pwc" v-model="form.password_confirmation" placeholder=" "
+                                :class="[!passwordsMatch ? 'border-amber-400 focus:border-amber-500 focus:ring-amber-500/10' : 'border-gray-200']"
+                                class="floating-input block w-full px-4 py-4 text-sm text-gray-900 border rounded-xl focus:ring-2 outline-none peer appearance-none transition-all" />
+                            <label for="u_pwc" class="floating-label absolute left-4 transition-all duration-200 pointer-events-none text-gray-400 text-sm">Confirm Password</label>
+                            
+                            <div class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
+                                <i v-if="form.password_confirmation && !passwordsMatch" class="fa-solid fa-triangle-exclamation text-amber-500 text-xs"></i>
+                                <i v-else-if="form.password_confirmation && passwordsMatch" class="fa-solid fa-circle-check text-emerald-500 text-xs"></i>
+                            </div>
+                        </div>
 
-                    <div class="md:col-span-2 -mt-4">
-                        <p class="text-[10px] text-gray-400 flex items-center gap-1.5 px-1">
-                            <i class="fa-solid fa-circle-info text-indigo-400/60"></i>
-                            {{ isEditing ? 'Leave password fields blank to keep current password.' : 'User will be required to use this password for their first login.' }}
+                        <p v-if="!passwordsMatch" 
+                        class="text-[10px] text-amber-500 font-bold mt-2 ml-1 flex items-center gap-1.5 animate-pulse">
+                            <i class="fa-solid fa-lock-open text-[10px]"></i>
+                            <span>Security check: Passwords do not match.</span>
                         </p>
+                    </div>
+
+                    <div class="md:col-span-2">
+                        <div class="bg-indigo-50/50 border border-indigo-100/50 rounded-xl p-4 flex items-start gap-3 transition-all">
+                            <div class="bg-white h-6 w-6 rounded-lg flex items-center justify-center shadow-sm shrink-0">
+                                <i class="fa-solid fa-shield-halved text-indigo-500 text-[10px]"></i>
+                            </div>
+                            <div class="flex flex-col gap-0.5">
+                                <p class="text-[10px] font-bold text-indigo-900 uppercase tracking-widest">Security Protocol</p>
+                                <p class="text-[11px] text-indigo-600/80 leading-relaxed font-medium">
+                                    {{ isEditing 
+                                        ? 'Authentication persistent: Leave password fields empty to maintain current security credentials.' 
+                                        : 'Initial access: The user will be required to utilize these credentials for their primary authorization.' 
+                                    }}
+                                </p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -200,8 +237,11 @@ const handleSubmit = () => {
                     class="px-5 py-2.5 text-sm font-bold text-gray-500 hover:text-gray-700 transition-colors">
                     Discard
                 </button>
-                <button @click="handleSubmit" :disabled="loading || (isEditing ? false : !form.role_id)"
-                    class="bg-indigo-600 text-white px-8 py-2.5 rounded-xl text-sm font-bold shadow-lg shadow-indigo-100 hover:bg-indigo-700 active:scale-95 disabled:opacity-50 disabled:active:scale-100 transition-all flex items-center gap-2">
+                <button 
+                    @click="handleSubmit" 
+                    :disabled="loading || (isEditing ? false : !form.role_id) || !passwordsMatch"
+                    class="bg-indigo-600 text-white px-8 py-2.5 rounded-xl text-sm font-bold shadow-lg shadow-indigo-100 hover:bg-indigo-700 active:scale-95 disabled:opacity-50 disabled:active:scale-100 transition-all flex items-center gap-2"
+                >
                     <i v-if="loading" class="fa-solid fa-circle-notch fa-spin"></i>
                     {{ isEditing ? 'Save Changes' : 'Confirm Registration' }}
                 </button>

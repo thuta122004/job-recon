@@ -192,7 +192,7 @@ onMounted(fetchData);
                 <button @click="openCreateModal"
                     class="bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white px-5 py-2.5 rounded-xl text-sm font-bold shadow-md shadow-indigo-200 transition-all flex items-center gap-2">
                     <i class="fa-solid fa-plus text-xs"></i>
-                    Add New User
+                    Add User
                 </button>
             </div>
         </div>

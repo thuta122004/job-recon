@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\EmployerProfileController;
 use App\Http\Controllers\Api\JobCategoryController;
 use App\Http\Controllers\Api\JobPostController;
@@ -10,7 +11,6 @@ use App\Http\Controllers\Api\JobSeekerSkillController;
 use App\Http\Controllers\Api\RoleController;
 use App\Http\Controllers\Api\SkillController;
 use App\Http\Controllers\Api\UserController;
-use App\Models\EmployerProfile;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -37,3 +37,4 @@ Route::apiResource('job-posts', JobPostController::class)->except(['index']);
 Route::patch('job-posts/{id}/toggle-visibility', [JobPostController::class, 'toggleVisibility']);
 Route::patch('job-posts/{id}/toggle-salary', [JobPostController::class, 'toggleSalaryVisibility']);
 Route::post('/job-posts/{id}/restore', [JobPostController::class, 'restore']);
+Route::get('/admin/dashboard-stats', [DashboardController::class, 'adminDashboard']);
