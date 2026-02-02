@@ -52,10 +52,10 @@ const formatLabel = (str) => {
                     class="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm hover:shadow-md transition-all group">
                     <div class="flex items-center justify-between mb-4">
                         <div class="h-12 w-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center group-hover:bg-indigo-600 group-hover:text-white transition-colors">
-                            <i v-if="key === 'totalUsers'" class="fa-solid fa-users text-lg"></i>
+                            <i v-if="key === 'totalUsers'" class="fa-solid fa-users-gear text-lg"></i>
                             <i v-else-if="key === 'activeJobs'" class="fa-solid fa-briefcase text-lg"></i>
-                            <i v-else-if="key === 'totalEmployers'" class="fa-solid fa-building text-lg"></i>
-                            <i v-else class="fa-solid fa-user-graduate text-lg"></i>
+                            <i v-else-if="key === 'totalEmployers'" class="fa-solid fa-user-check text-lg"></i>
+                            <i v-else class="fa-solid fa-address-card text-lg"></i>
                         </div>
                         <span class="text-[10px] font-black bg-emerald-100 text-emerald-700 px-2 py-1 rounded-lg uppercase">Live</span>
                     </div>

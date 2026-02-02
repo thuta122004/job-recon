@@ -285,17 +285,17 @@ watch(() => props.profileId, fetchData);
                     class="bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white px-5 py-2.5 rounded-xl text-sm font-bold shadow-md transition-all flex items-center gap-2">
                     <i class="fa-solid fa-plus text-xs"></i> Post Vacancy
                 </button>
-<button @click="showArchiveModal = true"
-    class="h-9 w-9 flex items-center justify-center text-rose-500 hover:bg-rose-50 rounded-xl transition-all relative group"
-    title="View Archived Vacancies">
-    
-    <i class="fa-solid fa-trash-can text-sm"></i>
+                <button @click="showArchiveModal = true"
+                    class="h-9 w-9 flex items-center justify-center text-rose-500 hover:bg-rose-50 rounded-xl transition-all relative group"
+                    title="View Archived Vacancies">
+                    
+                    <i class="fa-solid fa-trash-can text-sm"></i>
 
-    <span v-if="archivedJobs.length > 0" 
-        class="absolute -top-1 -right-1 flex h-4 min-w-[16px] px-1 items-center justify-center rounded-full bg-rose-600 text-[8px] text-white font-black border-2 border-white shadow-sm transition-transform group-hover:scale-110">
-        {{ archivedJobs.length }}
-    </span>
-</button>
+                    <span v-if="archivedJobs.length > 0" 
+                        class="absolute -top-1 -right-1 flex h-4 min-w-[16px] px-1 items-center justify-center rounded-full bg-rose-600 text-[8px] text-white font-black border-2 border-white shadow-sm transition-transform group-hover:scale-110">
+                        {{ archivedJobs.length }}
+                    </span>
+                </button>
             </div>
         </div>
 

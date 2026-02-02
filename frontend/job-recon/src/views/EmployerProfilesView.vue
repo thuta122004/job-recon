@@ -433,7 +433,7 @@ onMounted(fetchData);
                         <div class="h-16 w-16 rounded-2xl bg-white shadow-sm mx-auto mb-3 overflow-hidden border border-gray-100 flex items-center justify-center">
                             <img v-if="activeProfileForActions?.company_logo_url" :src="activeProfileForActions.company_logo_url" class="h-full w-full object-cover">
                             <div v-else class="h-full w-full flex items-center justify-center text-indigo-200">
-                                <i class="fa-solid fa-building text-2xl"></i>
+                                <i class="fa-solid fa-user-check text-2xl"></i>
                             </div>
                         </div>
                         <h3 class="text-lg font-black text-gray-900 leading-tight">
