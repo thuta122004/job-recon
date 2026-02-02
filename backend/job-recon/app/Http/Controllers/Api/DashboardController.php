@@ -19,26 +19,49 @@ class DashboardController extends Controller
     {
         return response()->json([
             'overview' => [
-                'totalUsers' => User::count(),
-                'activeJobs' => JobPost::where('status', 'OPEN')->count(),
-                'totalEmployers' => EmployerProfile::count(),
-                'talentPool' => JobSeekerProfile::count(),
+                'totalUsers' => User::where('status', 'ACTIVE')->count(),
+                'activeJobs' => JobPost::where('status', 'OPEN')
+                ->whereHas('employer.user', function ($query) {
+                    $query->where('status', 'ACTIVE');
+                })->count(),
+                'totalEmployers' => EmployerProfile::whereHas('user', function ($query) {
+                    $query->where('status', 'ACTIVE');
+                })->count(),
+                'talentPool' => JobSeekerProfile::whereHas('user', function ($query) {
+                    $query->where('status', 'ACTIVE');
+                })->count(),
             ],
             'talentInsights' => [
-                'seekersWithSkills' => DB::table('job_seeker_skills')->distinct('job_seeker_profile_id')->count(),
+                'seekersWithSkills' => DB::table('job_seeker_skills')
+                    ->join('job_seeker_profiles', 'job_seeker_skills.job_seeker_profile_id', '=', 'job_seeker_profiles.id')
+                    ->join('users', 'job_seeker_profiles.user_id', '=', 'users.id')
+                    ->where('users.status', 'ACTIVE')
+                    ->distinct('job_seeker_profile_id')
+                    ->count('job_seeker_profile_id'),
                 'topSkills' => DB::table('skills')
                     ->join('job_seeker_skills', 'skills.id', '=', 'job_seeker_skills.skill_id')
-                    ->select('skills.name', DB::raw('count(*) as count'))
-                    ->groupBy('skills.name', 'skills.id')
+                    ->join('job_seeker_profiles', 'job_seeker_skills.job_seeker_profile_id', '=', 'job_seeker_profiles.id')
+                    ->join('users', 'job_seeker_profiles.user_id', '=', 'users.id')
+                    ->where('users.status', 'ACTIVE')
+                    ->select('skills.name', DB::raw('count(job_seeker_skills.skill_id) as count'))
+                    ->groupBy('skills.id', 'skills.name')
                     ->orderBy('count', 'desc')
                     ->limit(5)
                     ->get(),
             ],
             'marketActivity' => [
                 'categoryDistribution' => DB::table('job_categories')
-                    ->leftJoin('job_posts', 'job_categories.id', '=', 'job_posts.job_category_id')
-                    ->select('job_categories.name', DB::raw('count(job_posts.id) as jobs_count'))
-                    ->groupBy('job_categories.name', 'job_categories.id')
+                    ->leftJoin('job_posts', function($join) {
+                        $join->on('job_categories.id', '=', 'job_posts.job_category_id')
+                            ->where('job_posts.status', '=', 'OPEN');
+                    })
+                    ->leftJoin('employer_profiles', 'job_posts.employer_profile_id', '=', 'employer_profiles.id')
+                    ->leftJoin('users', 'employer_profiles.user_id', '=', 'users.id')
+                    ->select(
+                        'job_categories.name', 
+                        DB::raw('COUNT(CASE WHEN users.status = "ACTIVE" THEN job_posts.id END) as jobs_count')
+                    )
+                    ->groupBy('job_categories.id', 'job_categories.name')
                     ->orderBy('jobs_count', 'desc')
                     ->limit(5)
                     ->get()
