@@ -133,7 +133,7 @@ const handleLogin = async () => {
                         class="w-full flex items-center justify-center py-3.5 px-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-sm shadow-lg shadow-indigo-200 transition-all transform active:scale-[0.98] disabled:opacity-70"
                     >
                         <i v-if="loading" class="fa-solid fa-circle-notch animate-spin mr-2"></i>
-                        {{ loading ? 'Authenticating...' : 'Sign In to Dashboard' }}
+                        {{ loading ? 'Authenticating...' : 'Sign In' }}
                     </button>
                 </form>
             </div>
