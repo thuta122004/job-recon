@@ -107,7 +107,7 @@ const formatLabel = (str) => {
                         <span class="text-2xl font-black text-indigo-600 leading-none block">
                             {{ report.talentInsights.seekersWithSkills }}
                         </span>
-                        <span class="text-[10px] font-bold text-gray-400 uppercase tracking-tighter">Skilled Seekers</span>
+                        <span class="text-[10px] font-bold text-gray-400 uppercase tracking-tighter">Skilled {{ report.talentInsights.seekersWithSkills <= 1 ? 'Seeker' : 'Seekers' }}</span>
                     </div>
                 </div>
 
@@ -118,7 +118,7 @@ const formatLabel = (str) => {
                     <div v-for="skill in report.talentInsights.topSkills" :key="skill.name">
                         <div class="flex justify-between items-end mb-2">
                             <span class="text-sm font-bold text-gray-700">{{ skill.name }}</span>
-                            <span class="text-xs font-medium text-gray-400">{{ skill.count }} Profiles</span>
+                            <span class="text-xs font-medium text-gray-400">{{ skill.count }} {{ skill.count <= 1 ? 'Profile' : 'Profiles' }}</span>
                         </div>
                         <div class="w-full bg-gray-100 h-2.5 rounded-full overflow-hidden">
                             <div class="bg-indigo-500 h-full rounded-full transition-all duration-1000" 
