@@ -147,6 +147,7 @@ class JobPostController extends Controller
             'qualifications'   => 'nullable|string',
             'salary_min'       => 'nullable|numeric|min:0',
             'salary_max'       => 'nullable|numeric|gte:salary_min',
+            'currency'            => 'nullable|string|max:10',
             'skills'           => 'nullable|array',
             'skills.*'         => 'exists:skills,id'
         ]);

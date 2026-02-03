@@ -10,14 +10,20 @@ import JobCategoriesView from '@/views/JobCategoriesView.vue'
 import EmployerProfilesView from '@/views/EmployerProfilesView.vue'
 import EmployerJobPostsView from '@/views/EmployerJobPostsView.vue'
 import AdminLayout from '@/layouts/AdminLayout.vue'
-import AdminDashboardView from '../views/AdminDashboardView.vue'
+import AdminDashboardView from '@/views/AdminDashboardView.vue'
+import LoginView from '@/views/LoginView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
+      path: '/',
+      redirect: { name: 'login' }
+    },
+    {
       path: '/admin',
       component: AdminLayout,
+      meta: { requiresAuth: true, role: 1 },
       redirect: { name: 'admin-dashboard' },
       children: [
         {
@@ -42,7 +48,7 @@ const router = createRouter({
           path: 'job-seeker-profiles',
           name: 'job-seeker-profiles',
           component: JobSeekerProfilesView,
-          meta: { parent: 'Talent Directory', label: 'Talent Directory' }
+          meta: { parent: 'Talent Management', label: 'Talent Profiles' }
         },
         {
           path: 'job-seekers/:profileId/experience',
@@ -89,6 +95,30 @@ const router = createRouter({
         },
       ]
     },
+    {
+      path: '/login',
+      name: 'login',
+      component: LoginView,
+    }
   ]
 })
+router.beforeEach((to, from, next) => {
+  const token = localStorage.getItem('auth_token');
+  const userRole = parseInt(localStorage.getItem('user_role'));
+
+  if (to.meta.requiresAuth && !token) {
+    return to.name === 'login' ? next() : next({ name: 'login' });
+  }
+
+  if (to.meta.role && userRole !== to.meta.role) {
+    console.warn("Unauthorized access attempt.");
+    return next({ name: 'login' }); 
+  }
+
+  if (to.name === 'login' && token) {
+    if (userRole === 1) return next({ name: 'admin-dashboard' });
+  }
+
+  next();
+});
 export default router

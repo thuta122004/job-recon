@@ -1,7 +1,27 @@
 <script setup>
-import { useRoute, RouterView } from 'vue-router';
+import { useRoute, useRouter, RouterView } from 'vue-router';
+import api from '@/services/api';
 
 const route = useRoute();
+const router = useRouter();
+
+const userName = localStorage.getItem('user_name') || 'Admin';
+const userEmail = localStorage.getItem('user_email') || 'admin@jobrecon.com';
+const userInitial = userName.charAt(0).toUpperCase();
+
+const handleLogout = async () => {
+    try {
+        await api.post('/logout');
+    } catch (error) {
+        console.error("Logout request failed, cleaning up local storage anyway.", error);
+    } finally {
+        localStorage.removeItem('auth_token');
+        localStorage.removeItem('user_role');
+        localStorage.removeItem('user_name');
+
+        router.push({ name: 'login' });
+    }
+};
 </script>
 
 <template>
@@ -10,14 +30,12 @@ const route = useRoute();
             <div class="h-16 flex items-center px-6 border-b border-gray-100">
                 <div class="relative flex items-center">
                     <div class="absolute -left-4 h-14 w-14 bg-indigo-100/40 rounded-full blur-xl"></div>
-                    
                     <div class="relative z-10 flex-shrink-0">
                         <img src="@/assets/logo.svg" 
                             alt="JobRecon Logo" 
                             class="h-12 w-12 object-contain"
                             style="filter: invert(48%) sepia(13%) saturate(583%) hue-rotate(182deg) brightness(92%) contrast(88%);" />
                     </div>
-                    
                     <span class="relative z-10 text-xl font-extrabold text-indigo-600 tracking-tighter -ml-2.5">
                         Job<span class="font-light text-gray-400">Recon</span>
                     </span>
@@ -66,9 +84,20 @@ const route = useRoute();
                 <router-link :to="{ name: 'employer-profiles' }" 
                     class="flex items-center px-4 py-3 text-gray-500 hover:bg-gray-50 rounded-lg transition-all"
                     active-class="bg-indigo-50 text-indigo-700 font-semibold">
-                    <i class="fa-solid fa-user-check w-5 mr-3"></i> Employers
+                    <i class="fa-solid fa-user-check w-5 mr-3"></i> Company Directory
                 </router-link>
             </nav>
+
+            <div class="p-4 border-t border-gray-100">
+                <p class="px-4 text-[10px] text-gray-400 font-bold uppercase tracking-[0.15em] mb-2">
+                    System Administrator
+                </p>
+                
+                <button @click="handleLogout" 
+                    class="w-full flex items-center px-4 py-3 text-red-500 hover:bg-red-50 rounded-lg transition-all font-medium">
+                    <i class="fa-solid fa-right-from-bracket w-5 mr-3"></i> Sign Out
+                </button>
+            </div>
         </aside>
 
         <div class="flex-1 flex flex-col overflow-hidden">
@@ -82,9 +111,13 @@ const route = useRoute();
                     </h1>
                 </div>
 
-                <div class="flex items-center gap-4">
-                    <div class="h-8 w-8 rounded-full bg-indigo-600 flex items-center justify-center text-white text-xs font-bold">
-                        H
+                <div class="flex items-center gap-3">
+                    <div class="text-right mr-2 hidden sm:block">
+                        <p class="text-sm font-bold text-gray-900 leading-none">{{ userName }}</p>
+                        <p class="text-[10px] text-indigo-500 font-medium mt-0.5 leading-none">{{ userEmail }}</p>
+                    </div>
+                    <div class="h-10 w-10 rounded-full bg-indigo-600 flex items-center justify-center text-white text-sm font-bold shadow-lg shadow-indigo-100">
+                        {{ userInitial }}
                     </div>
                 </div>
             </header>

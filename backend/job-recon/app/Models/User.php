@@ -65,4 +65,19 @@ class User extends Authenticatable
     {
         return $this->hasOne(EmployerProfile::class);
     }
+
+    public function isAdmin(): bool
+    {
+        return (int) $this->role_id === 1;
+    }
+
+    public function isJobSeeker(): bool
+    {
+        return (int) $this->role_id === 2;
+    }
+
+    public function isEmployer(): bool
+    {
+        return (int) $this->role_id === 3;
+    }
 }

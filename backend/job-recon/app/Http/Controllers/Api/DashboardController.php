@@ -17,20 +17,41 @@ class DashboardController extends Controller
      */
     public function adminDashboard()
     {
+        $thirtyDaysAgo = now()->subDays(30);
+
+        $metrics = [
+            'totalUsers' => User::where('status', 'ACTIVE'),
+            'activeJobs' => JobPost::where('status', 'OPEN')
+                ->whereHas('employer.user', fn($q) => $q->where('status', 'ACTIVE')),
+            'totalEmployers' => EmployerProfile::whereHas('user', fn($q) => $q->where('status', 'ACTIVE')),
+            'talentPool' => JobSeekerProfile::whereHas('user', fn($q) => $q->where('status', 'ACTIVE')),
+        ];
+
+        $overview = [];
+
+        foreach ($metrics as $key => $query) {
+            $currentCount = (clone $query)->count();
+            $previousCount = (clone $query)->where('created_at', '<=', $thirtyDaysAgo)->count();
+            
+            $growth = 0;
+            if ($previousCount > 0) {
+                $growth = (($currentCount - $previousCount) / $previousCount) * 100;
+            }
+
+            $sparkline = [];
+            for ($i = 6; $i >= 0; $i--) {
+                $sparkline[] = (clone $query)->whereDate('created_at', '<=', now()->subDays($i))->count();
+            }
+
+            $overview[$key] = [
+                'value' => $currentCount,
+                'growth' => round($growth, 1),
+                'sparkline' => $sparkline
+            ];
+        }
+
         return response()->json([
-            'overview' => [
-                'totalUsers' => User::where('status', 'ACTIVE')->count(),
-                'activeJobs' => JobPost::where('status', 'OPEN')
-                ->whereHas('employer.user', function ($query) {
-                    $query->where('status', 'ACTIVE');
-                })->count(),
-                'totalEmployers' => EmployerProfile::whereHas('user', function ($query) {
-                    $query->where('status', 'ACTIVE');
-                })->count(),
-                'talentPool' => JobSeekerProfile::whereHas('user', function ($query) {
-                    $query->where('status', 'ACTIVE');
-                })->count(),
-            ],
+            'overview' => $overview,
             'talentInsights' => [
                 'seekersWithSkills' => DB::table('job_seeker_skills')
                     ->join('job_seeker_profiles', 'job_seeker_skills.job_seeker_profile_id', '=', 'job_seeker_profiles.id')

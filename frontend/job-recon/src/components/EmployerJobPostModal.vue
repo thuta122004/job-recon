@@ -112,6 +112,18 @@ watch(() => props.isOpen, (newVal) => {
     showCategoryDropdown.value = false;
 });
 
+const closeCategoryDropdown = () => {
+    setTimeout(() => {
+        showCategoryDropdown.value = false;
+    }, 200);
+};
+
+const closeSkillDropdown = () => {
+    setTimeout(() => {
+        showSkillDropdown.value = false;
+    }, 200);
+};
+
 onMounted(fetchMetadata);
 </script>
 
@@ -146,7 +158,7 @@ onMounted(fetchMetadata);
                                     type="text" 
                                     v-model="categorySearch" 
                                     @focus="showCategoryDropdown = true" 
-                                    @blur="setTimeout(() => showCategoryDropdown = false, 200)"
+                                    @blur="closeCategoryDropdown"
                                     placeholder="Search categories..."
                                     class="block w-full px-4 py-3.5 text-sm text-gray-900 bg-white border border-gray-200 rounded-xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all placeholder:text-gray-300" 
                                 />
@@ -251,7 +263,6 @@ onMounted(fetchMetadata);
                             <select v-model="form.currency" class="w-full px-4 py-3.5 text-sm bg-white border border-gray-200 rounded-xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none appearance-none pr-10">
                                 <option value="USD">USD ($)</option>
                                 <option value="EUR">EUR (€)</option>
-                                <option value="GBP">GBP (£)</option>
                                 <option value="MMK">MMK (K)</option>
                                 <option value="THB">THB (฿)</option>
                             </select>
@@ -280,7 +291,7 @@ onMounted(fetchMetadata);
                                 <i class="fa-solid fa-xmark"></i>
                             </button>
                         </span>
-                        <input type="text" v-model="skillSearch" @focus="showSkillDropdown = true" @blur="setTimeout(() => showSkillDropdown = false, 200)" placeholder="Add skills..." class="bg-transparent border-none outline-none text-sm font-medium flex-1 min-w-[120px]" />
+                        <input type="text" v-model="skillSearch" @focus="showSkillDropdown = true" @blur="closeSkillDropdown" placeholder="Add skills..." class="bg-transparent border-none outline-none text-sm font-medium flex-1 min-w-[120px]" />
                     </div>
                     
                     <div v-if="showSkillDropdown" class="absolute z-[60] w-full mt-[72px] bg-white border border-gray-100 shadow-2xl rounded-xl max-h-48 overflow-y-auto p-2">
