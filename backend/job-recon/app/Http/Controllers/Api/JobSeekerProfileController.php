@@ -3,6 +3,9 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\EmployerProfile;
+use App\Models\JobCategory;
+use App\Models\JobPost;
 use App\Models\JobSeekerProfile;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -14,6 +17,27 @@ class JobSeekerProfileController extends Controller
     /**
      * Display a listing of the resource.
      */
+
+    public function getHomeData()
+    {
+        return response()->json([
+            'stats' => [
+                'activeJobs' => JobPost::where('status', 'OPEN')->count(),
+                'topCompanies' => EmployerProfile::count(),
+            ],
+            'categories' => JobCategory::withCount(['jobPosts' => fn($q) => $q->where('status', 'OPEN')])
+                ->having('job_posts_count', '>', 0)
+                ->orderBy('job_posts_count', 'desc')
+                ->take(8)
+                ->get(),
+            'featuredJobs' => JobPost::with(['employer', 'category'])
+                ->where('status', 'OPEN')
+                ->latest()
+                ->limit(6)
+                ->get()
+        ]);
+    }
+
     public function index()
     {
         $profiles = JobSeekerProfile::with('user')
@@ -73,22 +97,14 @@ class JobSeekerProfileController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show($id)
+    public function show($slug)
     {
-        // $profile = JobSeekerProfile::with('user')->find($id);
+        $job = JobPost::with(['employer.user', 'category', 'skills'])
+            ->where('status', 'OPEN')
+            ->where('slug', $slug)
+            ->firstOrFail();
 
-        // if (!$profile) {
-        //     return response()->json([
-        //         'status' => false,
-        //         'message' => 'Profile not found',
-        //     ], 404);
-        // }
-
-        // return response()->json([
-        //     'status' => true,
-        //     'message' => 'Profile found',
-        //     'data' => $profile
-        // ], 200);
+        return response()->json($job);
     }
 
     /**

@@ -41,3 +41,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/job-posts/{id}/restore', [JobPostController::class, 'restore']);
     Route::get('/admin/dashboard-stats', [DashboardController::class, 'adminDashboard']);
 });
+
+Route::get('/seeker/home-data', [JobSeekerProfileController::class, 'getHomeData']);
+Route::get('/seeker/jobs/{slug}', [JobSeekerProfileController::class, 'show']);

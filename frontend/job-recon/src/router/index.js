@@ -12,10 +12,27 @@ import EmployerJobPostsView from '@/views/EmployerJobPostsView.vue'
 import AdminLayout from '@/layouts/AdminLayout.vue'
 import AdminDashboardView from '@/views/AdminDashboardView.vue'
 import LoginView from '@/views/LoginView.vue'
+import JobSeekerHomeView from '@/views/JobSeekerHomeView.vue'
+import JobDetailView from '@/views/JobDetailView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
+    {
+      path: '/seeker',
+      redirect: { name: 'seeker-home' }
+    },
+    {
+      path: '/seeker/home',
+      name: 'seeker-home',
+      component: JobSeekerHomeView
+    },
+    {
+      path: '/seeker/job/:slug',
+      name: 'job-detail',
+      component: JobDetailView,
+      props: true
+    },
     {
       path: '/',
       redirect: { name: 'login' }

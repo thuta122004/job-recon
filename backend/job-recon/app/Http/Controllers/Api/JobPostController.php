@@ -92,9 +92,16 @@ class JobPostController extends Controller
 
         return DB::transaction(function () use ($request, $validator) {
             $data = $validator->validated();
-            $data['slug'] = Str::slug($data['title']) . '-' . Str::lower(Str::random(6));
+            
+            $employer = EmployerProfile::findOrFail($data['employer_profile_id']);
+            $companyName = $employer->company_name ?? 'hiring';
 
+            $data['slug'] = Str::slug($companyName . '-' . $data['title']);
             $job = JobPost::create($data);
+
+            $job->update([
+                'slug' => $job->slug . '-' . $job->id
+            ]);
 
             if (!empty($data['skills'])) {
                 $job->skills()->sync($data['skills']);
@@ -103,7 +110,7 @@ class JobPostController extends Controller
             return response()->json([
                 'status'  => true,
                 'message' => 'Job published successfully',
-                'data'    => $job->load('skills')
+                'data'    => $job->load(['skills', 'employer'])
             ], 201);
         });
     }
@@ -160,7 +167,9 @@ class JobPostController extends Controller
             $data = $validator->validated();
 
             if ($data['title'] !== $job->title) {
-                $data['slug'] = Str::slug($data['title']) . '-' . Str::lower(Str::random(6));
+                $companyName = $job->employer->company_name ?? 'hiring';
+                
+                $data['slug'] = Str::slug($companyName . '-' . $data['title'] . '-' . $job->id);
             }
 
             $job->update($data);
@@ -172,7 +181,7 @@ class JobPostController extends Controller
             return response()->json([
                 'status'  => true,
                 'message' => 'Job updated successfully',
-                'data'    => $job->load('skills')
+                'data'    => $job->load(['skills', 'employer'])
             ], 200);
         });
     }
