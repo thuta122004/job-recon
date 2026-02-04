@@ -194,7 +194,7 @@ onMounted(fetchJobDetail);
                 </div>
 
                 <div class="space-y-6 lg:sticky lg:top-32">
-                    <div class="bg-slate-900 p-10 rounded-[3rem] text-white shadow-2xl shadow-indigo-200/50">
+                    <div class="bg-white p-8 rounded-[3rem] border border-slate-100 shadow-xl shadow-indigo-100/50">
                         <p class="text-[13px] font-black text-slate-500 uppercase tracking-widest mb-4">Financial Package</p>
                         <div class="mb-10">
                             <template v-if="job.salary_visible && job.salary_min !== null">
@@ -212,7 +212,7 @@ onMounted(fetchJobDetail);
                                 <p class="text-slate-500 text-xs font-bold mt-2">Salary disclosed during interview</p>
                             </template>
                         </div>
-                        <button class="w-full py-5 bg-indigo-600 hover:bg-indigo-500 text-white font-black rounded-2xl transition-all shadow-xl shadow-indigo-900/40 mb-4 active:scale-95">
+                        <button class="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white text-[11px] font-black uppercase tracking-[0.2em] rounded-2xl transition-all shadow-lg shadow-indigo-100 hover:shadow-indigo-200 active:scale-[0.98] mb-4">
                             APPLY FOR THIS ROLE
                         </button>
                         <p class="text-[11px] text-center text-slate-500 font-bold uppercase tracking-widest">Process takes ~2 mins</p>
@@ -233,7 +233,7 @@ onMounted(fetchJobDetail);
 
                         <div class="flex justify-between items-center pb-4 border-b border-slate-50">
                             <span class="text-[10px] font-black text-slate-300 uppercase tracking-widest">Reference</span>
-                            <span class="text-xs font-black text-slate-700 uppercase">{{ job.slug.split('-')[0] }}</span>
+                            <span class="text-xs font-black text-slate-700 uppercase">{{ job.slug }}</span>
                         </div>
 
                         <div class="flex justify-between items-center">

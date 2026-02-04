@@ -234,10 +234,13 @@ onMounted(fetchMetadata);
                         <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1 mb-1.5">Exp. Level</label>
                         <div class="relative">
                             <select v-model="form.experience_level" class="w-full px-4 py-3.5 text-sm bg-white border border-gray-200 rounded-xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none appearance-none pr-10">
-                                <option value="ENTRY-LEVEL">Entry-Level</option>
-                                <option value="MID-SENIOR">Mid-Senior</option>
+                                <option value="ENTRY-LEVEL">Entry Level</option>
+                                <option value="JUNIOR">Junior</option>
+                                <option value="MID-LEVEL">Mid-Level</option>
+                                <option value="SENIOR">Senior</option>
+                                <option value="LEAD">Lead / Manager</option>
                                 <option value="DIRECTOR">Director</option>
-                                <option value="EXECUTIVE">Executive</option>
+                                <option value="EXECUTIVE">Executive (VP, C-Suite)</option>
                             </select>
                             <i class="fa-solid fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none text-[10px]"></i>
                         </div>

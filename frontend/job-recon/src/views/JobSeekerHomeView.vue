@@ -112,9 +112,17 @@ onMounted(fetchHomeData);
                     
                     <button v-for="cat in homeData.categories" :key="cat.slug" 
                         @click="filterByCategory(cat.slug)"
-                        class="px-5 py-2.5 bg-white border border-slate-100 rounded-full text-xs font-bold text-slate-600 hover:border-indigo-600 hover:text-indigo-600 transition-all shadow-sm active:scale-95">
-                        {{ cat.name }} 
-                        <span class="ml-1 text-slate-300">({{ cat.job_posts_count }})</span>
+                        class="flex items-center gap-3 px-4 py-2 bg-white border border-slate-100 rounded-full text-[11px] font-bold text-slate-600 hover:border-indigo-600 hover:text-indigo-600 transition-all shadow-sm shadow-slate-200/50 active:scale-95 group"
+                    >
+                        <i :class="cat.icon_class || 'fa-solid fa-layer-group'" 
+                        class="text-indigo-500 text-sm group-hover:scale-110 transition-transform">
+                        </i>
+
+                        <span>{{ cat.name }}</span>
+
+                        <span class="bg-slate-50 px-2 py-0.5 rounded-full text-[9px] text-slate-400 group-hover:bg-indigo-50 group-hover:text-indigo-400 transition-colors">
+                            {{ cat.job_posts_count }}
+                        </span>
                     </button>
                 </div>
             </div>

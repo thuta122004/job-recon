@@ -73,7 +73,7 @@ class JobPostController extends Controller
             'job_category_id'     => 'required|exists:job_categories,id',
             'workplace_type'      => 'required|in:ON-SITE,REMOTE,HYBRID',
             'employment_type'     => 'required|in:FULL-TIME,PART-TIME,CONTRACT,TEMPORARY,INTERNSHIP,VOLUNTEER',
-            'experience_level'    => 'required|in:INTERNSHIP,ENTRY-LEVEL,ASSOCIATE,MID-SENIOR,DIRECTOR,EXECUTIVE',
+            'experience_level'    => 'required|in:NTRY-LEVEL,JUNIOR,MID-LEVEL,SENIOR,LEAD,DIRECTOR,EXECUTIVE',   
             'location'            => 'required|string|max:255',
             'expires_at'          => 'nullable|date|after_or_equal:today',
             'description'         => 'required|string',
@@ -146,7 +146,7 @@ class JobPostController extends Controller
             'job_category_id'  => 'required|exists:job_categories,id',
             'workplace_type'   => 'required|in:ON-SITE,REMOTE,HYBRID',
             'employment_type'  => 'required|in:FULL-TIME,PART-TIME,CONTRACT,TEMPORARY,INTERNSHIP,VOLUNTEER',
-            'experience_level' => 'required|in:INTERNSHIP,ENTRY-LEVEL,ASSOCIATE,MID-SENIOR,DIRECTOR,EXECUTIVE',
+            'experience_level' => 'required|in:ENTRY-LEVEL,JUNIOR,MID-LEVEL,SENIOR,LEAD,DIRECTOR,EXECUTIVE',   
             'location'         => 'required|string|max:255',
             'expires_at'       => 'nullable|date|after_or_equal:today',
             'description'      => 'required|string',
@@ -154,7 +154,7 @@ class JobPostController extends Controller
             'qualifications'   => 'nullable|string',
             'salary_min'       => 'nullable|numeric|min:0',
             'salary_max'       => 'nullable|numeric|gte:salary_min',
-            'currency'            => 'nullable|string|max:10',
+            'currency'         => 'nullable|string|max:10',
             'skills'           => 'nullable|array',
             'skills.*'         => 'exists:skills,id'
         ]);
