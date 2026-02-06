@@ -14,6 +14,7 @@ import AdminDashboardView from '@/views/AdminDashboardView.vue'
 import LoginView from '@/views/LoginView.vue'
 import JobSeekerHomeView from '@/views/JobSeekerHomeView.vue'
 import JobDetailView from '@/views/JobDetailView.vue'
+import JobPostsView from '@/views/JobPostsView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -26,6 +27,11 @@ const router = createRouter({
       path: '/seeker/home',
       name: 'seeker-home',
       component: JobSeekerHomeView
+    },
+    {
+      path: '/seeker/jobs',
+      name: 'job-listings',
+      component: JobPostsView
     },
     {
       path: '/seeker/job/:slug',

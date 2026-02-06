@@ -118,9 +118,38 @@ class JobPostController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(Request $request)
     {
-        //
+        $query = JobPost::with(['employer', 'category', 'skills'])
+            ->where('status', 'OPEN');
+
+        if ($request->filled('q')) {
+            $search = $request->q;
+            $query->where(function ($q) use ($search) {
+                $q->where('title', 'LIKE', "%{$search}%")
+                ->orWhereHas('employer', function ($emp) use ($search) {
+                    $emp->where('company_name', 'LIKE', "%{$search}%");
+                });
+            });
+        }
+
+        if ($request->filled('l')) {
+            $query->where('location', 'LIKE', "%{$request->l}%");
+        }
+
+        if ($request->filled('category')) {
+            $query->whereHas('category', function ($cat) use ($request) {
+                $cat->where('slug', $request->category);
+            });
+        }
+
+        $jobs = $query->latest()->get();
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Available jobs retrieved successfully',
+            'data' => $jobs
+        ], 200);
     }
 
     /**

@@ -44,3 +44,4 @@ Route::middleware('auth:sanctum')->group(function () {
 
 Route::get('/seeker/home-data', [JobSeekerProfileController::class, 'getHomeData']);
 Route::get('/seeker/jobs/{slug}', [JobSeekerProfileController::class, 'show']);
+Route::get('/seeker/jobs', [JobPostController::class, 'show']);
