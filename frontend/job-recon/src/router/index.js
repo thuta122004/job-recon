@@ -15,33 +15,44 @@ import LoginView from '@/views/LoginView.vue'
 import JobSeekerHomeView from '@/views/JobSeekerHomeView.vue'
 import JobDetailView from '@/views/JobDetailView.vue'
 import JobPostsView from '@/views/JobPostsView.vue'
+import SeekerLayout from '@/layouts/SeekerLayout.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
-      path: '/seeker',
-      redirect: { name: 'seeker-home' }
-    },
-    {
-      path: '/seeker/home',
-      name: 'seeker-home',
-      component: JobSeekerHomeView
-    },
-    {
-      path: '/seeker/jobs',
-      name: 'job-listings',
-      component: JobPostsView
-    },
-    {
-      path: '/seeker/job/:slug',
-      name: 'job-detail',
-      component: JobDetailView,
-      props: true
-    },
-    {
       path: '/',
       redirect: { name: 'login' }
+    },
+    {
+      path: '/login',
+      name: 'login',
+      component: LoginView,
+    },
+    {
+      path: '/seeker',
+      component: SeekerLayout,
+      children: [
+        {
+          path: 'home',
+          name: 'seeker-home',
+          component: JobSeekerHomeView,
+          meta: { requiresAuth: false } 
+        },
+        {
+          path: 'jobs',
+          name: 'job-listings',
+          component: JobPostsView,
+          meta: { requiresAuth: false }
+        },
+        {
+          path: 'job/:slug',
+          name: 'job-detail',
+          component: JobDetailView,
+          props: true,
+          meta: { requiresAuth: true, role: 2, label: 'Job Details' }
+        },
+      ]
     },
     {
       path: '/admin',
@@ -134,12 +145,12 @@ router.beforeEach((to, from, next) => {
   }
 
   if (to.meta.role && userRole !== to.meta.role) {
-    console.warn("Unauthorized access attempt.");
-    return next({ name: 'login' }); 
+    console.warn("Unauthorized Role Access");
+    return next(userRole === 1 ? { name: 'admin-dashboard' } : { name: 'seeker-home' });
   }
 
   if (to.name === 'login' && token) {
-    if (userRole === 1) return next({ name: 'admin-dashboard' });
+    return next(userRole === 1 ? { name: 'admin-dashboard' } : { name: 'seeker-home' });
   }
 
   next();

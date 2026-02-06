@@ -70,7 +70,7 @@ onMounted(fetchJobDetail);
                     Back to Listings
                 </button>
                 <div class="flex items-center gap-3">
-                    <button class="h-11 w-11 flex items-center justify-center rounded-xl border border-slate-100 text-slate-400 hover:text-rose-500 hover:bg-rose-50 transition-all">
+                    <button class="h-11 w-11 flex items-center justify-center rounded-xl border border-slate-100 text-slate-400 hover:text-indigo-500 hover:bg-indigo-50 transition-all">
                         <i class="fa-regular fa-bookmark text-lg"></i>
                     </button>
                     <button @click="handleShare" class="h-11 px-6 bg-slate-900 text-white text-[10px] font-black uppercase tracking-[0.15em] rounded-xl hover:bg-indigo-600 transition-all active:scale-95 flex items-center gap-2">

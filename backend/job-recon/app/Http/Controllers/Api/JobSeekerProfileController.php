@@ -67,7 +67,7 @@ class JobSeekerProfileController extends Controller
             'current_position'   => 'nullable|string|max:255',
             'experience_years'   => 'nullable|integer|min:0',
             'profile_visibility' => 'required|in:PUBLIC,PRIVATE',
-            'profile_picture'    => 'nullable|image|mimes:jpeg,png,jpg|max:2048', 
+            'profile_picture'    => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048', 
             'resume'             => 'nullable|file|mimes:pdf,doc,docx|max:5120',
         ]);
 
@@ -126,7 +126,7 @@ class JobSeekerProfileController extends Controller
             'current_position'   => 'nullable|string|max:255',
             'experience_years'   => 'nullable|integer|min:0',
             'profile_visibility' => 'required|in:PUBLIC,PRIVATE',
-            'profile_picture'    => 'nullable|image|mimes:jpeg,png,jpg|max:2048', 
+            'profile_picture'    => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048', 
             'resume'             => 'nullable|file|mimes:pdf,doc,docx|max:5120',
             'delete_picture'     => 'nullable', 
             'delete_resume'      => 'nullable',

@@ -40,19 +40,23 @@ const handleLogin = async () => {
 
     const { token, user } = response.data;
 
-    if (user.role_id === 1) {
-      localStorage.setItem('auth_token', token);
-      localStorage.setItem('user_role', user.role_id);
-      
-      const firstName = user.first_name || 'Admin';
-      const lastName = user.last_name || '';
-      localStorage.setItem('user_name', `${firstName} ${lastName}`.trim());
-      localStorage.setItem('user_email', user.email);
+    localStorage.setItem('auth_token', token);
+    localStorage.setItem('user_role', user.role_id);
+    localStorage.setItem('user_email', user.email);
+    localStorage.setItem('user_profile_pic', user.profile?.profile_picture_url || '');
+    
+    const firstName = user.first_name || 'User';
+    const lastName = user.last_name || '';
+    localStorage.setItem('user_name', `${firstName} ${lastName}`.trim());
 
-      toast.success(`Welcome back, ${firstName}!`);
+    if (user.role_id === 1) {
+      toast.success(`Admin access granted. Welcome, ${firstName}!`);
       router.push({ name: 'admin-dashboard' });
+    } else if (user.role_id === 2) {
+      toast.success(`Welcome back, ${firstName}!`);
+      router.push({ name: 'seeker-home' });
     } else {
-      toast.error("Access restricted to administrators.");
+      toast.error("Role not recognized. Please contact support.");
       localStorage.clear();
     }
   } catch (err) {

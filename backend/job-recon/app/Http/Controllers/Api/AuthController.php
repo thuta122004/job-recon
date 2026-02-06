@@ -42,7 +42,9 @@ class AuthController extends Controller
                 'last_name' => $user->last_name,
                 'email' => $user->email,
                 'role_id' => $user->role_id,
-                'is_admin' => $user->isAdmin()
+                'is_admin' => $user->isAdmin(),
+                'is_seeker' => $user->isJobSeeker(),
+                'profile' => $user->profile
             ]
         ]);
     }

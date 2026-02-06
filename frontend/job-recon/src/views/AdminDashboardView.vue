@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import api from '@/services/api';
 import { useToast } from "vue-toastification";
 
@@ -16,13 +16,17 @@ const report = ref({
     }
 });
 
+const hasOverviewData = computed(() => Object.keys(report.value.overview).length > 0);
+const hasSkillsData = computed(() => report.value.talentInsights.topSkills.length > 0);
+const hasCategoryData = computed(() => report.value.marketActivity.categoryDistribution.length > 0);
+
 const fetchReport = async () => {
     loading.value = true;
     try {
         const response = await api.get('/admin/dashboard-stats');
         report.value = response.data;
     } catch (e) {
-        toast.error("Analytics engine failed to sync data");
+        toast.error("Failed to sync data from server");
         console.error(e);
     } finally {
         loading.value = false;
@@ -43,7 +47,7 @@ const formatLabel = (str) => {
                 <div v-for="i in 4" :key="i" class="h-44 bg-white animate-pulse rounded-[2.5rem] border border-gray-100 shadow-sm"></div>
             </template>
             
-            <template v-else>
+            <template v-else-if="hasOverviewData">
                 <div v-for="(data, key) in report.overview" :key="key" 
                     class="relative overflow-hidden bg-white p-6 rounded-[2.5rem] border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group">
                     
@@ -68,7 +72,7 @@ const formatLabel = (str) => {
                             <div class="flex flex-col items-end">
                                 <div :class="['flex items-center gap-1 text-xs font-black', data.growth >= 0 ? 'text-emerald-500' : 'text-rose-500']">
                                     <i :class="['fa-solid', data.growth >= 0 ? 'fa-caret-up' : 'fa-caret-down']"></i>
-                                    {{ Math.abs(data.growth) }}%
+                                    {{ Math.abs(data.growth || 0) }}%
                                 </div>
                                 <span class="text-[8px] text-gray-400 font-bold uppercase tracking-widest">vs last month</span>
                             </div>
@@ -79,17 +83,20 @@ const formatLabel = (str) => {
                                 {{ formatLabel(key) }}
                             </p>
                             <h2 class="text-4xl font-black text-gray-900 tracking-tighter">
-                                {{ data.value.toLocaleString() }}
+                                {{ (data.value || 0).toLocaleString() }}
                             </h2>
                         </div>
 
                         <div class="mt-6 flex items-end gap-1 h-8">
-                            <div v-for="(val, i) in data.sparkline" :key="i"
-                                class="flex-1 rounded-t-sm transition-all duration-700 bg-gray-100 group-hover:bg-indigo-400"
-                                :style="{ 
-                                    height: (Math.max(...data.sparkline) > 0 ? (val / Math.max(...data.sparkline) * 100) : 10) + '%' 
-                                }">
-                            </div>
+                            <template v-if="data.sparkline && data.sparkline.length > 0">
+                                <div v-for="(val, i) in data.sparkline" :key="i"
+                                    class="flex-1 rounded-t-sm transition-all duration-700 bg-gray-100 group-hover:bg-indigo-400"
+                                    :style="{ 
+                                        height: (Math.max(...data.sparkline) > 0 ? (val / Math.max(...data.sparkline) * 100) : 10) + '%' 
+                                    }">
+                                </div>
+                            </template>
+                            <div v-else class="w-full h-[2px] bg-gray-100 self-center"></div>
                         </div>
                     </div>
                 </div>
@@ -97,7 +104,7 @@ const formatLabel = (str) => {
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <div class="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm">
+            <div class="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm flex flex-col">
                 <div class="flex items-center justify-between mb-8">
                     <div>
                         <h3 class="text-lg font-extrabold text-gray-900 tracking-tight">Talent Readiness</h3>
@@ -105,7 +112,7 @@ const formatLabel = (str) => {
                     </div>
                     <div class="text-right">
                         <span class="text-2xl font-black text-indigo-600 leading-none block">
-                            {{ report.talentInsights.seekersWithSkills }}
+                            {{ report.talentInsights.seekersWithSkills || 0 }}
                         </span>
                         <span class="text-[10px] font-bold text-gray-400 uppercase tracking-tighter">Skilled {{ report.talentInsights.seekersWithSkills <= 1 ? 'Seeker' : 'Seekers' }}</span>
                     </div>
@@ -114,7 +121,8 @@ const formatLabel = (str) => {
                 <div v-if="loading" class="space-y-6">
                     <div v-for="i in 5" :key="i" class="h-4 bg-gray-50 rounded-full animate-pulse"></div>
                 </div>
-                <div v-else class="space-y-6">
+                
+                <div v-else-if="hasSkillsData" class="space-y-6">
                     <div v-for="skill in report.talentInsights.topSkills" :key="skill.name">
                         <div class="flex justify-between items-end mb-2">
                             <span class="text-sm font-bold text-gray-700">{{ skill.name }}</span>
@@ -127,16 +135,22 @@ const formatLabel = (str) => {
                         </div>
                     </div>
                 </div>
+
+                <div v-else class="flex-1 flex flex-col items-center justify-center py-10 opacity-60">
+                    <i class="fa-solid fa-lightbulb text-gray-200 text-4xl mb-4"></i>
+                    <p class="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">No talent insights found</p>
+                </div>
             </div>
 
-            <div class="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm">
+            <div class="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm flex flex-col">
                 <h3 class="text-lg font-extrabold text-gray-900 tracking-tight mb-2">Market Demand</h3>
                 <p class="text-xs text-gray-400 mb-8">Job postings per category</p>
 
                 <div v-if="loading" class="space-y-4">
                     <div v-for="i in 5" :key="i" class="h-10 bg-gray-50 rounded-xl animate-pulse"></div>
                 </div>
-                <div v-else class="overflow-hidden border border-gray-50 rounded-2xl">
+                
+                <div v-else-if="hasCategoryData" class="overflow-hidden border border-gray-50 rounded-2xl">
                     <table class="w-full text-left">
                         <thead class="bg-gray-50/50">
                             <tr>
@@ -157,6 +171,11 @@ const formatLabel = (str) => {
                             </tr>
                         </tbody>
                     </table>
+                </div>
+
+                <div v-else class="flex-1 flex flex-col items-center justify-center py-10 opacity-60">
+                    <i class="fa-solid fa-chart-line text-gray-200 text-4xl mb-4"></i>
+                    <p class="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">No market activity recorded</p>
                 </div>
             </div>
         </div>
