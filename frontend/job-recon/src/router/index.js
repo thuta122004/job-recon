@@ -16,6 +16,7 @@ import JobSeekerHomeView from '@/views/JobSeekerHomeView.vue'
 import JobDetailView from '@/views/JobDetailView.vue'
 import JobPostsView from '@/views/JobPostsView.vue'
 import SeekerLayout from '@/layouts/SeekerLayout.vue'
+import SeekerProfile from '@/views/SeekerProfile.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -51,6 +52,12 @@ const router = createRouter({
           component: JobDetailView,
           props: true,
           meta: { requiresAuth: true, role: 2, label: 'Job Details' }
+        },
+        {
+          path: 'profile',
+          name: 'seeker-profile',
+          component: SeekerProfile,
+          meta: { requiresAuth: true, role: 2, label: 'My Profile' }
         },
       ]
     },

@@ -224,12 +224,13 @@ onMounted(fetchMetadata);
                                 <option value="FULL-TIME">Full-Time</option>
                                 <option value="PART-TIME">Part-Time</option>
                                 <option value="CONTRACT">Contract</option>
-                                <option value="INTERNSHIP">Internship</option>
+                                <option value="TEMPORARY">Temporary</option> <option value="INTERNSHIP">Internship</option>
                                 <option value="VOLUNTEER">Volunteer</option>
                             </select>
                             <i class="fa-solid fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none text-[10px]"></i>
                         </div>
                     </div>
+
                     <div class="flex flex-col">
                         <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1 mb-1.5">Exp. Level</label>
                         <div class="relative">
@@ -238,9 +239,8 @@ onMounted(fetchMetadata);
                                 <option value="JUNIOR">Junior</option>
                                 <option value="MID-LEVEL">Mid-Level</option>
                                 <option value="SENIOR">Senior</option>
-                                <option value="LEAD">Lead / Manager</option>
-                                <option value="DIRECTOR">Director</option>
-                                <option value="EXECUTIVE">Executive (VP, C-Suite)</option>
+                                <option value="LEAD">Lead</option> <option value="DIRECTOR">Director</option>
+                                <option value="EXECUTIVE">Executive</option>
                             </select>
                             <i class="fa-solid fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none text-[10px]"></i>
                         </div>

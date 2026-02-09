@@ -41,6 +41,7 @@ const handleLogin = async () => {
     const { token, user } = response.data;
 
     localStorage.setItem('auth_token', token);
+    localStorage.setItem('user_id', user.id);
     localStorage.setItem('user_role', user.role_id);
     localStorage.setItem('user_email', user.email);
     localStorage.setItem('user_profile_pic', user.profile?.profile_picture_url || '');

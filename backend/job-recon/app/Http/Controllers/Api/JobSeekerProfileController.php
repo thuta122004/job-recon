@@ -97,14 +97,21 @@ class JobSeekerProfileController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show($slug)
+    public function show($id)
     {
-        $job = JobPost::with(['employer.user', 'category', 'skills'])
-            ->where('status', 'OPEN')
-            ->where('slug', $slug)
-            ->firstOrFail();
+        $profile = JobSeekerProfile::with('user')->where('user_id', $id)->firstOrFail();
 
-        return response()->json($job);
+        if (!$profile) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Profile not found'
+            ], 404);
+        }
+
+        return response()->json([
+            'status' => true,
+            'data' => $profile
+        ]);
     }
 
     /**

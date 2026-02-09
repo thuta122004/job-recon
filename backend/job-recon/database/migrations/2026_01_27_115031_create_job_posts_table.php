@@ -20,8 +20,23 @@ return new class extends Migration
             $table->string('slug')->unique();
             $table->enum('workplace_type', ['ON-SITE', 'REMOTE', 'HYBRID'])->default('ON-SITE');
             $table->string('location');
-            $table->enum('employment_type', ['FULL-TIME', 'PART-TIME', 'CONTRACT', 'TEMPORARY', 'INTERNSHIP', 'VOLUNTEER']);
-            $table->enum('experience_level', ['INTERNSHIP', 'ENTRY-LEVEL', 'JUNIOR', 'MID-LEVEL', 'SENIOR', 'LEAD', 'DIRECTOR', 'EXECUTIVE']);
+            $table->enum('employment_type', [
+                'FULL-TIME', 
+                'PART-TIME', 
+                'CONTRACT', 
+                'TEMPORARY', 
+                'INTERNSHIP', 
+                'VOLUNTEER'
+            ]);
+            $table->enum('experience_level', [
+                'ENTRY-LEVEL', 
+                'JUNIOR', 
+                'MID-LEVEL', 
+                'SENIOR', 
+                'LEAD', 
+                'DIRECTOR', 
+                'EXECUTIVE'
+            ]);
             $table->text('description');
             $table->text('responsibilities')->nullable();
             $table->text('qualifications')->nullable();

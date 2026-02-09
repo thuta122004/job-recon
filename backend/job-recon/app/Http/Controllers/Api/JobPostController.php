@@ -72,8 +72,8 @@ class JobPostController extends Controller
             'title'               => 'required|string|max:255',
             'job_category_id'     => 'required|exists:job_categories,id',
             'workplace_type'      => 'required|in:ON-SITE,REMOTE,HYBRID',
-            'employment_type'     => 'required|in:FULL-TIME,PART-TIME,CONTRACT,TEMPORARY,INTERNSHIP,VOLUNTEER',
-            'experience_level'    => 'required|in:NTRY-LEVEL,JUNIOR,MID-LEVEL,SENIOR,LEAD,DIRECTOR,EXECUTIVE',   
+            'employment_type'  => 'required|in:FULL-TIME,PART-TIME,CONTRACT,TEMPORARY,INTERNSHIP,VOLUNTEER',
+            'experience_level' => 'required|in:ENTRY-LEVEL,JUNIOR,MID-LEVEL,SENIOR,LEAD,DIRECTOR,EXECUTIVE',
             'location'            => 'required|string|max:255',
             'expires_at'          => 'nullable|date|after_or_equal:today',
             'description'         => 'required|string',
@@ -152,6 +152,16 @@ class JobPostController extends Controller
         ], 200);
     }
 
+    public function detail($slug)
+    {
+        $job = JobPost::with(['employer.user', 'category', 'skills'])
+            ->where('status', 'OPEN')
+            ->where('slug', $slug)
+            ->firstOrFail();
+
+        return response()->json($job);
+    }
+
     /**
      * Update the specified resource in storage.
      */
@@ -175,7 +185,7 @@ class JobPostController extends Controller
             'job_category_id'  => 'required|exists:job_categories,id',
             'workplace_type'   => 'required|in:ON-SITE,REMOTE,HYBRID',
             'employment_type'  => 'required|in:FULL-TIME,PART-TIME,CONTRACT,TEMPORARY,INTERNSHIP,VOLUNTEER',
-            'experience_level' => 'required|in:ENTRY-LEVEL,JUNIOR,MID-LEVEL,SENIOR,LEAD,DIRECTOR,EXECUTIVE',   
+            'experience_level' => 'required|in:ENTRY-LEVEL,JUNIOR,MID-LEVEL,SENIOR,LEAD,DIRECTOR,EXECUTIVE',
             'location'         => 'required|string|max:255',
             'expires_at'       => 'nullable|date|after_or_equal:today',
             'description'      => 'required|string',
