@@ -1,10 +1,12 @@
 <script setup>
 import { computed, ref, onMounted } from 'vue';
 import { useRoute, useRouter, RouterView } from 'vue-router';
+import { useToast } from "vue-toastification";
 import api from '@/services/api';
 
 const route = useRoute();
 const router = useRouter();
+const toast = useToast();
 
 const token = localStorage.getItem('auth_token');
 const isAuthenticated = computed(() => !!token);
@@ -13,12 +15,34 @@ const userName = localStorage.getItem('user_name') || 'Job Seeker';
 const userEmail = localStorage.getItem('user_email') || 'seeker@jobrecon.com';
 
 const profilePic = ref(null);
+const isLoggingOut = ref(false);
+const showConfirmModal = ref(false);
+
+const confirmConfig = ref({ 
+    title: '', 
+    message: '', 
+    action: null, 
+    type: 'danger', 
+    icon: '' 
+});
 
 onMounted(() => {
     profilePic.value = localStorage.getItem('user_profile_pic');
 });
 
-const handleLogout = async () => {
+const requestLogout = () => {
+    confirmConfig.value = {
+        title: 'Sign Out?',
+        message: 'Are you sure you want to end your current session? You will need to log back in to access your applications.',
+        type: 'danger',
+        icon: 'fa-right-from-bracket',
+        action: executeLogout
+    };
+    showConfirmModal.value = true;
+};
+
+const executeLogout = async () => {
+    isLoggingOut.value = true;
     try {
         await api.post('/logout');
     } catch (error) {
@@ -30,13 +54,18 @@ const handleLogout = async () => {
         localStorage.removeItem('user_email');
         localStorage.removeItem('user_profile_pic');
 
-        router.push({ name: 'login' });
+        showConfirmModal.value = false;
+        toast.success("Successfully Signed Out");
+
+        setTimeout(() => {
+            router.push({ name: 'login' });
+        }, 1000);
     }
 };
 </script>
 
 <template>
-    <div class="min-h-screen bg-white selection:bg-indigo-100 selection:text-indigo-700">
+    <div class="min-h-screen bg-white selection:bg-indigo-100 selection:text-indigo-700 text-left">
         <nav class="bg-white/80 backdrop-blur-xl border-b border-slate-100 sticky top-0 z-50">
             <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
                 
@@ -107,7 +136,7 @@ const handleLogout = async () => {
                                 </router-link>
 
                                 <div class="mt-3 pt-3 border-t border-slate-50">
-                                    <button @click="handleLogout" class="w-full flex items-center px-8 py-3 text-[10px] font-black text-rose-500 hover:bg-rose-50 uppercase tracking-widest transition-all">
+                                    <button @click="requestLogout" class="w-full flex items-center px-8 py-3 text-[10px] font-black text-rose-500 hover:bg-rose-50 uppercase tracking-widest transition-all">
                                         <i class="fa-solid fa-power-off mr-3 text-sm opacity-50"></i> Sign Out
                                     </button>
                                 </div>
@@ -144,5 +173,41 @@ const handleLogout = async () => {
                 </div>
             </div>
         </footer>
+
+        <Transition
+            enter-active-class="transition duration-300 ease-out"
+            enter-from-class="opacity-0 scale-95"
+            enter-to-class="opacity-100 scale-100"
+            leave-active-class="transition duration-200 ease-in"
+            leave-from-class="opacity-100 scale-100"
+            leave-to-class="opacity-0 scale-95"
+        >
+            <div v-if="showConfirmModal" class="fixed inset-0 z-[110] flex items-center justify-center p-6">
+                <div @click="showConfirmModal = false" class="absolute inset-0 bg-zinc-900/60 backdrop-blur-sm"></div>
+                
+                <div class="relative max-w-sm w-full bg-white rounded-2xl shadow-2xl overflow-hidden border border-gray-100">
+                    <div class="p-6">
+                        <div class="bg-rose-50 text-rose-600 h-12 w-12 rounded-xl flex items-center justify-center mb-4 text-xl">
+                            <i :class="['fa-solid', confirmConfig.icon]"></i>
+                        </div>
+                        
+                        <h3 class="text-xl font-bold text-gray-900 tracking-tight">{{ confirmConfig.title }}</h3>
+                        <p class="text-sm text-gray-500 mt-2 leading-relaxed">{{ confirmConfig.message }}</p>
+                        
+                        <div class="mt-8 flex gap-3">
+                            <button @click="showConfirmModal = false" 
+                                class="flex-1 px-4 py-2.5 rounded-xl text-sm font-bold text-gray-500 bg-gray-50 hover:bg-gray-100 transition-colors">
+                                Discard
+                            </button>
+                            <button @click="confirmConfig.action" 
+                                :disabled="isLoggingOut"
+                                class="flex-1 px-4 py-2.5 rounded-xl text-sm font-bold text-white bg-rose-500 hover:bg-rose-600 shadow-lg shadow-rose-100 transition-all active:scale-95 disabled:opacity-50">
+                                {{ isLoggingOut ? 'Ending...' : 'Confirm' }}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </Transition>
     </div>
 </template>
