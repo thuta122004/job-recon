@@ -65,7 +65,7 @@ onMounted(fetchHomeData);
             <div class="relative z-10 max-w-7xl mx-auto px-6 text-center">
                 <h1 class="text-6xl md:text-8xl font-black text-slate-900 tracking-tighter leading-[0.85] mb-8">
                     Discover your <br/> 
-                    <span class="text-indigo-600 italic">perfect</span> match.
+                    <span class="text-indigo-600 italic">perfect</span> company.
                 </h1>
                 
                 <p class="max-w-xl mx-auto text-slate-500 font-medium text-lg mb-12">
