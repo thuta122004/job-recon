@@ -160,8 +160,8 @@ onMounted(fetchProfile);
                 </div>
             </header>
 
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-12">
-                <div class="lg:col-span-4 space-y-6">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+                <div class="lg:col-span-4 space-y-6 sticky top-8">
                     <div class="bg-white border border-gray-100 rounded-[2rem] p-8 shadow-sm text-center">
                         <div class="group relative h-32 w-32 mx-auto mb-6">
                             <div class="h-full w-full rounded-3xl overflow-hidden bg-gray-50 border-2 border-dashed border-gray-200 transition-all group-hover:border-indigo-400">
@@ -225,6 +225,43 @@ onMounted(fetchProfile);
                                 </span>
                              </div>
                         </div>
+                    </div>
+                    <div class="bg-white border border-gray-100 rounded-[2rem] p-6 shadow-sm hover:shadow-md transition-shadow">
+                        <div class="flex items-center gap-4 mb-4 text-left">
+                            <div class="h-10 w-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                                <i class="fa-solid fa-graduation-cap"></i>
+                            </div>
+                            <div>
+                                <h4 class="text-xs font-black text-gray-900 uppercase tracking-wider">Qualifications</h4>
+                                <p class="text-[10px] text-gray-400 font-bold uppercase mt-0.5">Education History</p>
+                            </div>
+                        </div>
+                        
+                        <router-link 
+                            to="/seeker/education"
+                            class="w-full py-4 bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-2xl transition-all duration-300 flex items-center justify-center gap-2 group shadow-lg shadow-emerald-100 hover:shadow-emerald-200">
+                            Manage Education
+                            <i class="fa-solid fa-arrow-right text-[9px] group-hover:translate-x-1 transition-transform"></i>
+                        </router-link>
+                    </div>
+
+                    <div class="bg-white border border-gray-100 rounded-[2rem] p-6 shadow-sm hover:shadow-md transition-shadow">
+                        <div class="flex items-center gap-4 mb-4 text-left">
+                            <div class="h-10 w-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
+                                <i class="fa-solid fa-briefcase"></i>
+                            </div>
+                            <div>
+                                <h4 class="text-xs font-black text-gray-900 uppercase tracking-wider">Work History</h4>
+                                <p class="text-[10px] text-gray-400 font-bold uppercase mt-0.5">Professional Experience</p>
+                            </div>
+                        </div>
+                        
+                        <router-link 
+                            to="/seeker/experience"
+                            class="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-2xl transition-all duration-300 flex items-center justify-center gap-2 group shadow-lg shadow-indigo-100 hover:shadow-indigo-200">
+                            Manage Experience
+                            <i class="fa-solid fa-arrow-right text-[9px] group-hover:translate-x-1 transition-transform"></i>
+                        </router-link>
                     </div>
                 </div>
 

@@ -136,7 +136,7 @@ const executeLogout = async () => {
                                 </router-link>
 
                                 <div class="mt-3 pt-3 border-t border-slate-50">
-                                    <button @click="requestLogout" class="w-full flex items-center px-8 py-3 text-[10px] font-black text-rose-500 hover:bg-rose-50 uppercase tracking-widest transition-all">
+                                    <button @click="requestLogout" class="w-full flex items-center px-8 py-3 text-[10px] font-black text-rose-500 hover:bg-rose-50 uppercase tracking-widest transition-all rounded-b-xl">
                                         <i class="fa-solid fa-power-off mr-3 text-sm opacity-50"></i> Sign Out
                                     </button>
                                 </div>

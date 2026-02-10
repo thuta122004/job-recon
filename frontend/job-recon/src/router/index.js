@@ -59,6 +59,18 @@ const router = createRouter({
           component: SeekerProfile,
           meta: { requiresAuth: true, role: 2, label: 'My Profile' }
         },
+        {
+          path: 'education',
+          name: 'seeker-education',
+          component: JobSeekerEducationsView,
+          meta: { requiresAuth: true, role: 2, label: 'My Education' }
+        },
+        {
+          path: 'experience',
+          name: 'seeker-experience',
+          component: JobSeekerExperiencesView,
+          meta: { requiresAuth: true, role: 2, label: 'My Experience' }
+        },
       ]
     },
     {
