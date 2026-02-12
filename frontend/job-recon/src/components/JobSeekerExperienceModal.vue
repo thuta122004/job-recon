@@ -77,7 +77,7 @@ const handleSave = () => {
                 </button>
             </div>
 
-            <div class="p-5 space-y-6">
+            <div class="p-8 space-y-5 max-h-[70vh] overflow-y-auto custom-scrollbar">
                 <div class="grid grid-cols-1 gap-5">
                     <div class="space-y-2">
                         <label class="text-[11px] font-bold text-gray-400 uppercase tracking-[0.1em] ml-1">Job Title</label>
