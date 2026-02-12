@@ -44,7 +44,13 @@ class AuthController extends Controller
                 'role_id' => $user->role_id,
                 'is_admin' => $user->isAdmin(),
                 'is_seeker' => $user->isJobSeeker(),
-                'profile' => $user->profile
+                'is_employer' => $user->isEmployer(),
+                'profile' => $user->profile,
+                'employerProfile' => $user->employerProfile ? [
+                    'company_name' => $user->employerProfile->company_name,
+                    'company_logo_url' => $user->employerProfile->company_logo_url,
+                    'is_verified' => $user->employerProfile->is_verified,
+                ] : null,
             ]
         ]);
     }

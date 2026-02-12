@@ -4,12 +4,48 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\EmployerProfile;
+use App\Models\JobPost;
+use App\Models\JobSeekerProfile;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
 class EmployerProfileController extends Controller
 {
+
+   public function getHomeData($id)
+    {
+        $user = User::find($id);
+
+        if (!$user || !$user->employerProfile) {
+            return response()->json(['message' => 'Employer profile not found'], 404);
+        }
+
+        $employer = $user->employerProfile;
+
+        return response()->json([
+            'stats' => [
+                'totalPosts' => $employer->jobPosts()->count(),
+                'activeJobs' => $employer->jobPosts()->where('status', 'OPEN')->count(),
+                'closedJobs' => $employer->jobPosts()->where('status', 'CLOSED')->count(),
+                'platformReach' => JobSeekerProfile::count(), 
+            ],
+            'myRecentPosts' => $employer->jobPosts()
+                ->with('category')
+                ->latest()
+                ->limit(5)
+                ->get(),
+            'industryInsights' => [
+                'totalCompetitors' => EmployerProfile::where('industry', $employer->industry)
+                    ->where('id', '!=', $employer->id)
+                    ->count(),
+                'industryJobs' => JobPost::whereHas('category', function($q) use ($employer) {
+                    $q->where('name', $employer->industry);
+                })->where('status', 'OPEN')->count(),
+            ]
+        ]);
+    }
     /**
      * Display a listing of the resource.
      */

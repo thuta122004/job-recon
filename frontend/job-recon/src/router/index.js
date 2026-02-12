@@ -17,6 +17,8 @@ import JobDetailView from '@/views/JobDetailView.vue'
 import JobPostsView from '@/views/JobPostsView.vue'
 import SeekerLayout from '@/layouts/SeekerLayout.vue'
 import SeekerProfile from '@/views/SeekerProfile.vue'
+import EmployerHomeView from '@/views/EmployerHomeView.vue'
+import EmployerLayout from '@/layouts/EmployerLayout.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -70,6 +72,19 @@ const router = createRouter({
           name: 'seeker-experience',
           component: JobSeekerExperiencesView,
           meta: { requiresAuth: true, role: 2, label: 'My Experience' }
+        },
+      ]
+    },
+    {
+      path: '/employer',
+      component: EmployerLayout,
+      meta: { requiresAuth: true, role: 3 },
+      children: [
+        {
+          path: 'home',
+          name: 'employer-home',
+          component: EmployerHomeView,
+          meta: { label: 'Employer Dashboard' }
         },
       ]
     },

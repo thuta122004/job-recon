@@ -18,11 +18,11 @@ const handleLogin = async () => {
   const email = form.value.email.trim();
   const password = form.value.password.trim();
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  
   if (!emailRegex.test(email)) {
     toast.error("Please enter a valid email address.");
     return;
   }
-
 
   if (!email || !password) {
     toast.error("Please enter both email and password.");
@@ -44,7 +44,12 @@ const handleLogin = async () => {
     localStorage.setItem('user_id', user.id);
     localStorage.setItem('user_role', user.role_id);
     localStorage.setItem('user_email', user.email);
+    
+    const employerData = user.employerProfile;
+
     localStorage.setItem('user_profile_pic', user.profile?.profile_picture_url || '');
+    localStorage.setItem('company_logo', employerData?.company_logo_url || '');
+    localStorage.setItem('user_is_verified', employerData?.is_verified ? 'true' : 'false');
     
     const firstName = user.first_name || 'User';
     const lastName = user.last_name || '';
@@ -56,6 +61,9 @@ const handleLogin = async () => {
     } else if (user.role_id === 2) {
       toast.success(`Welcome back, ${firstName}!`);
       router.push({ name: 'seeker-home' });
+    } else if (user.role_id === 3) {
+      toast.success(`Employer Portal Active. Welcome, ${employerData?.company_name || firstName}!`);
+      router.push({ name: 'employer-home' });
     } else {
       toast.error("Role not recognized. Please contact support.");
       localStorage.clear();
