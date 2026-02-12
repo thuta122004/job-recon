@@ -115,9 +115,21 @@ class EmployerProfileController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show($id)
     {
-        //
+        $profile = EmployerProfile::with('user')->where('user_id', $id)->first();
+
+        if (!$profile) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Employer profile not found'
+            ], 404);
+        }
+
+        return response()->json([
+            'status' => true,
+            'data' => $profile
+        ]);
     }
 
     /**

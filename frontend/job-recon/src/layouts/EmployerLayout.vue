@@ -120,12 +120,12 @@ const executeLogout = async () => {
                         </div>
 
                         <div class="group relative">
-                            <div class="h-12 w-12 rounded-2xl bg-white overflow-hidden border border-slate-200 shadow-xl shadow-slate-200 cursor-pointer group-hover:-rotate-3 transition-all duration-300 flex items-center justify-center p-1.5">
+                            <div class="h-12 w-12 rounded-2xl bg-slate-100 overflow-hidden border border-slate-200 shadow-xl shadow-slate-200 cursor-pointer group-hover:-rotate-3 transition-all duration-300 flex items-center justify-center">
                                 <img v-if="companyLogo && companyLogo !== ''" 
                                     :src="companyLogo" 
                                     @error="(e) => e.target.style.display = 'none'"
                                     alt="Company Logo" 
-                                    class="h-full w-full object-contain" />
+                                    class="h-full w-full object-cover" />
                                 
                                 <div v-else class="h-full w-full flex items-center justify-center bg-slate-900 text-white text-xs font-black">
                                     {{ userName.charAt(0).toUpperCase() }}
@@ -139,7 +139,7 @@ const executeLogout = async () => {
                                 </div>
 
                                 <router-link to="/employer/profile" class="flex items-center px-8 py-3 text-[10px] font-black text-slate-500 hover:text-indigo-600 uppercase tracking-widest transition-colors">
-                                    <i class="fa-solid fa-building mr-3 text-sm opacity-40"></i> Profile
+                                    <i class="fa-solid fa-user-check mr-3 text-sm opacity-40"></i> Profile
                                 </router-link>
 
                                 <router-link to="/employer/jobs/create" class="flex items-center px-8 py-3 text-[10px] font-black text-slate-500 hover:text-indigo-600 uppercase tracking-widest transition-colors">

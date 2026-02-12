@@ -19,6 +19,7 @@ import SeekerLayout from '@/layouts/SeekerLayout.vue'
 import SeekerProfile from '@/views/SeekerProfile.vue'
 import EmployerHomeView from '@/views/EmployerHomeView.vue'
 import EmployerLayout from '@/layouts/EmployerLayout.vue'
+import EmployerProfile from '@/views/EmployerProfile.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -85,6 +86,12 @@ const router = createRouter({
           name: 'employer-home',
           component: EmployerHomeView,
           meta: { label: 'Employer Dashboard' }
+        },
+        {
+          path: 'profile',
+          name: 'employer-profile',
+          component: EmployerProfile,
+          meta: { label: 'Company Profile' }
         },
       ]
     },

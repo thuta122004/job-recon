@@ -40,13 +40,18 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::patch('job-posts/{id}/toggle-salary', [JobPostController::class, 'toggleSalaryVisibility']);
     Route::post('/job-posts/{id}/restore', [JobPostController::class, 'restore']);
     Route::get('/admin/dashboard-stats', [DashboardController::class, 'adminDashboard']);
+
+    Route::get('/seeker/jobs/{slug}', [JobPostController::class, 'detail']);
+    Route::get('/seeker/my-profile/{id}', [JobSeekerProfileController::class, 'show']);
+
+    Route::get('/employer/home-data/{id}', [EmployerProfileController::class, 'getHomeData']);
+    Route::get('/employer/profile/{id}', [EmployerProfileController::class, 'show']);
 });
 
 Route::get('/seeker/home-data', [JobSeekerProfileController::class, 'getHomeData']);
-Route::get('/seeker/jobs/{slug}', [JobPostController::class, 'detail']);
 Route::get('/seeker/jobs', [JobPostController::class, 'show']);
-Route::get('/seeker/my-profile/{id}', [JobSeekerProfileController::class, 'show']);
 
-Route::get('/employer/home-data/{id}', [EmployerProfileController::class, 'getHomeData']);
+
+
 
 
