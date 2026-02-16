@@ -1,23 +1,23 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
+import { useToast } from "vue-toastification";
 import api from '@/services/api';
+import EmployerJobPostModal from '@/components/EmployerJobPostModal.vue';
 
 const router = useRouter();
+const toast = useToast();
+
 const loading = ref(true);
+const isSavingJob = ref(false);
+const isModalOpen = ref(false);
+
+const employerProfileId = localStorage.getItem('employer_profile_id');
 
 const homeData = ref({
-    stats: { 
-        totalPosts: 0, 
-        activeJobs: 0, 
-        closedJobs: 0, 
-        platformReach: 0 
-    },
+    stats: { totalPosts: 0, activeJobs: 0, closedJobs: 0, platformReach: 0 },
     myRecentPosts: [],
-    industryInsights: {
-        totalCompetitors: 0,
-        industryJobs: 0
-    }
+    industryInsights: { totalCompetitors: 0, industryJobs: 0 }
 });
 
 const fetchHomeData = async () => {
@@ -32,8 +32,37 @@ const fetchHomeData = async () => {
         homeData.value = response.data;
     } catch (error) {
         console.error("Employer Dashboard Error:", error);
+        toast.error("Failed to load dashboard data");
     } finally {
         loading.value = false;
+    }
+};
+
+const handleSaveJob = async (formData) => {
+    isSavingJob.value = true;
+    try {
+        const payload = {
+            ...formData,
+            employer_profile_id: employerProfileId,
+            skills: formData.skills.map(s => (typeof s === 'object' ? s.id : s))
+        };
+
+        await api.post('/job-posts', payload);
+        
+        toast.success("Job vacancy published successfully!");
+        isModalOpen.value = false;
+        
+        await fetchHomeData(); 
+    } catch (error) {
+        if (error.response && error.response.status === 422) {
+            const validationErrors = error.response.data.errors;
+            const firstError = Object.values(validationErrors)[0][0];
+            toast.error(firstError);
+        } else {
+            toast.error(error.response?.data?.message || "Server connection failed.");
+        }
+    } finally {
+        isSavingJob.value = false;
     }
 };
 
@@ -41,44 +70,16 @@ const goToJobManagement = () => {
     router.push('/employer/jobs');
 };
 
-const createNewJob = () => {
-    router.push('/employer/jobs/create');
-};
-
 const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString('en-US', {
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric'
+        month: 'short', day: 'numeric', year: 'numeric'
     });
 };
 
 const tips = [
-    {
-        highlight: "2.5x more",
-        text: "Job posts with detailed salary ranges receive applications than those without.",
-        sub: "Transparency wins."
-    },
-    {
-        highlight: "40% higher",
-        text: "Verified company profiles see engagement from top-tier talent.",
-        sub: "Trust is key."
-    },
-    {
-        highlight: "Tuesday",
-        text: "is the best day to post. Most job seekers start their search early in the week.",
-        sub: "Timing matters."
-    },
-    {
-        highlight: "Remote",
-        text: "options attract 3x more diverse candidates across different regions.",
-        sub: "Expand your reach."
-    },
-    {
-        highlight: "Response time",
-        text: "within 48 hours increases your chance of landing the candidate by 60%.",
-        sub: "Stay fast."
-    }
+    { highlight: "2.5x more", text: "Job posts with detailed salary ranges receive applications than those without.", sub: "Transparency wins." },
+    { highlight: "40% higher", text: "Verified company profiles see engagement from top-tier talent.", sub: "Trust is key." },
+    { highlight: "Tuesday", text: "is the best day to post. Most job seekers start their search early in the week.", sub: "Timing matters." }
 ];
 
 const currentTip = ref(tips[Math.floor(Math.random() * tips.length)]);
@@ -104,7 +105,8 @@ onMounted(fetchHomeData);
                         <p class="text-slate-500 font-medium text-lg mb-8">
                             Your listings are currently visible to <span class="text-indigo-600 font-bold">{{ homeData.stats.platformReach }}</span> registered job seekers.
                         </p>
-                        <button @click="createNewJob" class="px-8 py-4 bg-indigo-600 text-white font-black rounded-2xl hover:bg-indigo-700 transition-all shadow-xl shadow-indigo-100 flex items-center gap-3 active:scale-95">
+                        <button @click="isModalOpen = true" 
+                            class="px-8 py-4 bg-indigo-600 text-white font-black rounded-2xl hover:bg-indigo-700 transition-all shadow-xl shadow-indigo-100 flex items-center gap-3 active:scale-95">
                             <i class="fa-solid fa-plus text-xs"></i>
                             CREATE JOB POST
                         </button>
@@ -136,7 +138,8 @@ onMounted(fetchHomeData);
                                 <h2 class="text-2xl font-black text-slate-900 tracking-tight">Recent Activity</h2>
                                 <p class="text-slate-400 text-xs font-bold uppercase tracking-widest mt-1">Manage your latest openings</p>
                             </div>
-                            <button @click="goToJobManagement" class="px-5 py-2 rounded-xl bg-white border border-slate-200 text-[10px] font-black text-slate-600 uppercase tracking-widest hover:border-indigo-600 hover:text-indigo-600 transition-all">
+                            <button @click="goToJobManagement" 
+                                class="px-5 py-2 rounded-xl bg-white border border-slate-200 text-[10px] font-black text-slate-600 uppercase tracking-widest hover:border-indigo-600 hover:text-indigo-600 transition-all">
                                 View Full List
                             </button>
                         </div>
@@ -145,7 +148,8 @@ onMounted(fetchHomeData);
                             <div v-for="i in 3" :key="i" class="h-24 bg-white animate-pulse rounded-3xl border border-slate-100"></div>
                         </div>
 
-                        <div v-else-if="homeData.myRecentPosts.length === 0" class="bg-white p-16 rounded-[3rem] border border-dashed border-slate-200 text-center">
+                        <div v-else-if="homeData.myRecentPosts.length === 0" 
+                            class="bg-white p-16 rounded-[3rem] border border-dashed border-slate-200 text-center">
                             <div class="h-16 w-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4">
                                 <i class="fa-solid fa-briefcase text-slate-200 text-2xl"></i>
                             </div>
@@ -183,7 +187,7 @@ onMounted(fetchHomeData);
                                         class="px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest">
                                         {{ job.status }}
                                     </span>
-                                    <button @click="router.push(`/employer/jobs/edit/${job.id}`)" 
+                                    <button @click="router.push(`/employer/jobs`)" 
                                             class="h-10 w-10 rounded-xl bg-white border border-slate-100 text-slate-400 hover:text-indigo-600 hover:border-indigo-100 transition-all">
                                         <i class="fa-solid fa-chevron-right text-xs"></i>
                                     </button>
@@ -237,7 +241,6 @@ onMounted(fetchHomeData);
                                     <template v-if="currentTip.text.startsWith(currentTip.highlight)">
                                         <span class="text-indigo-200">{{ currentTip.highlight }}</span> {{ currentTip.text.replace(currentTip.highlight, '') }}
                                     </template>
-                                    
                                     <template v-else>
                                         {{ currentTip.text.split(currentTip.highlight)[0] }}
                                         <span class="text-indigo-200">{{ currentTip.highlight }}</span>
@@ -250,5 +253,13 @@ onMounted(fetchHomeData);
                 </div>
             </div>
         </section>
+
+        <EmployerJobPostModal 
+            :is-open="isModalOpen"
+            :employer-id="employerProfileId"
+            :loading="isSavingJob"
+            @close="isModalOpen = false"
+            @save="handleSaveJob"
+        />
     </div>
 </template>

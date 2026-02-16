@@ -50,6 +50,7 @@ class AuthController extends Controller
                     'company_name' => $user->employerProfile->company_name,
                     'company_logo_url' => $user->employerProfile->company_logo_url,
                     'is_verified' => $user->employerProfile->is_verified,
+                    'employer_profile_id' => $user->employerProfile->id,
                 ] : null,
             ]
         ]);

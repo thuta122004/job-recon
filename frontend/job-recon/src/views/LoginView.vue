@@ -47,9 +47,13 @@ const handleLogin = async () => {
     
     const employerData = user.employerProfile;
 
-    localStorage.setItem('user_profile_pic', user.profile?.profile_picture_url || '');
-    localStorage.setItem('company_logo', employerData?.company_logo_url || '');
-    localStorage.setItem('user_is_verified', employerData?.is_verified ? 'true' : 'false');
+    if (employerData) {
+        localStorage.setItem('employer_profile_id', employerData.employer_profile_id);
+        localStorage.setItem('company_name', employerData.company_name);
+        localStorage.setItem('company_logo', employerData.company_logo_url);
+        localStorage.setItem('user_is_verified', employerData.is_verified);
+    }
+
     
     const firstName = user.first_name || 'User';
     const lastName = user.last_name || '';
