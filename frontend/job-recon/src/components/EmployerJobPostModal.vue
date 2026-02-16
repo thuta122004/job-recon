@@ -21,6 +21,12 @@ const showSkillDropdown = ref(false);
 const availableSkills = ref([]);
 const categories = ref([]);
 
+const getNextWeekDate = () => {
+    const date = new Date();
+    date.setDate(date.getDate() + 7);
+    return date.toISOString().split('T')[0];
+};
+
 const form = reactive({
     id: null,
     title: '',
@@ -34,10 +40,10 @@ const form = reactive({
     qualifications: '',   
     salary_min: null,
     salary_max: null,
-    currency: 'USD',
+    currency: 'MMK',
     skills: [], 
     status: 'DRAFT',
-    expires_at: null
+    expires_at: getNextWeekDate(),
 });
 
 const fetchMetadata = async () => {
@@ -88,11 +94,10 @@ watch(() => props.isOpen, (newVal) => {
                 id: null, title: '', job_category_id: '', workplace_type: 'ON-SITE',
                 location: '', employment_type: 'FULL-TIME', experience_level: 'ENTRY-LEVEL',
                 description: '', responsibilities: '', qualifications: '',
-                salary_min: null, salary_max: null, currency: 'USD', 
+                salary_min: null, salary_max: null, currency: 'MMK', 
                 skills: [],
                 status: 'OPEN', 
-                expires_at: null,
-                salary_visible: true
+                expires_at: getNextWeekDate(),
             });
             categorySearch.value = '';
         } else if (props.jobData) {
@@ -102,7 +107,6 @@ watch(() => props.isOpen, (newVal) => {
                 ...props.jobData, 
                 expires_at: expiryDate,
                 skills: props.jobData.skills ? [...props.jobData.skills] : [],
-                salary_visible: props.jobData.salary_visible ?? true
             });
 
             const currentCat = categories.value.find(c => c.id === props.jobData.job_category_id);
@@ -264,9 +268,9 @@ onMounted(fetchMetadata);
                         <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1 mb-1.5">Currency</label>
                         <div class="relative">
                             <select v-model="form.currency" class="w-full px-4 py-3.5 text-sm bg-white border border-gray-200 rounded-xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none appearance-none pr-10">
+                                <option value="MMK">MMK (K)</option>
                                 <option value="USD">USD ($)</option>
                                 <option value="EUR">EUR (€)</option>
-                                <option value="MMK">MMK (K)</option>
                                 <option value="THB">THB (฿)</option>
                             </select>
                             <i class="fa-solid fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none text-[10px]"></i>

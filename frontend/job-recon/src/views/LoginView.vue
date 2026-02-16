@@ -44,6 +44,8 @@ const handleLogin = async () => {
     localStorage.setItem('user_id', user.id);
     localStorage.setItem('user_role', user.role_id);
     localStorage.setItem('user_email', user.email);
+    localStorage.setItem('user_profile_pic', user.profile?.profile_picture_url);
+
     
     const employerData = user.employerProfile;
 

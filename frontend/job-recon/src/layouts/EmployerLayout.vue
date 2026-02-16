@@ -3,6 +3,7 @@ import { computed, ref, onMounted } from 'vue';
 import { useRoute, useRouter, RouterView } from 'vue-router';
 import { useToast } from "vue-toastification";
 import api from '@/services/api';
+import EmployerJobPostModal from '@/components/EmployerJobPostModal.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -13,6 +14,7 @@ const isAuthenticated = computed(() => !!token);
 
 const userName = localStorage.getItem('user_name') || 'Employer';
 const userEmail = localStorage.getItem('user_email') || 'hiring@jobrecon.com';
+const employerProfileId = localStorage.getItem('employer_profile_id');
 
 const isVerified = computed(() => {
     const status = localStorage.getItem('user_is_verified');
@@ -22,6 +24,9 @@ const isVerified = computed(() => {
 const companyLogo = ref(null);
 const isLoggingOut = ref(false);
 const showConfirmModal = ref(false);
+
+const isJobModalOpen = ref(false);
+const isSavingJob = ref(false);
 
 const confirmConfig = ref({ 
     title: '', 
@@ -34,6 +39,36 @@ const confirmConfig = ref({
 onMounted(() => {
     companyLogo.value = localStorage.getItem('company_logo');
 });
+
+const handleSaveJob = async (formData) => {
+    isSavingJob.value = true;
+    try {
+        const payload = {
+            ...formData,
+            employer_profile_id: employerProfileId,
+            skills: formData.skills.map(s => (typeof s === 'object' ? s.id : s))
+        };
+
+        await api.post('/job-posts', payload);
+        
+        toast.success("Job vacancy published successfully!");
+        isJobModalOpen.value = false;
+        
+        if (route.name === 'employer-home' || route.path.includes('/employer/jobs')) {
+            window.location.reload(); 
+        }
+    } catch (error) {
+        if (error.response && error.response.status === 422) {
+            const validationErrors = error.response.data.errors;
+            const firstError = Object.values(validationErrors)[0][0];
+            toast.error(firstError);
+        } else {
+            toast.error(error.response?.data?.message || "Server connection failed.");
+        }
+    } finally {
+        isSavingJob.value = false;
+    }
+};
 
 const requestLogout = () => {
     confirmConfig.value = {
@@ -61,6 +96,7 @@ const executeLogout = async () => {
         localStorage.removeItem('user_is_verified');
         localStorage.removeItem('user_profile_pic');
         localStorage.removeItem('user_id');
+        localStorage.removeItem('employer_profile_id');
 
         showConfirmModal.value = false;
         toast.success("Successfully Signed Out");
@@ -142,9 +178,9 @@ const executeLogout = async () => {
                                     <i class="fa-solid fa-user-check mr-3 text-sm opacity-40"></i> Profile
                                 </router-link>
 
-                                <router-link to="/employer/jobs/create" class="flex items-center px-8 py-3 text-[10px] font-black text-slate-500 hover:text-indigo-600 uppercase tracking-widest transition-colors">
+                                <button @click="isJobModalOpen = true" class="w-full flex items-center px-8 py-3 text-[10px] font-black text-slate-500 hover:text-indigo-600 uppercase tracking-widest transition-colors text-left">
                                     <i class="fa-solid fa-plus-circle mr-3 text-sm opacity-40"></i> Post Job
-                                </router-link>
+                                </button>
 
                                 <div class="mt-3 pt-3 border-t border-slate-50">
                                     <button @click="requestLogout" class="w-full flex items-center px-8 py-3 text-[10px] font-black text-rose-500 hover:bg-rose-50 uppercase tracking-widest transition-all rounded-b-xl text-left">
@@ -183,6 +219,14 @@ const executeLogout = async () => {
                 </div>
             </div>
         </footer>
+
+        <EmployerJobPostModal 
+            :is-open="isJobModalOpen"
+            :employer-id="employerProfileId"
+            :loading="isSavingJob"
+            @close="isJobModalOpen = false"
+            @save="handleSaveJob"
+        />
 
         <Transition
             enter-active-class="transition duration-300 ease-out"
