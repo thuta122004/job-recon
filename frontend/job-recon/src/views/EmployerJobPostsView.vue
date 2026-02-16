@@ -240,6 +240,10 @@ const executeRestore = async (id) => {
     }
 };
 
+const goBack = () => {
+    router.back();
+};
+
 onMounted(fetchData);
 watch(() => props.profileId, fetchData);
 </script>
@@ -248,8 +252,10 @@ watch(() => props.profileId, fetchData);
     <div class="space-y-6">
         <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
             <div class="flex items-center gap-4">
-                <button @click="router.push('/admin/employer-profiles')" 
-                    class="h-11 w-11 flex items-center justify-center rounded-xl bg-white border border-gray-200 text-gray-400 hover:text-indigo-600 transition-all shadow-sm">
+                <button 
+                    @click="goBack" 
+                    class="h-11 w-11 flex items-center justify-center rounded-xl bg-white border border-gray-200 text-gray-400 hover:text-indigo-600 transition-all shadow-sm"
+                >
                     <i class="fa-solid fa-arrow-left"></i>
                 </button>
                 <div>

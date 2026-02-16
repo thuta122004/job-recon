@@ -133,9 +133,11 @@ const executeLogout = async () => {
                             active-class="text-indigo-600">
                             Dashboard
                         </router-link>
-                        <router-link to="/employer/jobs" 
+                        <router-link 
+                            :to="{ name: 'employer-jobs', params: { profileId: employerProfileId } }" 
                             class="px-4 py-2 text-[11px] font-black uppercase tracking-widest text-slate-400 hover:text-indigo-600 transition-all"
-                            active-class="text-indigo-600">
+                            active-class="text-indigo-600"
+                        >
                             Manage Jobs
                         </router-link>
                     </div>
@@ -201,7 +203,7 @@ const executeLogout = async () => {
             </div>
         </nav>
 
-        <main class="relative">
+        <main class="relative px-30 pt-10">
             <RouterView />
         </main>
 

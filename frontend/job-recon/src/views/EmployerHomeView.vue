@@ -66,8 +66,19 @@ const handleSaveJob = async (formData) => {
     }
 };
 
+const navigateTo = (routeObj) => {
+    router.push(routeObj);
+};
+
 const goToJobManagement = () => {
-    router.push('/employer/jobs');
+    if (employerProfileId) {
+        navigateTo({ 
+            name: 'employer-jobs', 
+            params: { profileId: employerProfileId } 
+        });
+    } else {
+        toast.error("Employer profile not found. Please sign in again.");
+    }
 };
 
 const formatDate = (dateString) => {

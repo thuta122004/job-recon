@@ -93,6 +93,13 @@ const router = createRouter({
           component: EmployerProfile,
           meta: { label: 'Company Profile' }
         },
+        {
+          path: '/:profileId/jobs',
+          name: 'employer-jobs',
+          component: EmployerJobPostsView,
+          props: true,
+          meta: { label: 'Job Postings' }
+        },
       ]
     },
     {
