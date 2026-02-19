@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class JobPost extends Model
 {
@@ -29,5 +30,10 @@ class JobPost extends Model
         return $this->belongsToMany(Skill::class, 'job_post_skills')
                     ->withPivot('is_required')
                     ->withTimestamps();
+    }
+
+    public function applications(): HasMany
+    {
+        return $this->hasMany(JobApplication::class);
     }
 }

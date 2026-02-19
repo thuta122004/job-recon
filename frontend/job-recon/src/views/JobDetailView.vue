@@ -2,22 +2,60 @@
 import { ref, onMounted, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import api from '@/services/api';
+import { useToast } from 'vue-toastification';
 
 const route = useRoute();
 const router = useRouter();
+const toast = useToast();
+
 const loading = ref(true);
+const applying = ref(false);
 const job = ref(null);
+const hasApplied = ref(false);
 const showCopyTooltip = ref(false);
+
+const showApplyModal = ref(false);
+const cover_letter = ref('');
+const seekerId = localStorage.getItem('job_seeker_profile_id');
 
 const fetchJobDetail = async () => {
     loading.value = true;
     try {
         const response = await api.get(`/seeker/jobs/${route.params.slug}`);
         job.value = response.data;
+        if (seekerId && job.value) {
+            const checkResponse = await api.get(`/seeker/applications/check/${job.value.id}/${seekerId}`);
+            hasApplied.value = checkResponse.data.applied;
+        }
     } catch (error) {
         console.error("Error fetching job details:", error);
     } finally {
         loading.value = false;
+    }
+};
+
+const submitApplication = async () => {
+    if (!seekerId) {
+        toast.error("Please complete your seeker profile first.");
+        return;
+    }
+
+    applying.value = true;
+    try {
+        await api.post('/seeker/applications', {
+            job_post_id: job.value.id,
+            job_seeker_id: seekerId,
+            cover_letter: cover_letter.value
+        });
+        
+        toast.success("Application submitted successfully!");
+        hasApplied.value = true;
+        showApplyModal.value = false;
+    } catch (error) {
+        const message = error.response?.data?.message || "Failed to submit application";
+        toast.error(message);
+    } finally {
+        applying.value = false;
     }
 };
 
@@ -27,7 +65,6 @@ const handleShare = async () => {
         text: `Check out this ${job.value?.title} position at ${job.value?.employer?.company_name || 'JobRecon'}!`,
         url: window.location.href,
     };
-
     try {
         if (navigator.share) {
             await navigator.share(shareData);
@@ -36,9 +73,7 @@ const handleShare = async () => {
             showCopyTooltip.value = true;
             setTimeout(() => (showCopyTooltip.value = false), 2000);
         }
-    } catch (err) {
-        console.error('Share failed:', err);
-    }
+    } catch (err) { console.error('Share failed:', err); }
 };
 
 const daysRemaining = computed(() => {
@@ -48,9 +83,7 @@ const daysRemaining = computed(() => {
     return days > 0 ? days : 0;
 });
 
-const formatCurrency = (value) => {
-    return Number(value).toLocaleString();
-};
+const formatCurrency = (value) => Number(value).toLocaleString();
 
 onMounted(fetchJobDetail);
 </script>
@@ -212,8 +245,21 @@ onMounted(fetchJobDetail);
                                 <p class="text-slate-500 text-xs font-bold mt-2">Salary disclosed during interview</p>
                             </template>
                         </div>
-                        <button class="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white text-[11px] font-black uppercase tracking-[0.2em] rounded-2xl transition-all shadow-lg shadow-indigo-100 hover:shadow-indigo-200 active:scale-[0.98] mb-4">
+                        <button 
+                            v-if="!hasApplied"
+                            @click="showApplyModal = true"
+                            class="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white text-[11px] font-black uppercase tracking-[0.2em] rounded-2xl transition-all shadow-lg shadow-indigo-100 hover:shadow-indigo-200 active:scale-[0.98] mb-4"
+                        >
                             APPLY FOR THIS ROLE
+                        </button>
+
+                        <button 
+                            v-else
+                            disabled
+                            class="w-full py-4 bg-emerald-50 text-emerald-600 border border-emerald-100 text-[11px] font-black uppercase tracking-[0.2em] rounded-2xl mb-4 flex items-center justify-center gap-2 cursor-not-allowed"
+                        >
+                            <i class="fa-solid fa-circle-check"></i>
+                            APPLICATION SUBMITTED
                         </button>
                         <p class="text-[11px] text-center text-slate-500 font-bold uppercase tracking-widest">Process takes ~2 mins</p>
                     </div>
@@ -258,6 +304,54 @@ onMounted(fetchJobDetail);
                 <p class="text-slate-400 mt-2 mb-8 font-medium">The position might have been filled or the listing expired.</p>
                 <button @click="router.push('/seeker/home')" class="px-10 py-4 bg-slate-900 text-white text-xs font-black uppercase tracking-widest rounded-2xl">Return to Discovery</button>
             </div>
+            <transition name="modal">
+                <div v-if="showApplyModal" class="fixed inset-0 z-[100] flex items-center justify-center p-6">
+                    <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" @click="showApplyModal = false"></div>
+                    
+                    <div class="bg-white w-full max-w-xl rounded-[2.5rem] shadow-2xl relative z-10 overflow-hidden animate-in fade-in zoom-in duration-300">
+                        <div class="p-8 md:p-12">
+                            <div class="flex items-center justify-between mb-8">
+                                <div>
+                                    <h3 class="text-2xl font-black text-slate-900 tracking-tighter">Finalize Application</h3>
+                                    <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">Applying for {{ job.title }}</p>
+                                </div>
+                                <button @click="showApplyModal = false" class="h-10 w-10 flex items-center justify-center rounded-full bg-slate-50 text-slate-400 hover:text-rose-500 transition-colors">
+                                    <i class="fa-solid fa-xmark"></i>
+                                </button>
+                            </div>
+
+                            <div class="space-y-6">
+                                <div class="p-6 bg-indigo-50/50 rounded-2xl border border-indigo-100/50 flex items-start gap-4">
+                                    <i class="fa-solid fa-file-pdf text-indigo-500 text-2xl mt-1"></i>
+                                    <div>
+                                        <p class="text-[10px] font-black text-indigo-400 uppercase tracking-widest">System Attachment</p>
+                                        <p class="text-sm font-bold text-slate-700">Your profile resume will be attached automatically.</p>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 ml-1">Cover Letter (Optional)</label>
+                                    <textarea 
+                                        v-model="cover_letter"
+                                        rows="5"
+                                        placeholder="Briefly explain why you're a great fit for this role..."
+                                        class="w-full p-6 bg-slate-50 border border-slate-100 rounded-2xl text-slate-600 font-medium focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all outline-none resize-none"
+                                    ></textarea>
+                                </div>
+
+                                <button 
+                                    @click="submitApplication"
+                                    :disabled="applying"
+                                    class="w-full py-5 bg-slate-900 text-white text-[11px] font-black uppercase tracking-[0.2em] rounded-2xl hover:bg-indigo-600 transition-all shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3"
+                                >
+                                    <i v-if="applying" class="fa-solid fa-circle-notch fa-spin"></i>
+                                    {{ applying ? 'SUBMITTING...' : 'CONFIRM APPLICATION' }}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </transition>
         </main>
     </div>
 </template>

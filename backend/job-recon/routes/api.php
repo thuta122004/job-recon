@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\JobSeekerSkillController;
 use App\Http\Controllers\Api\RoleController;
 use App\Http\Controllers\Api\SkillController;
 use App\Http\Controllers\Api\UserController;
+use App\Http\Controllers\JobApplicationController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -46,6 +47,18 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('/employer/home-data/{id}', [EmployerProfileController::class, 'getHomeData']);
     Route::get('/employer/profile/{id}', [EmployerProfileController::class, 'show']);
+
+    Route::prefix('seeker')->group(function () {
+        Route::post('/applications', [JobApplicationController::class, 'store']);
+        Route::get('/applications/{seekerId}', [JobApplicationController::class, 'getBySeeker']);
+        Route::post('/applications/{id}/withdraw', [JobApplicationController::class, 'withdraw']);
+        Route::get('/applications/check/{jobPostId}/{seekerId}', [JobApplicationController::class, 'checkApplicationStatus']);
+    });
+
+    Route::prefix('employer')->group(function () {
+        Route::get('/jobs/{jobId}/applications', [JobApplicationController::class, 'getByJob']);
+        Route::patch('/applications/{id}/status', [JobApplicationController::class, 'updateStatus']);
+    });
 });
 
 Route::get('/seeker/home-data', [JobSeekerProfileController::class, 'getHomeData']);

@@ -46,6 +46,7 @@ class AuthController extends Controller
                 'is_seeker' => $user->isJobSeeker(),
                 'is_employer' => $user->isEmployer(),
                 'profile' => $user->profile,
+                'job_seeker_profile_id' => $user->profile?->id,
                 'employerProfile' => $user->employerProfile ? [
                     'company_name' => $user->employerProfile->company_name,
                     'company_logo_url' => $user->employerProfile->company_logo_url,

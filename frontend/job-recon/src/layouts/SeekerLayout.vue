@@ -53,6 +53,8 @@ const executeLogout = async () => {
         localStorage.removeItem('user_name');
         localStorage.removeItem('user_email');
         localStorage.removeItem('user_profile_pic');
+        localStorage.removeItem('user_id');
+        localStorage.removeItem('job_seeker_profile_id');
 
         showConfirmModal.value = false;
         toast.success("Successfully Signed Out");

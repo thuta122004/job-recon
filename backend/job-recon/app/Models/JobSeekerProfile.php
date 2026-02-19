@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class JobSeekerProfile extends Model
 {
@@ -38,5 +39,10 @@ class JobSeekerProfile extends Model
         return $this->belongsToMany(Skill::class, 'job_seeker_skills', 'job_seeker_profile_id', 'skill_id')
                     ->withPivot('proficiency')
                     ->withTimestamps();
+    }
+
+    public function applications(): HasMany
+    {
+        return $this->hasMany(JobApplication::class, 'job_seeker_id');
     }
 }
