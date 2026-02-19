@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useToast } from "vue-toastification";
 import api from '@/services/api';
@@ -9,7 +9,8 @@ const route = useRoute();
 const router = useRouter();
 const toast = useToast();
 
-const profileId = route.params.profileId;
+const profileId = ref(route.params.profileId);
+const isAdmin = computed(() => route.path.includes('/admin'));
 const profile = ref(null);
 const skills = ref([]);
 const loading = ref(true);
@@ -20,7 +21,13 @@ const showModal = ref(false);
 const fetchData = async () => {
     loading.value = true;
     try {
-        const res = await api.get(`/job-seeker/skills/${profileId}`);
+        if (!profileId.value) {
+            const userId = localStorage.getItem('user_id');
+            const profileRes = await api.get(`/seeker/my-profile/${userId}`);
+            profileId.value = profileRes.data.data.id;
+        }
+
+        const res = await api.get(`/job-seeker/skills/${profileId.value}`);
         
         if (res.data.status && res.data.data) {
             profile.value = res.data.data.profile;
@@ -31,8 +38,8 @@ const fetchData = async () => {
             skills.value.sort((a, b) => b.pivot.proficiency - a.pivot.proficiency);
         }
     } catch (e) {
-        console.error("Fetch Error:", e);
-        toast.error("Failed to load skills");
+        toast.error("Skills profile not found");
+        router.push(isAdmin.value ? '/admin/job-seeker-profiles' : '/seeker/profile');
     } finally {
         loading.value = false;
     }
@@ -46,7 +53,7 @@ const handleSave = async (selectedSkillsData) => {
     saving.value = true;
     try {
         const res = await api.post('/job-seeker/skills', {
-            job_seeker_profile_id: profileId,
+            job_seeker_profile_id: profileId.value,
             skills: selectedSkillsData
         });
         
@@ -56,11 +63,8 @@ const handleSave = async (selectedSkillsData) => {
             showModal.value = false;
         }
     } catch (e) {
-        if (e.response?.status === 422) {
-            toast.error(Object.values(e.response.data.errors)[0][0]);
-        } else {
-            toast.error("An error occurred while updating skills.");
-        }
+        const msg = e.response?.data?.errors ? Object.values(e.response.data.errors)[0][0] : "Update failed";
+        toast.error(msg);
     } finally {
         saving.value = false;
     }
@@ -77,7 +81,7 @@ const confirmDelete = (skill) => {
 const executeDelete = async () => {
     if (!skillToDelete.value) return;
     try {
-        await api.delete(`/job-seeker/skills/${profileId}/${skillToDelete.value.id}`);
+        await api.delete(`/job-seeker/skills/${profileId.value}/${skillToDelete.value.id}`);
         toast.success(`${skillToDelete.value.name} removed`);
         await fetchData();
     } catch (e) {
@@ -88,13 +92,6 @@ const executeDelete = async () => {
     }
 };
 
-const getProficiencyColor = (percent) => {
-    if (percent < 30) return 'text-slate-500 bg-slate-50 border-slate-100';
-    if (percent < 60) return 'text-blue-600 bg-blue-50 border-blue-100';
-    if (percent < 90) return 'text-indigo-600 bg-indigo-50 border-indigo-100';
-    return 'text-emerald-600 bg-emerald-50 border-emerald-100';
-};
-
 const formatSkillDate = (dateString) => {
     if (!dateString) return 'Recent';
     const date = new Date(dateString);
@@ -103,24 +100,30 @@ const formatSkillDate = (dateString) => {
         year: 'numeric' 
     });
 };
+
 onMounted(fetchData);
 </script>
 
 <template>
-    <div class="space-y-6 animate-in fade-in duration-500">
+    <div class="max-w-5xl mx-auto py-10 px-4 md:px-0 space-y-6 animate-in fade-in duration-500">
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div class="flex items-center gap-4">
-                <button @click="router.push('/admin/job-seeker-profiles')" 
-                    class="h-11 w-11 flex items-center justify-center rounded-xl bg-white border border-gray-200 text-gray-400 hover:text-indigo-600 transition-all">
+                <button @click="router.push(isAdmin ? '/admin/job-seeker-profiles' : '/seeker/profile')" 
+                    class="h-11 w-11 flex items-center justify-center rounded-xl bg-white border border-gray-200 text-gray-400 hover:text-indigo-600 transition-all shadow-sm">
                     <i class="fa-solid fa-arrow-left"></i>
                 </button>
-                <div>
+                <div class="text-left">
                     <h1 class="text-2xl font-extrabold text-gray-900 tracking-tight">Professional Skills</h1>
                     <p v-if="profile" class="text-sm text-gray-500 flex items-center gap-2 mt-0.5">
-                        Technical expertise for 
-                        <span class="font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-lg">
-                            {{ profile.user?.first_name }} {{ profile.user?.last_name }}
-                        </span>
+                        <template v-if="isAdmin">
+                            Technical expertise for 
+                            <span class="font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-lg">
+                                {{ profile.user?.first_name }} {{ profile.user?.last_name }}
+                            </span>
+                        </template>
+                        <template v-else>
+                            Manage your technical stack and proficiency levels.
+                        </template>
                     </p>
                 </div>
             </div>
@@ -137,7 +140,7 @@ onMounted(fetchData);
             </div>
 
             <div v-else-if="skills.length === 0" 
-                class="bg-white rounded-3xl border-2 border-dashed border-gray-100 p-20 text-center">
+                class="bg-white rounded-[2rem] border-2 border-dashed border-gray-100 p-20 text-center">
                 <div class="h-20 w-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-6">
                     <i class="fa-solid fa-layer-group text-gray-300 text-2xl"></i>
                 </div>
@@ -148,7 +151,7 @@ onMounted(fetchData);
 
             <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 <div v-for="skill in skills" :key="skill.id" 
-                    class="group relative bg-white rounded-[2.5rem] p-8 border border-gray-50 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.02)] hover:shadow-[0_20px_40px_-12px_rgba(79,70,229,0.12)] transition-all duration-500 animate-in slide-in-from-bottom-4">
+                    class="group relative bg-white rounded-[2.5rem] p-8 border border-gray-100 shadow-sm hover:shadow-md transition-all duration-500 animate-in slide-in-from-bottom-4 text-left overflow-hidden">
                     
                     <span class="absolute -bottom-4 -right-2 text-[10rem] font-black text-gray-50 select-none pointer-events-none group-hover:text-indigo-50/50 transition-colors duration-700 leading-none">
                         {{ skill.name.charAt(0) }}
@@ -160,18 +163,14 @@ onMounted(fetchData);
                                 {{ skill.name }}
                             </h3>
                             <div class="flex items-center gap-2 group/date">
-                                <div class="flex -space-x-1">
-                                    <span class="h-1 w-1 rounded-full bg-indigo-500"></span>
-                                    <span class="h-1 w-1 rounded-full bg-indigo-300 opacity-0 group-hover/card:opacity-100 transition-all duration-500"></span>
-                                </div>
-                                <span class="text-[9px] font-black text-gray-400 uppercase tracking-[0.2em] group-hover/card:text-indigo-600 transition-colors duration-500">
-                                    In Stack Since {{ formatSkillDate(skill.pivot.created_at) }}
+                                <span class="text-[9px] font-black text-gray-400 uppercase tracking-[0.2em] group-hover:text-indigo-600 transition-colors">
+                                    Since {{ formatSkillDate(skill.pivot.created_at) }}
                                 </span>
                             </div>
                         </div>
 
                         <button @click="confirmDelete(skill)" 
-                            class="h-10 w-10 flex items-center justify-center text-gray-200 hover:text-red-500 hover:bg-red-50 rounded-2xl transition-all opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 duration-300">
+                            class="h-9 w-9 flex items-center justify-center text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 duration-300">
                             <i class="fa-solid fa-trash-can text-sm"></i>
                         </button>
                     </div>
@@ -184,7 +183,7 @@ onMounted(fetchData);
                         
                         <div class="h-3 w-full bg-gray-50 rounded-full border border-gray-100 p-1 overflow-hidden">
                             <div 
-                                class="h-full bg-gradient-to-r from-indigo-500 to-indigo-600 rounded-full transition-all duration-[1.5s] ease-out shadow-[0_0_15px_rgba(79,70,229,0.4)]"
+                                class="h-full bg-indigo-600 rounded-full transition-all duration-[1.5s] ease-out shadow-[0_0_15px_rgba(79,70,229,0.3)]"
                                 :style="{ width: `${skill.pivot.proficiency}%` }"
                             ></div>
                         </div>
@@ -201,18 +200,18 @@ onMounted(fetchData);
             leave-from-class="opacity-100 scale-100"
             leave-to-class="opacity-0 scale-95"
         >
-            <div v-if="showConfirmModal" class="fixed inset-0 z-[110] flex items-center justify-center p-6">
+            <div v-if="showConfirmModal" class="fixed inset-0 z-[150] flex items-center justify-center p-6 text-center">
                 <div @click="showConfirmModal = false" class="absolute inset-0 bg-zinc-900/60 backdrop-blur-sm"></div>
                 <div class="relative max-w-sm w-full bg-white rounded-2xl shadow-2xl overflow-hidden border border-gray-100">
-                    <div class="p-6 text-center">
+                    <div class="p-8">
                         <div class="bg-red-50 text-red-600 h-16 w-16 rounded-2xl flex items-center justify-center mb-4 text-2xl mx-auto">
                             <i class="fa-solid fa-layer-group"></i>
                         </div>
                         <h3 class="text-xl font-bold text-gray-900 tracking-tight">Remove Skill?</h3>
                         <p class="text-sm text-gray-500 mt-2">The skill <span class="font-bold text-gray-700">{{ skillToDelete?.name }}</span> will be removed from this profile.</p>
                         <div class="mt-8 flex gap-3">
-                            <button @click="showConfirmModal = false" class="flex-1 px-4 py-2.5 rounded-xl text-sm font-bold text-gray-500 bg-gray-50 hover:bg-gray-100 transition-colors">Discard</button>
-                            <button @click="executeDelete" class="flex-1 px-4 py-2.5 rounded-xl text-sm font-bold text-white bg-red-500 hover:bg-red-600 shadow-lg shadow-red-100 transition-all active:scale-95">
+                            <button @click="showConfirmModal = false" class="flex-1 px-4 py-3 rounded-xl text-xs font-black uppercase tracking-widest text-gray-500 bg-gray-50 hover:bg-gray-100 transition-colors">Discard</button>
+                            <button @click="executeDelete" class="flex-1 px-4 py-3 rounded-xl text-xs font-black uppercase tracking-widest text-white bg-red-500 hover:bg-red-600 transition-all active:scale-95">
                                 Delete
                             </button>
                         </div>

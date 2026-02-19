@@ -74,6 +74,12 @@ const router = createRouter({
           component: JobSeekerExperiencesView,
           meta: { requiresAuth: true, role: 2, label: 'My Experience' }
         },
+        {
+          path: 'skill',
+          name: 'seeker-skill',
+          component: JobSeekerSkillsView,
+          meta: { requiresAuth: true, role: 2, label: 'My Skill' }
+        },
       ]
     },
     {
