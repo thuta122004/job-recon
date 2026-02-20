@@ -52,6 +52,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/applications', [JobApplicationController::class, 'store']);
         Route::get('/applications/{seekerId}', [JobApplicationController::class, 'getBySeeker']);
         Route::post('/applications/{id}/withdraw', [JobApplicationController::class, 'withdraw']);
+        Route::post('/applications/{id}/reapply', [JobApplicationController::class, 'reapply']);
+
         Route::get('/applications/check/{jobPostId}/{seekerId}', [JobApplicationController::class, 'checkApplicationStatus']);
     });
 

@@ -181,4 +181,27 @@ class JobApplicationController extends Controller
             ], 200);
         });
     }
+
+    public function reapply($id)
+    {
+        $application = JobApplication::findOrFail($id);
+
+        if ($application->status !== 'WITHDRAWN') {
+            return response()->json(['status' => false, 'message' => 'Application is already active'], 400);
+        }
+
+        return DB::transaction(function () use ($application) {
+            $application->update([
+                'status'             => 'PENDING',
+                'last_status_change' => now(),
+            ]);
+
+            JobPost::where('id', $application->job_post_id)->increment('application_count');
+
+            return response()->json([
+                'status'  => true,
+                'message' => 'Application restored successfully'
+            ], 200);
+        });
+    }
 }
