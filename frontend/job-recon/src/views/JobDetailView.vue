@@ -16,23 +16,56 @@ const showCopyTooltip = ref(false);
 
 const showApplyModal = ref(false);
 const cover_letter = ref('');
+const seekerProfile = ref(null);
+const skillMatch = ref({ matched: 0, total: 0, percentage: 0 });
 const seekerId = localStorage.getItem('job_seeker_profile_id');
 
 const fetchJobDetail = async () => {
     loading.value = true;
     try {
-        const response = await api.get(`/seeker/jobs/${route.params.slug}`);
-        job.value = response.data;
+        const userId = localStorage.getItem('user_id');
+        const [jobRes, profileRes] = await Promise.all([
+            api.get(`/seeker/jobs/${route.params.slug}`),
+            api.get(`/seeker/my-profile/${userId}`)
+        ]);
+
+        job.value = jobRes.data;
+        
+        seekerProfile.value = profileRes.data.data || profileRes.data;
+
         if (seekerId && job.value) {
             const checkResponse = await api.get(`/seeker/applications/check/${job.value.id}/${seekerId}`);
             hasApplied.value = checkResponse.data.applied;
+            
+            const jobSkills = job.value.skills?.map(s => Number(s.id)) || [];
+            
+            const seekerSkillsRaw = seekerProfile.value.skills || [];
+            const seekerSkills = seekerSkillsRaw.map(s => Number(s.id));
+
+            console.log('Job IDs:', jobSkills);
+            console.log('Seeker IDs:', seekerSkills);
+
+            const matches = jobSkills.filter(id => seekerSkills.includes(id));
+            
+            skillMatch.value = {
+                matched: matches.length,
+                total: jobSkills.length,
+                percentage: jobSkills.length > 0 ? (matches.length / jobSkills.length) * 100 : 100
+            };
         }
     } catch (error) {
-        console.error("Error fetching job details:", error);
+        console.error("Fetch Error:", error);
+        toast.error("Error loading job details");
     } finally {
         loading.value = false;
     }
 };
+
+const canApply = computed(() => {
+    const hasResume = !!seekerProfile.value?.resume_url;
+    const hasSkills = job.value?.skills?.length > 0 ? skillMatch.value.matched > 0 : true;
+    return hasResume && hasSkills;
+});
 
 const submitApplication = async () => {
     if (!seekerId) {
@@ -245,22 +278,44 @@ onMounted(fetchJobDetail);
                                 <p class="text-slate-500 text-xs font-bold mt-2">Salary disclosed during interview</p>
                             </template>
                         </div>
-                        <button 
-                            v-if="!hasApplied"
-                            @click="showApplyModal = true"
-                            class="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white text-[11px] font-black uppercase tracking-[0.2em] rounded-2xl transition-all shadow-lg shadow-indigo-100 hover:shadow-indigo-200 active:scale-[0.98] mb-4"
-                        >
-                            APPLY FOR THIS ROLE
-                        </button>
+                        <div class="space-y-3">
+                            <div v-if="!seekerProfile?.resume_url" class="p-4 bg-rose-50 border border-rose-100 rounded-2xl">
+                                <p class="text-[10px] font-black text-rose-600 uppercase tracking-widest flex items-center gap-2">
+                                    <i class="fa-solid fa-file-circle-exclamation"></i> Resume Required
+                                </p>
+                                <router-link to="/seeker/profile" class="text-[9px] font-bold text-rose-500 underline uppercase mt-1 block">
+                                    Upload Resume in Profile
+                                </router-link>
+                            </div>
 
-                        <button 
-                            v-else
-                            disabled
-                            class="w-full py-4 bg-emerald-50 text-emerald-600 border border-emerald-100 text-[11px] font-black uppercase tracking-[0.2em] rounded-2xl mb-4 flex items-center justify-center gap-2 cursor-not-allowed"
-                        >
-                            <i class="fa-solid fa-circle-check"></i>
-                            APPLICATION SUBMITTED
-                        </button>
+                            <div v-if="job?.skills?.length" class="p-4 bg-slate-50 border border-slate-100 rounded-2xl">
+                                <div class="flex justify-between items-center mb-2">
+                                    <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Skill Match</span>
+                                    <span class="text-[10px] font-black text-indigo-600">{{ Math.round(skillMatch.percentage) }}%</span>
+                                </div>
+                                <div class="h-1.5 w-full bg-slate-200 rounded-full overflow-hidden">
+                                    <div class="h-full bg-indigo-500 transition-all duration-1000" :style="{ width: `${skillMatch.percentage}%` }"></div>
+                                </div>
+                            </div>
+
+                            <button 
+                                v-if="!hasApplied"
+                                @click="showApplyModal = true"
+                                :disabled="!canApply"
+                                class="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white text-[11px] font-black uppercase tracking-[0.2em] rounded-2xl transition-all shadow-lg disabled:opacity-50 disabled:grayscale disabled:cursor-not-allowed"
+                            >
+                                {{ !canApply ? 'Incomplete Requirements' : 'APPLY FOR THIS ROLE' }}
+                            </button>
+
+                            <button 
+                                v-else
+                                disabled
+                                class="w-full py-4 bg-emerald-50 text-emerald-600 border border-emerald-100 text-[11px] font-black uppercase tracking-[0.2em] rounded-2xl mb-4 flex items-center justify-center gap-2 cursor-not-allowed"
+                            >
+                                <i class="fa-solid fa-circle-check"></i>
+                                APPLICATION SUBMITTED
+                            </button>
+                        </div>
                         <p class="text-[11px] text-center text-slate-500 font-bold uppercase tracking-widest">Process takes ~2 mins</p>
                     </div>
 

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Models\JobApplication;
 use App\Models\JobPost;
+use App\Models\JobSeekerProfile;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
@@ -61,6 +62,29 @@ class JobApplicationController extends Controller
 
         if ($validator->fails()) {
             return response()->json(['status' => false, 'errors' => $validator->errors()], 422);
+        }
+
+        $job = JobPost::with('skills')->findOrFail($request->job_post_id);
+        $seeker = JobSeekerProfile::with('skills')->findOrFail($request->job_seeker_id);
+
+        if (!$seeker->resume_url) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Your profile must have a resume before applying.'
+            ], 403);
+        }
+
+        $jobSkillIds = $job->skills->pluck('id')->toArray();
+        if (!empty($jobSkillIds)) {
+            $seekerSkillIds = $seeker->skills->pluck('id')->toArray();
+            $matches = array_intersect($jobSkillIds, $seekerSkillIds);
+            
+            if (count($matches) === 0) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'You do not have the required skills in your profile to apply for this role.'
+                ], 403);
+            }
         }
 
         $job = JobPost::findOrFail($request->job_post_id);
