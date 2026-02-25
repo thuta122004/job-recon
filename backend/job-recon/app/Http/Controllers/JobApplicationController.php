@@ -26,7 +26,7 @@ class JobApplicationController extends Controller
 
     public function getByJob($jobId)
     {
-        $applications = JobApplication::with(['jobSeeker.user'])
+        $applications = JobApplication::with(['jobSeeker.user', 'jobPost'])
             ->where('job_post_id', $jobId)
             ->latest()
             ->get();
@@ -139,14 +139,12 @@ class JobApplicationController extends Controller
                 'last_status_change' => now(),
             ]);
 
-            // If moving TO withdrawn/rejected FROM an active status, decrement count
             $activeStatuses = ['PENDING', 'REVIEWING', 'SHORTLISTED', 'INTERVIEW_SCHEDULED', 'INTERVIEWED'];
             $inactiveStatuses = ['REJECTED', 'WITHDRAWN'];
 
             if (in_array($oldStatus, $activeStatuses) && in_array($newStatus, $inactiveStatuses)) {
                 JobPost::where('id', $application->job_post_id)->decrement('application_count');
             } 
-            // If restoring FROM inactive back TO active, increment count
             else if (in_array($oldStatus, $inactiveStatuses) && in_array($newStatus, $activeStatuses)) {
                 JobPost::where('id', $application->job_post_id)->increment('application_count');
             }

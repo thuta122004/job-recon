@@ -21,6 +21,7 @@ import EmployerHomeView from '@/views/EmployerHomeView.vue'
 import EmployerLayout from '@/layouts/EmployerLayout.vue'
 import EmployerProfile from '@/views/EmployerProfile.vue'
 import SeekerApplications from '@/views/SeekerApplications.vue'
+import EmployerJobApplications from '@/views/EmployerJobApplications.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -113,6 +114,13 @@ const router = createRouter({
           props: true,
           meta: { label: 'Job Postings' }
         },
+        {
+          path: 'jobs/:jobId/applications',
+          name: 'employer-job-applications',
+          component: EmployerJobApplications,
+          props: true,
+          meta: { label: 'Manage Applicants' }
+    }
       ]
     },
     {

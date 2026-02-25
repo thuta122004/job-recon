@@ -398,10 +398,17 @@ watch(() => props.profileId, fetchData);
                             </td>
 
                             <td class="px-6 py-5 text-center">
-                                <div class="inline-flex flex-col items-center">
-                                    <span class="text-lg font-black text-gray-900 leading-none">{{ job.application_count || 0 }}</span>
-                                    <span class="text-[9px] font-bold text-gray-400 uppercase tracking-widest mt-1">Candidates</span>
-                                </div>
+                                <button 
+                                    @click="router.push({ name: 'employer-job-applications', params: { jobId: job.id } })"
+                                    class="inline-flex flex-col items-center group/btn hover:scale-110 transition-transform cursor-pointer"
+                                >
+                                    <span class="text-lg font-black text-gray-900 leading-none group-hover/btn:text-indigo-600">
+                                        {{ job.application_count || 0 }}
+                                    </span>
+                                    <span class="text-[9px] font-bold text-gray-400 uppercase tracking-widest mt-1 group-hover/btn:text-indigo-400">
+                                        Candidates <i class="fa-solid fa-arrow-right-long ml-1 opacity-0 group-hover/btn:opacity-100 transition-all"></i>
+                                    </span>
+                                </button>
                             </td>
 
                             <td class="px-6 py-5">

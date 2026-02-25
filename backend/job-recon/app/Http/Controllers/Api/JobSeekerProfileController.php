@@ -97,7 +97,7 @@ class JobSeekerProfileController extends Controller
     /**
      * Display the specified resource.
      */
-   public function show($id)
+    public function show($id)
     {
         $profile = JobSeekerProfile::with(['user', 'skills', 'experiences', 'educations'])
             ->where('user_id', $id)
