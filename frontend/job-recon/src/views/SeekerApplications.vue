@@ -33,13 +33,16 @@ const fetchApplications = async () => {
 
 const getStatusTheme = (status) => {
     const themes = {
-        'PENDING': { icon: 'fa-solid fa-clock-rotate-left', color: 'text-amber-500', bg: 'bg-amber-50', label: 'In Review' },
+        'PENDING': { icon: 'fa-solid fa-paper-plane', color: 'text-amber-500', bg: 'bg-amber-50', label: 'Submitted' },
+        'REVIEWING': { icon: 'fa-solid fa-eye', color: 'text-blue-600', bg: 'bg-blue-50', label: 'In Review' },
         'SHORTLISTED': { icon: 'fa-solid fa-star', color: 'text-indigo-600', bg: 'bg-indigo-50', label: 'Shortlisted' },
-        'ACCEPTED': { icon: 'fa-solid fa-circle-check', color: 'text-emerald-600', bg: 'bg-emerald-50', label: 'Accepted' },
+        'INTERVIEW_SCHEDULED': { icon: 'fa-solid fa-calendar-check', color: 'text-purple-600', bg: 'bg-purple-50', label: 'Interview Set' },
+        'INTERVIEWED': { icon: 'fa-solid fa-clipboard-check', color: 'text-cyan-600', bg: 'bg-cyan-50', label: 'Interviewed' },
+        'OFFERED': { icon: 'fa-solid fa-handshake', color: 'text-emerald-600', bg: 'bg-emerald-50', label: 'Offer Received' },
         'REJECTED': { icon: 'fa-solid fa-circle-xmark', color: 'text-rose-600', bg: 'bg-rose-50', label: 'Not Selected' },
         'WITHDRAWN': { icon: 'fa-solid fa-ban', color: 'text-slate-400', bg: 'bg-slate-50', label: 'Withdrawn' }
     };
-    return themes[status] || themes['PENDING'];
+    return themes[status] || { icon: 'fa-solid fa-circle-question', color: 'text-slate-400', bg: 'bg-slate-50', label: status };
 };
 
 const promptWithdraw = (id) => {
@@ -182,7 +185,7 @@ onMounted(fetchApplications);
                                         View Details
                                     </button>
                                     
-                                    <button v-if="['PENDING', 'SHORTLISTED'].includes(app.status)" 
+                                    <button v-if="['PENDING', 'REVIEWING', 'SHORTLISTED'].includes(app.status)" 
                                         @click="promptWithdraw(app.id)"
                                         class="text-[10px] font-black text-rose-500 uppercase tracking-widest hover:bg-rose-50 px-3 py-1 rounded-lg transition-all">
                                         <i class="fa-solid fa-trash-can mr-1"></i> Retract
@@ -206,7 +209,7 @@ onMounted(fetchApplications);
 
             </div>
         </main>
-
+        
         <Transition enter-active-class="transition duration-300 ease-out" enter-from-class="opacity-0 scale-95" enter-to-class="opacity-100 scale-100" leave-active-class="transition duration-200 ease-in" leave-from-class="opacity-100 scale-100" leave-to-class="opacity-0 scale-95">
             <div v-if="showConfirmModal" class="fixed inset-0 z-[110] flex items-center justify-center p-6">
                 <div @click="showConfirmModal = false" class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"></div>
