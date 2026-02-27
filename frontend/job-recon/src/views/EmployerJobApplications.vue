@@ -22,6 +22,70 @@ const showProfileModal = ref(false);
 const selectedSeeker = ref(null);
 const loadingProfile = ref(false);
 
+const showInterviewModal = ref(false);
+const interviewForm = ref({
+    job_application_id: null,
+    title: '',
+    scheduled_at: '',
+    type: 'ONLINE',
+    location_url: ''
+});
+
+const openInterviewModal = async (app) => {
+    interviewForm.value = {
+        job_application_id: app.id,
+        title: `Interview for ${jobDetails.value?.title}`,
+        scheduled_at: '',
+        type: 'ONLINE',
+        location_url: ''
+    };
+
+    if (app.status === 'INTERVIEW_SCHEDULED') {
+        try {
+            const res = await api.get(`/seeker/applications/${app.id}/interviews`);
+            if (res.data.data.length > 0) {
+                const latest = res.data.data[0];
+                
+                let formattedDate = '';
+                if (latest.scheduled_at) {
+                    const dateObj = new Date(latest.scheduled_at);
+                    formattedDate = dateObj.toISOString().slice(0, 16);
+                }
+
+                interviewForm.value = {
+                    ...interviewForm.value,
+                    scheduled_at: formattedDate,
+                    type: latest.type,
+                    location_url: latest.location_url
+                };
+            }
+        } catch (e) {
+            toast.error("Failed to load existing interview data");
+        }
+    }
+
+    showInterviewModal.value = true;
+};
+
+const handleScheduleInterview = async () => {
+    if (!interviewForm.value.scheduled_at || !interviewForm.value.location_url) {
+        toast.warning("Please fill in all interview details.");
+        return;
+    }
+
+    isProcessing.value = true;
+    try {
+        await api.post('/employer/interviews', interviewForm.value);
+        toast.success("Interview scheduled successfully");
+        showInterviewModal.value = false;
+        await fetchApplications();
+    } catch (e) {
+        toast.error(e.response?.data?.message || "Failed to schedule interview");
+    } finally {
+        isProcessing.value = false;
+    }
+};
+
 const getImageUrl = (path) => {
     if (!path) return null;
     if (path.startsWith('http')) return path;
@@ -125,6 +189,55 @@ const filteredApplications = computed(() => {
     });
 });
 
+const showCompleteModal = ref(false);
+const completionForm = ref({
+    application_id: null,
+    interview_id: null,
+    feedback: ''
+});
+
+const openCompleteModal = async (app) => {
+    try {
+        const res = await api.get(`/seeker/applications/${app.id}/interviews`);
+        if (res.data.data.length > 0) {
+            const latest = res.data.data[0];
+            completionForm.value = {
+                application_id: app.id,
+                interview_id: latest.id,
+                feedback: latest.feedback || ''
+            };
+            showCompleteModal.value = true;
+        } else {
+            toast.error("No active interview record found.");
+        }
+    } catch (e) {
+        toast.error("Error loading interview details");
+    }
+};
+
+const executeInterviewCompletion = async () => {
+    if (!completionForm.value.feedback.trim()) {
+        toast.warning("Please enter your interview notes/feedback.");
+        return;
+    }
+
+    isProcessing.value = true;
+    try {
+        await api.patch(`/employer/interviews/${completionForm.value.interview_id}/status`, {
+            interview_status: 'COMPLETED',
+            feedback: completionForm.value.feedback
+        });
+        
+        toast.success("Interview marked as completed");
+        showCompleteModal.value = false;
+        await fetchApplications();
+    } catch (e) {
+        toast.error("Failed to save feedback");
+    } finally {
+        isProcessing.value = false;
+    }
+};
+
 onMounted(fetchApplications);
 </script>
 
@@ -182,7 +295,7 @@ onMounted(fetchApplications);
                     <div>
                         <label class="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-3 ml-1">Status Filter</label>
                         <div class="grid grid-cols-1 gap-2">
-                            <button v-for="s in ['', 'PENDING', 'REVIEWING', 'SHORTLISTED', 'OFFERED', 'REJECTED']" :key="s" 
+                            <button v-for="s in ['', 'PENDING', 'REVIEWING', 'SHORTLISTED', 'INTERVIEW_SCHEDULED', 'OFFERED', 'REJECTED']" :key="s" 
                                 @click="filters.status = s"
                                 :class="filters.status === s ? 'bg-indigo-600 text-white shadow-lg' : 'bg-slate-50 text-slate-500 hover:bg-slate-100'"
                                 class="w-full text-left px-4 py-3 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all">
@@ -248,26 +361,44 @@ onMounted(fetchApplications);
                             </a>
 
                             <div v-if="!['REJECTED', 'WITHDRAWN', 'OFFERED'].includes(app.status)" class="flex gap-2">
-                                
+    
                                 <button v-if="app.status === 'PENDING'" 
                                         @click="confirmStatusChange(app.id, 'REVIEWING')" 
                                         class="h-12 px-5 bg-blue-600 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-blue-700 hover:-translate-y-0.5 transition-all shadow-lg shadow-blue-100">
                                     Review
                                 </button>
 
-                                <button v-if="!['SHORTLISTED', 'PENDING'].includes(app.status)" 
+                                <button v-if="app.status === 'REVIEWING'" 
                                         @click="confirmStatusChange(app.id, 'SHORTLISTED')" 
                                         class="h-12 px-5 bg-indigo-600 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-indigo-700 hover:-translate-y-0.5 transition-all shadow-lg shadow-indigo-100">
                                     Shortlist
                                 </button>
                                 
-                                <button v-if="['SHORTLISTED', 'INTERVIEWED'].includes(app.status)" 
+                                <button v-if="app.status === 'SHORTLISTED'" 
+                                        @click="openInterviewModal(app)" 
+                                        class="h-12 px-5 bg-purple-600 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-purple-700 hover:-translate-y-0.5 transition-all shadow-lg shadow-purple-100">
+                                    Schedule Interview
+                                </button>
+
+                                <template v-if="app.status === 'INTERVIEW_SCHEDULED'">
+                                    <button @click="openCompleteModal(app)" 
+                                            class="h-12 px-5 bg-cyan-600 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-cyan-700 hover:-translate-y-0.5 transition-all shadow-lg shadow-cyan-100">
+                                        Complete Interview
+                                    </button>
+                                    <button @click="openInterviewModal(app)" 
+                                            class="h-12 w-12 flex items-center justify-center rounded-2xl bg-purple-50 text-purple-600 hover:bg-purple-600 hover:text-white transition-all" title="Reschedule">
+                                        <i class="fa-solid fa-calendar-day"></i>
+                                    </button>
+                                </template>
+
+                                <button v-if="app.status === 'INTERVIEWED'" 
                                         @click="confirmStatusChange(app.id, 'OFFERED')" 
                                         class="h-12 px-5 bg-emerald-500 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-emerald-600 hover:-translate-y-0.5 transition-all shadow-lg shadow-emerald-100">
                                     Send Offer
                                 </button>
 
-                                <button @click="confirmStatusChange(app.id, 'REJECTED')" class="h-12 w-12 flex items-center justify-center rounded-2xl bg-rose-50 text-rose-600 hover:bg-rose-600 hover:text-white transition-all" title="Reject">
+                                <button @click="confirmStatusChange(app.id, 'REJECTED')" 
+                                        class="h-12 w-12 flex items-center justify-center rounded-2xl bg-rose-50 text-rose-600 hover:bg-rose-600 hover:text-white transition-all" title="Reject">
                                     <i class="fa-solid fa-user-xmark text-sm"></i>
                                 </button>
                             </div>
@@ -284,6 +415,36 @@ onMounted(fetchApplications);
                 </div>
             </main>
         </div>
+
+        <Transition enter-active-class="transition duration-300 ease-out" enter-from-class="opacity-0 scale-95" enter-to-class="opacity-100 scale-100" leave-active-class="transition duration-200 ease-in" leave-from-class="opacity-100 scale-100" leave-to-class="opacity-0 scale-95">
+            <div v-if="showCompleteModal" class="fixed inset-0 z-[140] flex items-center justify-center p-6">
+                <div @click="showCompleteModal = false" class="absolute inset-0 bg-slate-900/80 backdrop-blur-md"></div>
+                <div class="relative max-w-md w-full bg-white rounded-[3rem] shadow-2xl p-10">
+                    <div class="h-16 w-16 bg-cyan-100 text-cyan-600 rounded-2xl flex items-center justify-center mb-6 text-2xl">
+                        <i class="fa-solid fa-clipboard-check"></i>
+                    </div>
+                    
+                    <h3 class="text-3xl font-black text-slate-900 tracking-tighter mb-2">Interview Notes</h3>
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-6">Summarize the candidate's performance</p>
+
+                    <div class="space-y-4">
+                        <label class="text-[9px] font-black text-slate-400 uppercase tracking-widest block ml-1">Employer Notes / Feedback</label>
+                        <textarea 
+                            v-model="completionForm.feedback" 
+                            placeholder="How did the interview go? Mention strengths, weaknesses, or technical assessment results..." 
+                            class="w-full p-5 bg-slate-50 border-none rounded-2xl text-[11px] font-bold h-40 resize-none focus:ring-2 focus:ring-cyan-500/20"
+                        ></textarea>
+                    </div>
+
+                    <div class="mt-8 flex gap-3">
+                        <button @click="showCompleteModal = false" class="flex-1 py-4 rounded-2xl text-[10px] font-black uppercase text-slate-400 bg-slate-50 hover:bg-slate-100 transition-all">Cancel</button>
+                        <button @click="executeInterviewCompletion" :disabled="isProcessing" class="flex-1 py-4 bg-cyan-600 text-white rounded-2xl text-[10px] font-black uppercase shadow-xl shadow-cyan-100 hover:bg-cyan-700 transition-all">
+                            {{ isProcessing ? 'Saving...' : 'Mark as Interviewed' }}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </Transition>
 
         <Transition enter-active-class="transition duration-300 ease-out" enter-from-class="opacity-0 scale-95" enter-to-class="opacity-100 scale-100" leave-active-class="transition duration-200 ease-in" leave-from-class="opacity-100 scale-100" leave-to-class="opacity-0 scale-95">
             <div v-if="showConfirmModal" class="fixed inset-0 z-[110] flex items-center justify-center p-6">
@@ -454,7 +615,62 @@ onMounted(fetchApplications);
                 </div>
             </div>
         </Transition>
-    </div>
+
+        <Transition enter-active-class="transition duration-300 ease-out" enter-from-class="opacity-0 scale-95" enter-to-class="opacity-100 scale-100" leave-active-class="transition duration-200 ease-in" leave-from-class="opacity-100 scale-100" leave-to-class="opacity-0 scale-95">
+            <div v-if="showInterviewModal" class="fixed inset-0 z-[130] flex items-center justify-center p-6">
+                <div @click="showInterviewModal = false" class="absolute inset-0 bg-slate-900/80 backdrop-blur-md"></div>
+                <div class="relative max-w-md w-full bg-white rounded-[3rem] shadow-2xl p-10 overflow-hidden">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-purple-50 rounded-full -mr-16 -mt-16"></div>
+                    
+                    <div class="relative">
+                        <div class="h-16 w-16 bg-purple-600 text-white rounded-2xl flex items-center justify-center mb-8 text-2xl shadow-xl shadow-purple-200">
+                            <i class="fa-solid fa-calendar-plus"></i>
+                        </div>
+                        
+                        <h3 class="text-3xl font-black text-slate-900 tracking-tighter mb-2">Schedule Interview</h3>
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-8">Set the meeting details below</p>
+
+                        <div class="space-y-5">
+                            <div>
+                                <label class="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-2 ml-1">Meeting Type</label>
+                                <div class="grid grid-cols-3 gap-2">
+                                    <button v-for="t in ['ONLINE', 'IN-PERSON', 'PHONE']" :key="t" 
+                                        @click="interviewForm.type = t"
+                                        :class="interviewForm.type === t ? 'bg-purple-600 text-white' : 'bg-slate-50 text-slate-400'"
+                                        class="py-3 rounded-xl text-[9px] font-black uppercase transition-all">
+                                        {{ t }}
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-2 ml-1">Date & Time</label>
+                                <input v-model="interviewForm.scheduled_at" type="datetime-local" class="w-full p-4 bg-slate-50 border-none rounded-2xl text-[11px] font-bold focus:ring-2 focus:ring-purple-500/20" />
+                            </div>
+
+                            <div>
+                                <label class="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-2 ml-1">
+                                    {{ 
+                                        interviewForm.type === 'ONLINE' ? 'Meeting Link' : 
+                                        interviewForm.type === 'PHONE' ? 'Phone Number' : 'Location Address' 
+                                    }}
+                                </label>
+                                <input v-model="interviewForm.location_url" type="text" :placeholder="interviewForm.type === 'ONLINE' ? 'https://zoom.us/...' : 'Office Building, Floor 4...'" class="w-full p-4 bg-slate-50 border-none rounded-2xl text-[11px] font-bold focus:ring-2 focus:ring-purple-500/20" />
+                            </div>
+                        </div>
+
+                        <div class="mt-10 flex gap-3">
+                            <button @click="showInterviewModal = false" class="flex-1 py-4 rounded-2xl text-[10px] font-black uppercase text-slate-400 bg-slate-50 hover:bg-slate-100 transition-all">Cancel</button>
+                            <button @click="handleScheduleInterview" :disabled="isProcessing" class="flex-1 py-4 bg-purple-600 text-white rounded-2xl text-[10px] font-black uppercase shadow-xl shadow-purple-100 hover:bg-purple-700 transition-all">
+                                {{ isProcessing ? 'Scheduling...' : 'Confirm Meeting' }}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </Transition>
+
+        </div>
 </template>
 
 <style scoped>

@@ -23,7 +23,19 @@ const fetchApplications = async () => {
     loading.value = true;
     try {
         const response = await api.get(`/seeker/applications/${seekerId}`);
-        applications.value = response.data.data;
+        let apps = response.data.data;
+
+        apps = await Promise.all(apps.map(async (app) => {
+            try {
+                const interviewRes = await api.get(`/seeker/applications/${app.id}/interviews`);
+                app.interview = interviewRes.data.data[0] || null;
+            } catch (e) {
+                app.interview = null;
+            }
+            return app;
+        }));
+
+        applications.value = apps;
     } catch (error) {
         toast.error("Failed to load application history");
     } finally {
@@ -43,6 +55,16 @@ const getStatusTheme = (status) => {
         'WITHDRAWN': { icon: 'fa-solid fa-ban', color: 'text-slate-400', bg: 'bg-slate-50', label: 'Withdrawn' }
     };
     return themes[status] || { icon: 'fa-solid fa-circle-question', color: 'text-slate-400', bg: 'bg-slate-50', label: status };
+};
+
+const formatDateTime = (dateTimeString) => {
+    if (!dateTimeString) return 'N/A';
+    const date = new Date(dateTimeString);
+    return date.toLocaleString('en-US', {
+        weekday: 'short', month: 'short', day: 'numeric',
+        hour: 'numeric', minute: 'numeric',
+        timeZone: 'UTC'
+    });
 };
 
 const promptWithdraw = (id) => {
@@ -147,60 +169,109 @@ onMounted(fetchApplications);
 
                     <div v-else class="grid grid-cols-1 gap-6">
                         <div v-for="app in applications" :key="app.id" 
-                            class="bg-white p-10 rounded-[3rem] border border-slate-100 hover:border-indigo-200 shadow-sm hover:shadow-2xl hover:shadow-indigo-100/40 transition-all duration-500 group relative overflow-hidden flex flex-col md:flex-row md:items-center gap-10">
+                            class="bg-white p-10 rounded-[3rem] border border-slate-100 hover:border-indigo-200 shadow-sm hover:shadow-2xl hover:shadow-indigo-100/40 transition-all duration-500 group relative overflow-hidden flex flex-col gap-8">
                             
                             <div class="absolute inset-0 bg-gradient-to-br from-indigo-50/0 to-indigo-50/0 group-hover:to-indigo-50/50 transition-colors duration-500 pointer-events-none"></div>
 
-                            <div class="relative shrink-0 z-10">
-                                <div class="h-20 w-20 bg-slate-50 rounded-[1.5rem] flex items-center justify-center border border-slate-50 group-hover:bg-white group-hover:border-indigo-100 transition-all duration-500 overflow-hidden">
-                                    <img v-if="app.job_post.employer?.company_logo_url" :src="app.job_post.employer.company_logo_url" class="h-full w-full object-cover" />
-                                    <i v-else class="fa-solid fa-briefcase text-slate-300 group-hover:text-indigo-500 text-2xl"></i>
-                                </div>
-                            </div>
-
-                            <div class="flex-1 space-y-3 relative z-10">
-                                <div class="flex flex-wrap gap-2">
-                                    <div :class="[getStatusTheme(app.status).bg, getStatusTheme(app.status).color]" 
-                                        class="px-3 py-1 text-[9px] font-black uppercase rounded-lg flex items-center gap-2">
-                                        <i :class="getStatusTheme(app.status).icon"></i>
-                                        {{ getStatusTheme(app.status).label }}
+                            <div class="flex flex-col md:flex-row md:items-center gap-10 z-10">
+                                <div class="relative shrink-0">
+                                    <div class="h-20 w-20 bg-slate-50 rounded-[1.5rem] flex items-center justify-center border border-slate-50 group-hover:bg-white group-hover:border-indigo-100 transition-all duration-500 overflow-hidden">
+                                        <img v-if="app.job_post.employer?.company_logo_url" :src="app.job_post.employer.company_logo_url" class="h-full w-full object-cover" />
+                                        <i v-else class="fa-solid fa-briefcase text-slate-300 group-hover:text-indigo-500 text-2xl"></i>
                                     </div>
-                                    <span class="px-3 py-1 bg-slate-50 text-slate-400 text-[9px] font-black uppercase rounded-lg">
-                                        Applied {{ new Date(app.created_at).toLocaleDateString() }}
-                                    </span>
                                 </div>
-                                <h3 @click="router.push({ name: 'job-detail', params: { slug: app.job_post.slug } })" 
-                                    class="text-3xl font-black text-slate-900 group-hover:text-indigo-600 transition-colors leading-tight tracking-tighter cursor-pointer">
-                                    {{ app.job_post.title }}
-                                </h3>
-                                <p class="text-slate-400 font-bold text-xs uppercase tracking-tight">
-                                    {{ app.job_post.employer?.company_name }} • {{ app.job_post.location }}
-                                </p>
+
+                                <div class="flex-1 space-y-3 relative">
+                                    <div class="flex flex-wrap gap-2">
+                                        <div :class="[getStatusTheme(app.status).bg, getStatusTheme(app.status).color]" 
+                                            class="px-3 py-1 text-[9px] font-black uppercase rounded-lg flex items-center gap-2">
+                                            <i :class="getStatusTheme(app.status).icon"></i>
+                                            {{ getStatusTheme(app.status).label }}
+                                        </div>
+                                        <span class="px-3 py-1 bg-slate-50 text-slate-400 text-[9px] font-black uppercase rounded-lg">
+                                            Applied {{ new Date(app.created_at).toLocaleDateString() }}
+                                        </span>
+                                    </div>
+                                    <h3 @click="router.push({ name: 'job-detail', params: { slug: app.job_post.slug } })" 
+                                        class="text-3xl font-black text-slate-900 group-hover:text-indigo-600 transition-colors leading-tight tracking-tighter cursor-pointer">
+                                        {{ app.job_post.title }}
+                                    </h3>
+                                    <p class="text-slate-400 font-bold text-xs uppercase tracking-tight">
+                                        {{ app.job_post.employer?.company_name }} • {{ app.job_post.location }}
+                                    </p>
+                                </div>
+
+                                <div class="shrink-0 text-left md:text-right flex flex-row md:flex-col justify-between items-center md:items-end gap-6 border-t md:border-t-0 md:border-l border-slate-50 pt-8 md:pt-0 md:pl-10 relative">
+                                    <div class="flex flex-col items-end gap-2">
+                                        <button @click="router.push({ name: 'job-detail', params: { slug: app.job_post.slug } })" 
+                                            class="text-[10px] font-black text-slate-400 uppercase tracking-widest hover:text-indigo-600 transition-colors">
+                                            View Details
+                                        </button>
+                                        
+                                        <button v-if="['PENDING', 'REVIEWING', 'SHORTLISTED'].includes(app.status)" 
+                                            @click="promptWithdraw(app.id)"
+                                            class="text-[10px] font-black text-rose-500 uppercase tracking-widest hover:bg-rose-50 px-3 py-1 rounded-lg transition-all">
+                                            <i class="fa-solid fa-trash-can mr-1"></i> Retract
+                                        </button>
+
+                                        <button v-else-if="app.status === 'WITHDRAWN'" 
+                                            @click="handleReapply(app.id)"
+                                            :disabled="isProcessing"
+                                            class="text-[10px] font-black text-indigo-600 uppercase tracking-widest hover:bg-indigo-50 px-3 py-1 rounded-lg transition-all">
+                                            <i class="fa-solid fa-rotate-right mr-1" :class="{'fa-spin': isProcessing}"></i> Re-activate
+                                        </button>
+                                    </div>
+                                    <div @click="router.push({ name: 'job-detail', params: { slug: app.job_post.slug } })" 
+                                        class="h-12 w-12 rounded-full bg-slate-900 text-white flex items-center justify-center group-hover:bg-indigo-600 group-hover:rotate-[-45deg] transition-all duration-500 shadow-lg shadow-slate-200 group-hover:shadow-indigo-200 cursor-pointer">
+                                        <i class="fa-solid fa-arrow-right text-xs"></i>
+                                    </div>
+                                </div>
                             </div>
-
-                            <div class="shrink-0 text-left md:text-right flex flex-row md:flex-col justify-between items-center md:items-end gap-6 border-t md:border-t-0 md:border-l border-slate-50 pt-8 md:pt-0 md:pl-10 relative z-10">
-                                <div class="flex flex-col items-end gap-2">
-                                    <button @click="router.push({ name: 'job-detail', params: { slug: app.job_post.slug } })" 
-                                        class="text-[10px] font-black text-slate-400 uppercase tracking-widest hover:text-indigo-600 transition-colors">
-                                        View Details
-                                    </button>
-                                    
-                                    <button v-if="['PENDING', 'REVIEWING', 'SHORTLISTED'].includes(app.status)" 
-                                        @click="promptWithdraw(app.id)"
-                                        class="text-[10px] font-black text-rose-500 uppercase tracking-widest hover:bg-rose-50 px-3 py-1 rounded-lg transition-all">
-                                        <i class="fa-solid fa-trash-can mr-1"></i> Retract
-                                    </button>
-
-                                    <button v-else-if="app.status === 'WITHDRAWN'" 
-                                        @click="handleReapply(app.id)"
-                                        :disabled="isProcessing"
-                                        class="text-[10px] font-black text-indigo-600 uppercase tracking-widest hover:bg-indigo-50 px-3 py-1 rounded-lg transition-all">
-                                        <i class="fa-solid fa-rotate-right mr-1" :class="{'fa-spin': isProcessing}"></i> Re-activate
-                                    </button>
+                            
+                            <div v-if="app.interview || app.status === 'OFFERED' || app.status === 'REJECTED'" class="border-t border-slate-100 pt-8 z-10 space-y-4">
+                                
+                                <div v-if="app.status === 'INTERVIEW_SCHEDULED' && app.interview" class="bg-purple-50/50 p-6 rounded-2xl border border-purple-100">
+                                    <div class="flex items-center justify-between gap-4 mb-4">
+                                        <h4 class="text-xs font-black text-purple-900 uppercase tracking-widest flex items-center gap-2">
+                                            <i class="fa-solid fa-calendar-alt"></i> Interview Scheduled
+                                        </h4>
+                                        <span class="text-xs font-bold text-purple-700 bg-white px-3 py-1 rounded-full uppercase">
+                                            {{ app.interview.type }}
+                                        </span>
+                                    </div>
+                                    <div class="grid md:grid-cols-2 gap-4 text-sm">
+                                        <div>
+                                            <p class="text-xs text-purple-600 font-bold uppercase tracking-wider">Date & Time</p>
+                                            <p class="font-bold text-purple-950">{{ formatDateTime(app.interview.scheduled_at) }}</p>
+                                        </div>
+                                        <div>
+                                            <p class="text-xs text-purple-600 font-bold uppercase tracking-wider">Location / Link</p>
+                                            <a v-if="app.interview.type === 'ONLINE'" :href="app.interview.location_url" target="_blank" class="font-bold text-indigo-600 hover:underline flex items-center gap-1.5">
+                                                <i class="fa-solid fa-video"></i> Join Meeting
+                                            </a>
+                                            <p v-else class="font-bold text-purple-950">{{ app.interview.location_url }}</p>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div @click="router.push({ name: 'job-detail', params: { slug: app.job_post.slug } })" 
-                                    class="h-12 w-12 rounded-full bg-slate-900 text-white flex items-center justify-center group-hover:bg-indigo-600 group-hover:rotate-[-45deg] transition-all duration-500 shadow-lg shadow-slate-200 group-hover:shadow-indigo-200 cursor-pointer">
-                                    <i class="fa-solid fa-arrow-right text-xs"></i>
+
+                                <div v-else-if="app.status === 'INTERVIEWED' && app.interview" class="bg-cyan-50/50 p-6 rounded-2xl border border-cyan-100">
+                                    <p class="text-xs text-cyan-800 font-black uppercase tracking-wider mb-2 flex items-center gap-2">
+                                        <i class="fa-solid fa-comment-dots"></i> Interview Feedback
+                                    </p>
+                                    <p class="text-sm text-cyan-950 leading-relaxed">{{ app.interview.feedback || 'Waiting for employer feedback...' }}</p>
+                                </div>
+                                
+                                <div v-else-if="app.status === 'OFFERED'" class="bg-emerald-50/50 p-6 rounded-2xl border border-emerald-100 text-center">
+                                    <i class="fa-solid fa-circle-check text-4xl text-emerald-500 mb-3"></i>
+                                    <h4 class="text-lg font-black text-emerald-900 uppercase tracking-widest">Congratulations!</h4>
+                                    <p class="text-sm text-emerald-800 mt-1">You have received an offer for this position.</p>
+                                </div>
+
+                                <div v-else-if="app.status === 'REJECTED'" class="bg-rose-50/50 p-6 rounded-2xl border border-rose-100">
+                                    <p class="text-xs text-rose-800 font-black uppercase tracking-wider mb-2 flex items-center gap-2">
+                                        <i class="fa-solid fa-envelope-open-text"></i> Update
+                                    </p>
+                                    <p class="text-sm text-rose-950 leading-relaxed">Thank you for your interest. Unfortunately, we will not be moving forward with your application at this time.</p>
                                 </div>
                             </div>
                         </div>

@@ -32,8 +32,13 @@ class JobApplication extends Model
         return $this->belongsTo(JobSeekerProfile::class, 'job_seeker_id');
     }
 
-    public function interviews(): HasMany
+    public function interviewSchedules()
     {
         return $this->hasMany(InterviewSchedule::class);
+    }
+
+    public function latestInterview()
+    {
+        return $this->hasOne(InterviewSchedule::class)->latestOfMany();
     }
 }

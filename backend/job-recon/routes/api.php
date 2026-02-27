@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\EmployerProfileController;
+use App\Http\Controllers\Api\InterviewController;
 use App\Http\Controllers\Api\JobCategoryController;
 use App\Http\Controllers\Api\JobPostController;
 use App\Http\Controllers\Api\JobSeekerEducationController;
@@ -60,6 +61,16 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::prefix('employer')->group(function () {
         Route::get('/jobs/{jobId}/applications', [JobApplicationController::class, 'getByJob']);
         Route::patch('/applications/{id}/status', [JobApplicationController::class, 'updateStatus']);
+    });
+
+    Route::prefix('employer')->group(function () {
+        Route::post('/interviews', [InterviewController::class, 'store']);
+        Route::patch('/interviews/{id}/status', [InterviewController::class, 'updateStatus']);
+    });
+
+    Route::prefix('seeker')->group(function () {
+        Route::get('/interviews/{seekerId}', [InterviewController::class, 'getForSeeker']);
+        Route::get('/applications/{applicationId}/interviews', [InterviewController::class, 'getByApplication']);
     });
 });
 
