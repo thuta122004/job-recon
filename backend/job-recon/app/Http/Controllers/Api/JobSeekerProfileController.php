@@ -9,6 +9,7 @@ use App\Models\JobPost;
 use App\Models\JobSeekerProfile;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
@@ -17,6 +18,69 @@ class JobSeekerProfileController extends Controller
     /**
      * Display a listing of the resource.
      */
+
+    public function getRecommendations(Request $request)
+    {
+        try {
+            $user = $request->user();
+            
+            if (!$user) {
+                return response()->json(['status' => false, 'message' => 'Unauthorized'], 401);
+            }
+
+            $profile = JobSeekerProfile::with('skills')->where('user_id', $user->id)->first();
+
+            if (!$profile || !$profile->skills || $profile->skills->isEmpty()) {
+                return response()->json([
+                    'status' => true,
+                    'data' => [],
+                    'message' => 'Profile or skills not found'
+                ]);
+            }
+
+            $seekerSkillIds = $profile->skills->pluck('id')->toArray();
+
+            $recommendedJobs = JobPost::with(['employer', 'category', 'skills'])
+                ->where('status', 'OPEN')
+                ->whereHas('skills', function ($query) use ($seekerSkillIds) {
+                    $query->whereIn('skills.id', $seekerSkillIds);
+                })
+                ->get()
+                ->map(function ($job) use ($seekerSkillIds) {
+                    $jobSkillIds = $job->skills->pluck('id')->toArray();
+                    
+                    $matches = array_intersect($seekerSkillIds, $jobSkillIds);
+                    $matchCount = count($matches);
+                    $totalJobSkills = count($jobSkillIds);
+
+                    $job->match_percentage = $totalJobSkills > 0 
+                        ? round(($matchCount / $totalJobSkills) * 100) 
+                        : 0;
+
+                    return $job;
+                })
+                ->sortByDesc('match_percentage')
+                ->take(6)
+                ->values();
+
+            return response()->json([
+                'status' => true,
+                'data' => $recommendedJobs
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error("Recommendation Error: " . $e->getMessage(), [
+                'file' => $e->getFile(),
+                'line' => $e->getLine()
+            ]);
+
+            return response()->json([
+                'status' => false,
+                'message' => 'Server error',
+                'debug' => $e->getMessage()
+            ], 500);
+        }
+    }
 
     public function getHomeData()
     {

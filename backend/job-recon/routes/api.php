@@ -50,6 +50,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/employer/profile/{id}', [EmployerProfileController::class, 'show']);
 
     Route::prefix('seeker')->group(function () {
+        Route::get('/recommendations', [JobSeekerProfileController::class, 'getRecommendations']);
         Route::post('/applications', [JobApplicationController::class, 'store']);
         Route::get('/applications/{seekerId}', [JobApplicationController::class, 'getBySeeker']);
         Route::post('/applications/{id}/withdraw', [JobApplicationController::class, 'withdraw']);

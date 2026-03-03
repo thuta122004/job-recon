@@ -48,10 +48,28 @@ const goToJobDetail = (slug) => {
 };
 
 const formatCurrency = (value) => {
+    if (!value || isNaN(value) || value == 0) return null;
     return Number(value).toLocaleString();
 };
+const recommendedJobs = ref([]);
+const loadingRecommendations = ref(true);
 
-onMounted(fetchHomeData);
+const fetchRecommendations = async () => {
+    loadingRecommendations.value = true;
+    try {
+        const response = await api.get('/seeker/recommendations');
+        recommendedJobs.value = response.data.data || [];
+    } catch (error) {
+        console.error("Recommendation Engine Error:", error);
+    } finally {
+        loadingRecommendations.value = false;
+    }
+};
+
+onMounted(() => {
+    fetchHomeData();
+    fetchRecommendations();
+});
 </script>
 
 <template>
@@ -127,6 +145,92 @@ onMounted(fetchHomeData);
                 </div>
             </div>
         </div>
+
+        <section v-if="loadingRecommendations || recommendedJobs.length > 0" class="py-16 bg-white border-t border-slate-100">
+            <div class="max-w-7xl mx-auto px-6">
+                <div class="flex flex-col md:flex-row justify-between items-end gap-6 mb-12">
+                    <div class="flex items-center gap-4">
+                        <div class="h-14 w-14 bg-indigo-600 rounded-2xl flex items-center justify-center text-white shadow-xl shadow-indigo-200">
+                            <i class="fa-solid fa-wand-magic-sparkles text-xl"></i>
+                        </div>
+                        <div>
+                            <h2 class="text-3xl font-black text-slate-900 tracking-tight">Matched for you</h2>
+                            <p class="text-slate-400 font-bold text-[10px] uppercase tracking-[0.2em] mt-1">Based on your unique skill set</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div v-if="loadingRecommendations" class="flex gap-8 overflow-hidden">
+                    <div v-for="i in 3" :key="i" class="min-w-[380px] h-64 bg-slate-50 animate-pulse rounded-[3rem] border border-slate-100"></div>
+                </div>
+
+                <div v-else class="flex gap-8 overflow-x-auto pb-12 snap-x no-scrollbar -mx-4 px-4">
+                    <div v-for="job in recommendedJobs" :key="job.slug"
+                        @click="goToJobDetail(job.slug)"
+                        class="min-w-[350px] md:min-w-[400px] snap-start bg-white p-8 rounded-[3rem] border border-slate-100 hover:border-indigo-200 shadow-sm hover:shadow-2xl hover:shadow-indigo-100/40 transition-all duration-500 group cursor-pointer relative overflow-hidden">
+                        
+                        <div class="absolute top-6 right-6 z-20">
+                            <div class="px-3 py-1 bg-emerald-50 text-emerald-600 text-[10px] font-black rounded-lg border border-emerald-100 flex items-center gap-1.5">
+                                <span class="relative flex h-2 w-2">
+                                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                                    <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                                </span>
+                                {{ job.match_percentage }}% MATCH
+                            </div>
+                        </div>
+
+                        <div class="relative z-10">
+                            <div class="flex items-center gap-4 mb-6">
+                                <div class="h-12 w-12 bg-slate-50 rounded-xl flex items-center justify-center border border-slate-100 group-hover:bg-white group-hover:border-indigo-100 transition-all overflow-hidden">
+                                    <img v-if="job.employer?.company_logo_url" :src="job.employer.company_logo_url" class="h-full w-full object-cover" />
+                                    <i v-else class="fa-solid fa-briefcase text-slate-300 text-lg"></i>
+                                </div>
+                                <div class="overflow-hidden">
+                                    <h4 class="text-slate-900 font-black text-sm truncate uppercase tracking-tight">{{ job.employer?.company_name }}</h4>
+                                    <p class="text-slate-400 text-[10px] font-bold uppercase truncate">{{ job.location }}</p>
+                                </div>
+                            </div>
+
+                            <h3 class="text-2xl font-black text-slate-900 mb-4 group-hover:text-indigo-600 transition-colors leading-tight line-clamp-1">
+                                {{ job.title }}
+                            </h3>
+
+                            <div class="flex flex-wrap gap-1.5 mb-8">
+                                <span v-for="skill in job.skills.slice(0, 3)" :key="skill.id" 
+                                    class="text-[9px] bg-slate-50 text-slate-500 group-hover:bg-indigo-50 group-hover:text-indigo-600 px-2.5 py-1 rounded-lg font-bold transition-colors">
+                                    {{ skill.name }}
+                                </span>
+                                <span v-if="job.skills.length > 3" class="text-[9px] text-slate-300 font-bold self-center ml-1">
+                                    +{{ job.skills.length - 3 }}
+                                </span>
+                            </div>
+
+                            <div class="flex items-center justify-between pt-6 border-t border-slate-50 group-hover:border-indigo-50 transition-colors">
+                                <div>
+                                    <p class="text-[9px] font-black text-slate-300 uppercase tracking-widest mb-1">Est. Salary</p>
+                                    
+                                    <p v-if="job.salary_visible && job.salary_min !== null" class="text-lg font-black text-slate-900">
+                                        {{ job.currency }} {{ formatCurrency(job.salary_min) }} - {{ formatCurrency(job.salary_max) }}
+                                    </p>
+                                    
+                                    <p v-else-if="job.salary_visible" class="text-lg font-black text-slate-400 italic">
+                                        Negotiable
+                                    </p>
+                                    
+                                    <p v-else class="text-lg font-black text-slate-400 italic">
+                                        Competitive
+                                    </p>
+                                </div>
+                                
+                                <div class="h-11 w-11 rounded-full bg-slate-900 text-white flex items-center justify-center group-hover:bg-indigo-600 group-hover:rotate-[-45deg] transition-all duration-500 shadow-lg shadow-slate-200 group-hover:shadow-indigo-200">
+                                    <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
 
         <section class="py-24 bg-slate-50/50 border-t border-slate-100">
             <div class="max-w-7xl mx-auto px-6">
