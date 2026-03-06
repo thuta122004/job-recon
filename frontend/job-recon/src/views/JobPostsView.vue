@@ -196,18 +196,30 @@ onMounted(fetchDiscoveryData);
                                 <div>
                                     <p class="text-[9px] font-black text-slate-300 uppercase tracking-widest mb-1">Financial Range</p>
                                     
-                                    <p v-if="job.salary_visible && job.salary_min !== null" class="text-xl font-black text-slate-900">
-                                        {{ job.currency }} {{ formatCurrency(job.salary_min) }}
-                                    </p>
+                                    <template v-if="job.salary_visible && job.salary_min !== null">
+                                        <p class="text-xl font-black text-slate-900 leading-tight">
+                                            {{ job.currency }} {{ formatCurrency(job.salary_min) }} 
+                                            <span class="text-slate-300 mx-0.5">-</span> 
+                                            {{ formatCurrency(job.salary_max) }}
+                                        </p>
+                                        <p class="text-[9px] font-bold text-indigo-500 uppercase tracking-tighter mt-1">Est. Monthly Gross</p>
+                                    </template>
                                     
-                                    <p v-else-if="job.salary_visible" class="text-lg font-black text-slate-400 italic">
-                                        Negotiable
-                                    </p>
+                                    <template v-else-if="job.salary_visible">
+                                        <p class="text-xl font-black text-slate-400 italic tracking-tight">
+                                            Negotiable
+                                        </p>
+                                        <p class="text-[9px] font-bold text-slate-300 uppercase tracking-tighter mt-1">Discuss with Employer</p>
+                                    </template>
                                     
-                                    <p v-else class="text-lg font-black text-slate-400 italic">
-                                        Competitive
-                                    </p>
+                                    <template v-else>
+                                        <p class="text-xl font-black text-slate-400 italic tracking-tight">
+                                            Competitive
+                                        </p>
+                                        <p class="text-[9px] font-bold text-slate-300 uppercase tracking-tighter mt-1">Market Rate Applied</p>
+                                    </template>
                                 </div>
+
                                 <div class="h-12 w-12 rounded-full bg-slate-900 text-white flex items-center justify-center group-hover:bg-indigo-600 group-hover:rotate-[-45deg] transition-all duration-500 shadow-lg shadow-slate-200 group-hover:shadow-indigo-200">
                                     <i class="fa-solid fa-arrow-right text-xs"></i>
                                 </div>

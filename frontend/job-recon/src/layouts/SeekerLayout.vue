@@ -133,6 +133,10 @@ const executeLogout = async () => {
                                     <i class="fa-solid fa-user-astronaut mr-3 text-sm opacity-40"></i> My Profile
                                 </router-link>
 
+                                <router-link to="/seeker/saved-jobs" class="flex items-center px-8 py-3 text-[10px] font-black text-slate-500 hover:text-indigo-600 uppercase tracking-widest transition-colors">
+                                    <i class="fa-solid fa-bookmark mr-3 text-sm opacity-40"></i> Saved Jobs
+                                </router-link>
+
                                 <router-link to="/seeker/applications" class="flex items-center px-8 py-3 text-[10px] font-black text-slate-500 hover:text-indigo-600 uppercase tracking-widest transition-colors">
                                     <i class="fa-solid fa-paper-plane mr-3 text-sm opacity-40"></i> Applications
                                 </router-link>

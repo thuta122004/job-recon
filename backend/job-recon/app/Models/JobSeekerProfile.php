@@ -45,4 +45,10 @@ class JobSeekerProfile extends Model
     {
         return $this->hasMany(JobApplication::class, 'job_seeker_id');
     }
+
+    public function savedJobs()
+    {
+        return $this->belongsToMany(JobPost::class, 'saved_jobs', 'job_seeker_profile_id', 'job_post_id')
+                    ->withTimestamps();
+    }
 }

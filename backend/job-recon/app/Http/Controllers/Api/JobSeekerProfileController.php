@@ -8,6 +8,7 @@ use App\Models\JobCategory;
 use App\Models\JobPost;
 use App\Models\JobSeekerProfile;
 use App\Models\User;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
@@ -102,6 +103,49 @@ class JobSeekerProfileController extends Controller
         ]);
     }
 
+    public function toggleSaveJob(Request $request, $jobId)
+    {
+        try {
+            $user = $request->user();
+            $profile = $user->profile;
+
+            if (!$profile) {
+                return response()->json(['message' => 'Profile not found'], 404);
+            }
+
+            $status = $profile->savedJobs()->toggle($jobId);
+
+            $isSaved = count($status['attached']) > 0;
+
+            return response()->json([
+                'status' => true,
+                'is_saved' => $isSaved,
+                'message' => $isSaved ? 'Job saved successfully' : 'Job removed from saved'
+            ]);
+
+        } catch (Exception $e) {
+            return response()->json(['message' => 'Error toggling save status'], 500);
+        }
+    }
+
+    public function getSavedJobs($id) 
+    {
+        $profile = JobSeekerProfile::with(['savedJobs.employer', 'savedJobs.category'])
+            ->find($id);
+
+        if (!$profile) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Profile not found'
+            ], 404);
+        }
+
+        return response()->json([
+            'status' => true,
+            'data' => $profile->savedJobs
+        ]);
+    }
+
     public function index()
     {
         $profiles = JobSeekerProfile::with('user')
@@ -163,7 +207,7 @@ class JobSeekerProfileController extends Controller
      */
     public function show($id)
     {
-        $profile = JobSeekerProfile::with(['user', 'skills', 'experiences', 'educations'])
+        $profile = JobSeekerProfile::with(['user', 'skills', 'experiences', 'educations', 'savedJobs:id'])
             ->where('user_id', $id)
             ->first();
 

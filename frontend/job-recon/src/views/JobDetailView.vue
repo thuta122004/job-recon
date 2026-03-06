@@ -10,8 +10,10 @@ const toast = useToast();
 
 const loading = ref(true);
 const applying = ref(false);
+const togglingSave = ref(false);
 const job = ref(null);
 const hasApplied = ref(false);
+const isSaved = ref(false);
 const showCopyTooltip = ref(false);
 
 const showApplyModal = ref(false);
@@ -30,20 +32,18 @@ const fetchJobDetail = async () => {
         ]);
 
         job.value = jobRes.data;
-        
         seekerProfile.value = profileRes.data.data || profileRes.data;
 
         if (seekerId && job.value) {
             const checkResponse = await api.get(`/seeker/applications/check/${job.value.id}/${seekerId}`);
             hasApplied.value = checkResponse.data.applied;
             
-            const jobSkills = job.value.skills?.map(s => Number(s.id)) || [];
+            const savedJobs = seekerProfile.value.saved_jobs || [];
+            isSaved.value = savedJobs.some(sj => sj.id === job.value.id);
             
+            const jobSkills = job.value.skills?.map(s => Number(s.id)) || [];
             const seekerSkillsRaw = seekerProfile.value.skills || [];
             const seekerSkills = seekerSkillsRaw.map(s => Number(s.id));
-
-            console.log('Job IDs:', jobSkills);
-            console.log('Seeker IDs:', seekerSkills);
 
             const matches = jobSkills.filter(id => seekerSkills.includes(id));
             
@@ -58,6 +58,31 @@ const fetchJobDetail = async () => {
         toast.error("Error loading job details");
     } finally {
         loading.value = false;
+    }
+};
+
+const handleToggleSave = async () => {
+    if (!seekerId) {
+        toast.info("Please complete your profile to save jobs");
+        return;
+    }
+
+    togglingSave.value = true;
+    try {
+        const response = await api.post(`/seeker/jobs/${job.value.id}/toggle-save`);
+        
+        isSaved.value = response.data.is_saved;
+        
+        if (isSaved.value) {
+            toast.success("Job saved to your bookmarks");
+        } else {
+            toast.info("Job removed from bookmarks");
+        }
+    } catch (error) {
+        console.error("Save Error:", error);
+        toast.error("Could not update bookmark");
+    } finally {
+        togglingSave.value = false;
     }
 };
 
@@ -136,8 +161,17 @@ onMounted(fetchJobDetail);
                     Back to Listings
                 </button>
                 <div class="flex items-center gap-3">
-                    <button class="h-11 w-11 flex items-center justify-center rounded-xl border border-slate-100 text-slate-400 hover:text-indigo-500 hover:bg-indigo-50 transition-all">
-                        <i class="fa-regular fa-bookmark text-lg"></i>
+                    <button 
+                        @click="handleToggleSave"
+                        :disabled="togglingSave"
+                        class="h-11 w-11 flex items-center justify-center rounded-xl border transition-all active:scale-90"
+                        :class="isSaved 
+                            ? 'bg-indigo-600 border-indigo-600 text-white shadow-lg shadow-indigo-100' 
+                            : 'bg-white border-slate-100 text-slate-400 hover:text-indigo-500 hover:bg-indigo-50'"
+                        :title="isSaved ? 'Remove from Saved' : 'Save Job'"
+                    >
+                        <i v-if="togglingSave" class="fa-solid fa-circle-notch fa-spin text-sm"></i>
+                        <i v-else :class="isSaved ? 'fa-solid fa-bookmark' : 'fa-regular fa-bookmark'" class="text-lg"></i>
                     </button>
                     <button @click="handleShare" class="h-11 px-6 bg-slate-900 text-white text-[10px] font-black uppercase tracking-[0.15em] rounded-xl hover:bg-indigo-600 transition-all active:scale-95 flex items-center gap-2">
                         <i class="fa-solid fa-share-nodes"></i>

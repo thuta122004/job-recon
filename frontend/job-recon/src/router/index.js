@@ -22,6 +22,7 @@ import EmployerLayout from '@/layouts/EmployerLayout.vue'
 import EmployerProfile from '@/views/EmployerProfile.vue'
 import SeekerApplications from '@/views/SeekerApplications.vue'
 import EmployerJobApplications from '@/views/EmployerJobApplications.vue'
+import SavedJobs from '@/views/SavedJobs.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -87,6 +88,16 @@ const router = createRouter({
           name: 'seeker-skill',
           component: JobSeekerSkillsView,
           meta: { requiresAuth: true, role: 2, label: 'My Skill' }
+        },
+        {
+          path: 'saved-jobs',
+          name: 'seeker-saved-jobs',
+          component: SavedJobs,
+          meta: { 
+            requiresAuth: true, 
+            role: 2, 
+            label: 'Saved Jobs' 
+          }
         },
       ]
     },

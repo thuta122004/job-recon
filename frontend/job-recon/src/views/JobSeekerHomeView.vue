@@ -150,9 +150,6 @@ onMounted(() => {
             <div class="max-w-7xl mx-auto px-6">
                 <div class="flex flex-col md:flex-row justify-between items-end gap-6 mb-12">
                     <div class="flex items-center gap-4">
-                        <div class="h-14 w-14 bg-indigo-600 rounded-2xl flex items-center justify-center text-white shadow-xl shadow-indigo-200">
-                            <i class="fa-solid fa-wand-magic-sparkles text-xl"></i>
-                        </div>
                         <div>
                             <h2 class="text-3xl font-black text-slate-900 tracking-tight">Matched for you</h2>
                             <p class="text-slate-400 font-bold text-[10px] uppercase tracking-[0.2em] mt-1">Based on your unique skill set</p>
@@ -325,3 +322,13 @@ onMounted(() => {
         </section>
     </div>
 </template>
+
+<style scoped>
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+.no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+</style>

@@ -36,4 +36,10 @@ class JobPost extends Model
     {
         return $this->hasMany(JobApplication::class);
     }
+
+    public function savedBy()
+    {
+        return $this->belongsToMany(JobSeekerProfile::class, 'saved_jobs', 'job_post_id', 'job_seeker_profile_id')
+                    ->withTimestamps();
+    }
 }
