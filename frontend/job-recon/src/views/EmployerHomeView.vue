@@ -198,7 +198,7 @@ onMounted(fetchHomeData);
                                         class="px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest">
                                         {{ job.status }}
                                     </span>
-                                    <button @click="router.push(`/employer/jobs`)" 
+                                    <button @click="goToJobManagement" 
                                             class="h-10 w-10 rounded-xl bg-white border border-slate-100 text-slate-400 hover:text-indigo-600 hover:border-indigo-100 transition-all">
                                         <i class="fa-solid fa-chevron-right text-xs"></i>
                                     </button>

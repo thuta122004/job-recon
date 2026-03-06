@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
@@ -41,5 +42,17 @@ class JobPost extends Model
     {
         return $this->belongsToMany(JobSeekerProfile::class, 'saved_jobs', 'job_post_id', 'job_seeker_profile_id')
                     ->withTimestamps();
+    }
+
+    protected static function booted()
+    {
+        static::retrieved(function ($job) {
+            if ($job->getRawOriginal('status') === 'OPEN' && 
+                $job->expires_at && 
+                Carbon::parse($job->expires_at)->isPast()) {
+                
+                $job->update(['status' => 'CLOSED']);
+            }
+        });
     }
 }
