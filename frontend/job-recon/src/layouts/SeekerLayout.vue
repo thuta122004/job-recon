@@ -15,6 +15,7 @@ const userName = localStorage.getItem('user_name') || 'Job Seeker';
 const userEmail = localStorage.getItem('user_email') || 'seeker@jobrecon.com';
 
 const profilePic = ref(null);
+const picError = ref(false);
 const isLoggingOut = ref(false);
 const showConfirmModal = ref(false);
 
@@ -28,7 +29,14 @@ const confirmConfig = ref({
 
 onMounted(() => {
     profilePic.value = localStorage.getItem('user_profile_pic');
+    if (!profilePic.value || profilePic.value === 'null' || profilePic.value === '') {
+        picError.value = true;
+    }
 });
+
+const handlePicError = () => {
+    picError.value = true;
+};
 
 const requestLogout = () => {
     confirmConfig.value = {
@@ -112,15 +120,16 @@ const executeLogout = async () => {
 
                         <div class="group relative">
                             <div class="h-12 w-12 rounded-2xl bg-slate-100 overflow-hidden border border-slate-200 shadow-xl shadow-slate-200 cursor-pointer group-hover:-rotate-3 transition-all duration-300 flex items-center justify-center">
-                                <img v-if="profilePic && profilePic !== ''" 
+                                <img v-if="profilePic && !picError" 
                                     :src="profilePic" 
-                                    @error="(e) => e.target.style.display = 'none'"
+                                    @error="handlePicError"
                                     alt="Profile" 
                                     class="h-full w-full object-cover" />
                                 
-                                <div v-else class="h-full w-full flex items-center justify-center bg-slate-900 text-white text-xs font-black">
+                                <div v-else class="h-full w-full flex items-center justify-center bg-indigo-50 text-indigo-600 text-sm font-black tracking-tighter">
                                     {{ userName.charAt(0).toUpperCase() }}
                                 </div>
+
                             </div>
                             
                             <div class="absolute right-0 mt-4 w-60 bg-white rounded-[2.5rem] shadow-2xl shadow-indigo-100/60 border border-slate-50 py-4 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50">

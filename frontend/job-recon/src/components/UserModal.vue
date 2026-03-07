@@ -159,16 +159,20 @@ const handleSubmit = () => {
                                 </div>
                             </transition>
                         </div>
-                        <p v-if="disableRole" class="text-[10px] text-amber-500 font-bold mt-2 ml-1 flex items-center gap-1.5">
-                            <i class="fa-solid fa-lock text-[9px]"></i>
-                            <span>Role locked: This user is currently linked to an active employer profile.</span>
-                        </p>
 
-                        <p v-else-if="!form.role_id && !showRoleDropdown" 
-                        class="text-[10px] text-amber-500 font-bold mt-2 ml-1 flex items-center gap-1.5 animate-pulse">
-                            <i class="fa-solid fa-circle-info text-[10px]"></i>
-                            <span>Selection required: Assign a system role to define access levels.</span>
-                        </p>
+                        <div class="relative h-0"> 
+                            <div class="absolute top-1 left-1 w-full">
+                                <p v-if="disableRole" class="text-[9px] text-amber-500 font-bold flex items-center gap-1.5 leading-tight">
+                                    <i class="fa-solid fa-lock text-[8px]"></i>
+                                    <span>Role locked: This user is currently linked to an active employer profile.</span>
+                                </p>
+                                <p v-else-if="!form.role_id && !showRoleDropdown" 
+                                class="text-[9px] text-amber-500 font-bold flex items-center gap-1.5 animate-pulse leading-tight">
+                                    <i class="fa-solid fa-circle-info text-[9px]"></i>
+                                    <span>Selection required: Assign a system role to define access levels.</span>
+                                </p>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="relative">

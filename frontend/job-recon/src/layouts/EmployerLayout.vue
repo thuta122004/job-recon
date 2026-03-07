@@ -22,6 +22,7 @@ const isVerified = computed(() => {
 });
 
 const companyLogo = ref(null);
+const logoError = ref(false);
 const isLoggingOut = ref(false);
 const showConfirmModal = ref(false);
 
@@ -38,7 +39,14 @@ const confirmConfig = ref({
 
 onMounted(() => {
     companyLogo.value = localStorage.getItem('company_logo');
+    if (!companyLogo.value || companyLogo.value === 'null' || companyLogo.value === '') {
+        logoError.value = true;
+    }
 });
+
+const handleLogoError = () => {
+    logoError.value = true;
+};
 
 const handleSaveJob = async (formData) => {
     isSavingJob.value = true;
@@ -160,17 +168,18 @@ const executeLogout = async () => {
                         </div>
 
                         <div class="group relative">
-                            <div class="h-12 w-12 rounded-2xl bg-slate-100 overflow-hidden border border-slate-200 shadow-xl shadow-slate-200 cursor-pointer group-hover:-rotate-3 transition-all duration-300 flex items-center justify-center">
-                                <img v-if="companyLogo && companyLogo !== ''" 
-                                    :src="companyLogo" 
-                                    @error="(e) => e.target.style.display = 'none'"
-                                    alt="Company Logo" 
-                                    class="h-full w-full object-cover" />
-                                
-                                <div v-else class="h-full w-full flex items-center justify-center bg-slate-900 text-white text-xs font-black">
-                                    {{ userName.charAt(0).toUpperCase() }}
-                                </div>
+                           <div class="h-12 w-12 rounded-2xl bg-slate-100 overflow-hidden border border-slate-200 shadow-xl shadow-slate-200 cursor-pointer group-hover:-rotate-3 transition-all duration-300 flex items-center justify-center">
+                            <img v-if="companyLogo && !logoError" 
+                                :src="companyLogo" 
+                                @error="handleLogoError"
+                                alt="Company Logo" 
+                                class="h-full w-full object-cover" />
+                            
+                            <div v-else class="h-full w-full flex items-center justify-center bg-indigo-50 text-indigo-600 text-sm font-black tracking-tighter">
+                                {{ userName.charAt(0).toUpperCase() }}
                             </div>
+
+                        </div>
                             
                             <div class="absolute right-0 mt-4 w-60 bg-white rounded-[2.5rem] shadow-2xl shadow-indigo-100/60 border border-slate-50 py-4 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50">
                                 <div class="px-8 py-4 border-b border-slate-50 mb-3 text-left">
