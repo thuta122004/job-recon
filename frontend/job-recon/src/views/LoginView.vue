@@ -156,6 +156,13 @@ const handleLogin = async () => {
                         {{ loading ? 'Authenticating...' : 'Sign In' }}
                     </button>
                 </form>
+
+                <div class="mt-8 text-center">
+                    <p class="text-gray-400 text-xs font-medium">
+                        Don't have an account? 
+                        <router-link :to="{ name: 'register' }" class="text-indigo-600 font-bold hover:underline ml-1">Sign Up</router-link>
+                    </p>
+                </div>
             </div>
 
             <p class="text-center text-gray-400 text-xs mt-8">

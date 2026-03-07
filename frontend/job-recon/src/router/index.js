@@ -24,6 +24,7 @@ import SeekerApplications from '@/views/SeekerApplications.vue'
 import EmployerJobApplications from '@/views/EmployerJobApplications.vue'
 import SavedJobs from '@/views/SavedJobs.vue'
 import CompanyProfile from '@/views/CompanyProfile.vue'
+import Register from '../views/Register.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -36,6 +37,11 @@ const router = createRouter({
       path: '/login',
       name: 'login',
       component: LoginView,
+    },
+    {
+      path: '/register',
+      name: 'register',
+      component: Register,
     },
     {
       path: '/seeker',

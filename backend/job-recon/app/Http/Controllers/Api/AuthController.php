@@ -7,6 +7,8 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 
 class AuthController extends Controller
 {
@@ -61,6 +63,64 @@ class AuthController extends Controller
     {
         $request->user()->currentAccessToken()->delete();
         return response()->json(['message' => 'Logged out successfully']);
+    }
+
+    public function register(Request $request)
+    {
+        $request->validate([
+            'first_name' => 'required|string|max:255',
+            'last_name'  => 'required|string|max:255',
+            'email'      => 'required|string|email|max:255|unique:users',
+            'password'   => 'required|string|min:8|confirmed',
+            'phone'      => 'required|string|max:20',
+            'role_id'    => ['required', Rule::in([2, 3])],
+
+            'company_name' => 'required_if:role_id,3|nullable|string|max:255',
+            'industry'     => 'required_if:role_id,3|nullable|string|max:255',
+
+            'headline' => 'required_if:role_id,2|nullable|string|max:255',
+            'location' => 'required_if:role_id,2|nullable|string|max:255',
+        ]);
+
+        try {
+            $result = DB::transaction(function () use ($request) {
+                $user = User::create([
+                    'first_name' => $request->first_name,
+                    'last_name'  => $request->last_name,
+                    'email'      => $request->email,
+                    'password'   => Hash::make($request->password),
+                    'phone'      => $request->phone,
+                    'role_id'    => $request->role_id,
+                    'status'     => 'ACTIVE',
+                ]);
+
+                if ($user->isEmployer()) {
+                    $user->employerProfile()->create([
+                        'company_name' => $request->company_name,
+                        'industry'     => $request->industry,
+                    ]);
+                } else if ($user->isJobSeeker()) {
+                    $user->profile()->create([
+                        'headline' => $request->headline,
+                        'location' => $request->location,
+                    ]);
+                }
+
+                return $user;
+            });
+
+            return response()->json([
+                'message' => 'Account created successfully.',
+                'token'   => $result->createToken('auth_token')->plainTextToken,
+                'user'    => $result->load(['role', 'profile', 'employerProfile']),
+            ], 201);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Registration failed.',
+                'error'   => $e->getMessage()
+            ], 500);
+        }
     }
 
     public function index()
