@@ -351,7 +351,7 @@ onMounted(fetchApplications);
                             </h3>
                             <div class="flex flex-wrap gap-4 mt-2 text-slate-500 text-[10px] font-bold uppercase tracking-widest">
                                 <span class="flex items-center gap-1.5"><i class="fa-solid fa-envelope opacity-30"></i> {{ app.job_seeker?.user?.email }}</span>
-                                <span v-if="app.job_seeker?.phone" class="flex items-center gap-1.5"><i class="fa-solid fa-phone opacity-30"></i> {{ app.job_seeker?.phone }}</span>
+                                <span v-if="app.job_seeker?.user.phone" class="flex items-center gap-1.5"><i class="fa-solid fa-phone opacity-30"></i> {{ app.job_seeker?.user.phone }}</span>
                             </div>
                         </div>
 
