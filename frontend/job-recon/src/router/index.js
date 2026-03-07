@@ -23,6 +23,7 @@ import EmployerProfile from '@/views/EmployerProfile.vue'
 import SeekerApplications from '@/views/SeekerApplications.vue'
 import EmployerJobApplications from '@/views/EmployerJobApplications.vue'
 import SavedJobs from '@/views/SavedJobs.vue'
+import CompanyProfile from '@/views/CompanyProfile.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -58,6 +59,12 @@ const router = createRouter({
           component: JobDetailView,
           props: true,
           meta: { requiresAuth: true, role: 2, label: 'Job Details' }
+        },
+        {
+          path: 'company/:id',
+          name: 'company-profile',
+          component: CompanyProfile,
+          meta: { requiresAuth: false, label: 'Company Profile' }
         },
         {
           path: 'profile',

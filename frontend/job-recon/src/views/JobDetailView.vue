@@ -207,16 +207,19 @@ onMounted(fetchJobDetail);
                             </h1>
 
                             <div class="flex flex-wrap gap-8 items-center pt-8 border-t border-slate-50">
-                                <div class="flex items-center gap-4">
+                                <router-link 
+                                    :to="{ name: 'company-profile', params: { id: job.employer.user_id } }" 
+                                    class="flex items-center gap-4 group/employer cursor-pointer"
+                                >
                                     <div class="relative">
-                                        <div class="h-14 w-14 bg-slate-50 rounded-2xl flex items-center justify-center border border-slate-50 group-hover:bg-white group-hover:border-indigo-100 transition-all duration-500 overflow-hidden">
+                                        <div class="h-14 w-14 bg-slate-50 rounded-2xl flex items-center justify-center border border-slate-50 group-hover/employer:bg-white group-hover/employer:border-indigo-100 transition-all duration-500 overflow-hidden">
                                             <img 
                                                 v-if="job.employer?.company_logo_url" 
                                                 :src="job.employer.company_logo_url" 
                                                 :alt="job.employer?.company_name"
                                                 class="h-full w-full object-cover"
                                             />
-                                            <i v-else class="fa-solid fa-briefcase text-slate-300 group-hover:text-indigo-500 text-xl"></i>
+                                            <i v-else class="fa-solid fa-briefcase text-slate-300 group-hover/employer:text-indigo-500 text-xl"></i>
                                         </div>
 
                                         <div 
@@ -227,14 +230,14 @@ onMounted(fetchJobDetail);
                                             <i class="fa-solid fa-circle-check text-emerald-400 text-[14px]"></i>
                                         </div>
                                     </div>
+                                    
                                     <div>
-                                        <p class="text-[10px] font-black text-slate-300 uppercase tracking-widest">Hiring Company</p>
-                                        <p class="font-bold text-slate-800 text-lg">
+                                        <p class="text-[10px] font-black text-slate-300 uppercase tracking-widest mb-0.5">Hiring Company</p>
+                                        <p class="font-bold text-slate-800 text-lg group-hover/employer:text-indigo-600 transition-colors">
                                             {{ job.employer?.company_name || 'Incognito Entity' }}
                                         </p>
                                     </div>
-                                </div>
-
+                                </router-link>
                                 <div class="flex items-center gap-4">
                                     <div class="h-16 w-16 bg-slate-50 rounded-2xl flex items-center justify-center border border-slate-100">
                                         <i class="fa-solid fa-location-dot text-slate-400 text-xl"></i>
