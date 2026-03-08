@@ -164,7 +164,7 @@ const handleSubmit = () => {
                             <div class="absolute top-1 left-1 w-full">
                                 <p v-if="disableRole" class="text-[9px] text-amber-500 font-bold flex items-center gap-1.5 leading-tight">
                                     <i class="fa-solid fa-lock text-[8px]"></i>
-                                    <span>Role locked: This user is currently linked to an active employer profile.</span>
+                                    <span>Role locked: This user is currently linked to an active profile.</span>
                                 </p>
                                 <p v-else-if="!form.role_id && !showRoleDropdown" 
                                 class="text-[9px] text-amber-500 font-bold flex items-center gap-1.5 animate-pulse leading-tight">

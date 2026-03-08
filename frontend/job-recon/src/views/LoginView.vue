@@ -40,15 +40,23 @@ const handleLogin = async () => {
 
     const { token, user } = response.data;
 
+    if (user.role_id === 2 && !user.profile) {
+      toast.error("Account error: Job seeker profile not found. Please contact support.");
+      return;
+    }
+    
+    const employerData = user.employerProfile;
+    if (user.role_id === 3 && !employerData) {
+      toast.error("Account error: Employer company profile not found.");
+      return;
+    }
+
     localStorage.setItem('auth_token', token);
     localStorage.setItem('user_id', user.id);
     localStorage.setItem('user_role', user.role_id);
     localStorage.setItem('user_email', user.email);
-    localStorage.setItem('user_profile_pic', user.profile?.profile_picture_url);
+    localStorage.setItem('user_profile_pic', user.profile?.profile_picture_url || '');
     localStorage.setItem('job_seeker_profile_id', user.job_seeker_profile_id);
-
-    
-    const employerData = user.employerProfile;
 
     if (employerData) {
         localStorage.setItem('employer_profile_id', employerData.employer_profile_id);
@@ -57,7 +65,6 @@ const handleLogin = async () => {
         localStorage.setItem('user_is_verified', employerData.is_verified);
     }
 
-    
     const firstName = user.first_name || 'User';
     const lastName = user.last_name || '';
     localStorage.setItem('user_name', `${firstName} ${lastName}`.trim());
