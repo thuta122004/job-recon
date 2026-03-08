@@ -1,6 +1,6 @@
 Job Recon
 
-Administrator (admin@jobrecon.com, password123)
+**Administrator (admin@jobrecon.com, password123)**
 - Seed master data (roles, skills, categories, and admin account)
 - Can search/filter all kinds of data with paginations
 - Can edit/deactivate all kinds of master data except seeded roles
