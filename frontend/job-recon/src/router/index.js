@@ -24,7 +24,9 @@ import SeekerApplications from '@/views/SeekerApplications.vue'
 import EmployerJobApplications from '@/views/EmployerJobApplications.vue'
 import SavedJobs from '@/views/SavedJobs.vue'
 import CompanyProfile from '@/views/CompanyProfile.vue'
-import Register from '../views/Register.vue'
+import Register from '@/views/Register.vue'
+import Contact from '@/views/Contact.vue'
+import About from '@/views/About.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -46,6 +48,7 @@ const router = createRouter({
     {
       path: '/seeker',
       component: SeekerLayout,
+      redirect: { name: 'seeker-home' },
       children: [
         {
           path: 'home',
@@ -112,12 +115,23 @@ const router = createRouter({
             label: 'Saved Jobs' 
           }
         },
+        {
+          path: 'contact',
+          name: 'seeker-contact',
+          component: Contact,
+        },
+        {
+          path: 'about',
+          name: 'seeker-about',
+          component: About,
+        },
       ]
     },
     {
       path: '/employer',
       component: EmployerLayout,
       meta: { requiresAuth: true, role: 3 },
+      redirect: { name: 'employer-home' },
       children: [
         {
           path: 'home',
@@ -144,7 +158,17 @@ const router = createRouter({
           component: EmployerJobApplications,
           props: true,
           meta: { label: 'Manage Applicants' }
-    }
+        },
+        {
+          path: 'contact',
+          name: 'employer-contact',
+          component: Contact,
+        },
+        {
+          path: 'about',
+          name: 'employer-about',
+          component: About,
+        },
       ]
     },
     {

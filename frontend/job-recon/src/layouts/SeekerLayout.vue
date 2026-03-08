@@ -104,6 +104,16 @@ const executeLogout = async () => {
                             active-class="text-indigo-600">
                             Find Jobs
                         </router-link>
+                        <router-link :to="{ name: 'seeker-about' }" 
+                            class="px-4 py-2 text-[11px] font-black uppercase tracking-widest text-slate-400 hover:text-indigo-600 transition-all"
+                            active-class="text-indigo-600">
+                            About
+                        </router-link>
+                        <router-link :to="{ name: 'seeker-contact' }" 
+                            class="px-4 py-2 text-[11px] font-black uppercase tracking-widest text-slate-400 hover:text-indigo-600 transition-all"
+                            active-class="text-indigo-600">
+                            Contact
+                        </router-link>
                     </div>
                 </div>
 
