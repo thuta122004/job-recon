@@ -1,6 +1,6 @@
 **Job Recon**
 
-**Administrator (admin@jobrecon.com, password123)**
+**Administrator (admin@jobrecon.com, password)**
 - Seed master data (roles, skills, categories, and admin account)
 - Can search/filter all kinds of data with paginations
 - Can edit/deactivate all kinds of master data except seeded roles
@@ -13,7 +13,7 @@
 - Can verify company, edit information for Employer profiles
 - Can create, close, open, archive, unarchive, edit job posts and toggle salary visibility
 
-**Seeker (seeker@jobrecon.com, password123)**
+**Seeker (seeker@jobrecon.com, password)**
 - Can browse job posts via keywords, company, or location
 - Can view personalised job matching based on unique skill set
 - Can view latest job posts
@@ -30,7 +30,7 @@
 - Can view feedback after interviewed
 - Can view application result
 
-**Employer (employer@jobrecon.com, password123)**
+**Employer (employer@jobrecon.com, password)**
 - Can view market insights
 - Can update profile (basic info)
 - Can create job posts
